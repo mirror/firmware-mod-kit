@@ -1,8 +1,8 @@
 /* untrx
  * Copyright (C) 2006  Jeremy Collake  <jeremy@bitsum.com>
  *
- *	version: 0.44 beta		
- *	Quick and dirty tool to find and extract parts of a cybertan style firmware		
+ *	version: 0.45 beta		
+ *	Quick and dirty tool to find and extract parts of a TRX style firmware		
  *	I whipped this out quickly. Didn't spend much/any time on polishing.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -90,7 +90,7 @@ void ShowUsage()
 /* main */
 int main(int argc, char **argv)
 {
-	printf(" untrx v0.44 beta - (c)2006 Jeremy Collake\n");
+	printf(" untrx v0.45 beta - (c)2006 Jeremy Collake\n");
 	
 	if(argc<3)
 	{
@@ -115,12 +115,12 @@ int main(int argc, char **argv)
 	fseek(fIn,0,SEEK_END);
 	size_t nFilesize=ftell(fIn);
 	fseek(fIn,0,SEEK_SET);	
-	unsigned char *pData=(unsigned char *)malloc(nFilesize);	
+	unsigned char *pDataOrg,*pData=(unsigned char *)malloc(nFilesize);	
 	if(fread(pData,1,nFilesize,fIn)!=nFilesize)
 	{
 		fprintf(stderr," ERROR reading %s\n", argv[1]);		
 		fclose(fIn);	
-		free(pData);
+		free(pDataOrg);
 		free(pszOutFolder);	
 		exit(1);
 	}	
@@ -128,22 +128,24 @@ int main(int argc, char **argv)
 	printf(" read %u bytes\n", nFilesize);
 	
 	// uf U2ND header present, skip past it (pData is preserved above)
+	unsigned long nDataSkip=0;
 	trx_header *trx=(trx_header *)pData;
 	if(READ32_LE(trx->magic)!=TRX_MAGIC)
 	{
-		pData+=U2ND_HEADER_SIZE;	
+		pData+=U2ND_HEADER_SIZE;			
 		trx=(trx_header *)pData;	
 		if(READ32_LE(trx->magic)!=TRX_MAGIC)
 		{
 			fprintf(stderr," ERROR trx header not found\n");
-			free(pData);
+			free(pDataOrg);
 			free(pszOutFolder);	
 			exit(2);			
 		}
 	}
 	
 	// allocate filename buffer
-	char *pszTemp=(char *)malloc(strlen(pszOutFolder)+128);			
+	char *pszTemp=(char *)
+		malloc(strlen(pszOutFolder)*sizeof(char)+128*sizeof(char));			
 	
 	/* Extract the segments */
 	for(int nI=0;nI<3;nI++)
@@ -159,10 +161,6 @@ int main(int argc, char **argv)
 		{
 			nEndOffset=nFilesize;
 		}		
-		fprintf(stderr," Writing %s of size %d from offset %d ...\n", 
-			pszTemp, 
-			nEndOffset-READ32_LE(trx->offsets[nI]),
-			READ32_LE(trx->offsets[nI]));		
 		
 		switch(IdentifySegment(pData+READ32_LE(trx->offsets[nI]),
 			nEndOffset-READ32_LE(trx->offsets[nI])))
@@ -183,11 +181,16 @@ int main(int argc, char **argv)
 				sprintf(pszTemp,"%s/segment%d",pszOutFolder,nI);
 				break;			
 		}		
+		fprintf(stderr," Writing %s\n    size %d from offset %d ...\n", 
+			pszTemp, 
+			nEndOffset-READ32_LE(trx->offsets[nI]),
+			READ32_LE(trx->offsets[nI]));		
+
 		fOut=fopen(pszTemp,"wb");
 		if(!fOut)
 		{
 			fprintf(stderr," ERROR could not open %s\n", pszTemp);
-			free(pData);
+			free(pDataOrg);
 			free(pszOutFolder);	
 			free(pszTemp);
 			exit(3);		
@@ -197,7 +200,7 @@ int main(int argc, char **argv)
 		{
 			fprintf(stderr," ERROR could not write %s\n", pszTemp);
 			fclose(fOut);
-			free(pData);
+			free(pDataOrg);
 			free(pszOutFolder);	
 			free(pszTemp);
 			exit(4);				
@@ -205,8 +208,7 @@ int main(int argc, char **argv)
 		fclose(fOut);	
 	}
 	
-	delete pszTemp;		
-	free(pData);
+	free(pDataOrg);
 	free(pszOutFolder);	
 	free(pszTemp);
 	printf(" Done!\n");

@@ -12,7 +12,7 @@ addpattern: addpattern.o
 	$(CC) addpattern.o -lz -o $@
 
 untrx: untrx.o
-	$(CC) untrx.o -lz -o $@
+	$(CXX) untrx.o -lz -o $@
 
 asustrx: asustrx.o
 	$(CC) asustrx.o -lz -o $@
