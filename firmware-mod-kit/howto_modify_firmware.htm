@@ -11,12 +11,11 @@
 <body>
 
 <p><b><font size="6">Firmware Modification Kit</font></b><br>
-<i>[documentation version 0.43 beta]<br>
+<i>[documentation version 0.45 beta]<br>
 all scripts, untrx tool, and docs (c) Jeremy Collake &lt;jeremy@bitsum.com&gt;
 <a href="http://www.bitsum.com">http://www.bitsum.com</a><br>
 other portions (c) their respective holders (squashfs, asustrx, addpattern 
-tools)<br>
-Entire package is released under GNU license</i></p>
+tools)</i></p>
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 <input type="hidden" name="cmd0" value="_s-xclick">
 <input type="image" src="https://www.paypal.com/en_US/i/btn/x-click-but21.gif" border="0" name="submit0" alt="Make payments with PayPal - it's fast, free and secure!">
@@ -60,6 +59,9 @@ recompiling the firmware sources. It works by extracting the firmware into
 its component parts, then extracting the squashfs-lzma based file system (other 
 file systems can be supported with tweaks). The user can then make modifications 
 to the extracted file system, then rebuild the firmware image.</p>
+<p>I am currently in the process of extending this kit to support many other 
+firmware images. If you want YOUR device supported, please send me information 
+at jeremy@bitsum.com.</p>
 <p>&nbsp;</p>
 <p><b><font size="5">II. <a name="Why_is_this_useful">Why is this useful?</a></font></b><br>
 <br>
@@ -70,26 +72,30 @@ A list of some of the many reasons this might be desired are:</p>
 	much better)</li>
 	<li>extend web UI</li>
 	<li>remove un-needed packages</li>
-	<li>mix-and-match packages from various DD-WRT variants</li>
+	<li>mix-and-match packages from various flavors of the firmware image.</li>
 </ul>
-<p><b>WARNING:</b> Due to abuse by those re-branding DD-WRT and selling it, or 
-pre-flashed routers with it on eBay, builds dated later than 08/04/2006 have 
-some protections against re-branding the web UI.</p>
+<p><b>WARNING:</b> Since this mod kit is most commonly used on DD-WRT, I should 
+note that builds dated later than 08/04/2006 have some protections against 
+re-branding the web UI.<br>
+<br>
+<b>UPDATE: </b>Squashfs v3.1 has been released. Eventually I'll release a new firmware mod kit to 
+support it.</p>
 <p>&nbsp;</p>
 <p><b><font size="5">III. <a name="Where_to_get_the_kit">Where to get the kit</a><br>
 </font></b><br>
 The latest version can always be downloaded here:</p>
-<p>Latest official build:
+<p>Project hosting and repository:
+<a href="http://code.google.com/p/firmware-mod-kit/">
+http://code.google.com/p/firmware-mod-kit/</a><br>
+Latest official build:
 <a href="http://www.bitsum.com/files/firmware_mod_tools.tar.gz">
 http://www.bitsum.com/files/firmware_mod_tools.tar.gz</a> <br>
-Latest official build /w pre-built linux binaries:
+/w pre-built linux binaries:
 <a href="http://www.bitsum.com/files/firmware_mod_tools.tar.gz">
 http://www.bitsum.com/files/firmware_mod_tools_prebuilt.tar.gz</a> <br>
-Latest snapshot build (beta beta):
-<a href="http://www.bitsum.com/files/beta/firmware_mod_tools.tar.gz">http://www.bitsum.com/files/beta/firmware_mod_tools.tar.gz</a>
-<br>
-<br>
-&nbsp;</p>
+Sometimes newer snapshots are posted for testing. When available, they are
+<a href="http://www.bitsum.com/files/beta/firmware_mod_tools.tar.gz">here</a>.</p>
+<p>&nbsp;</p>
 <p><b><font size="5">IV. <a name="Requirements">Requirements</a></font></b></p>
 <p>I've worked hard to make sure the requirements are low enough for anyone to 
 use this kit. However, to reduce distribution costs and better represent the 
@@ -124,39 +130,39 @@ systems (i.e. cramfs) will work if the steps that extract the file system and
 rebuild the file system are tweaked. As is, it is compatible with the following:</p>
 <table border="0" width="100%" id="table3">
 	<tr>
-		<td width="247">DD-WRT</td>
-		<td>tested</td>
+		<td width="181">DD-WRT</td>
+		<td>tested&nbsp;</td>
 	</tr>
 	<tr>
-		<td width="247">Ewrt</td>
+		<td width="181">Ewrt</td>
 		<td><i>untested</i></td>
 	</tr>
 	<tr>
-		<td width="247">OpenWrt White Russian</td>
+		<td width="181">OpenWrt White Russian</td>
 		<td><i>untested - should require older mksquashfs if using White Russian</i></td>
 	</tr>
 	<tr>
-		<td width="247">OpenWrt Kamikaze</td>
+		<td width="181">OpenWrt Kamikaze</td>
 		<td><i>untested</i></td>
 	</tr>
 	<tr>
-		<td width="247">FreeWrt</td>
+		<td width="181">FreeWrt</td>
 		<td><i>untested</i></td>
 	</tr>
 	<tr>
-		<td width="247">Sveasoft Alchemy</td>
+		<td width="181">Sveasoft Alchemy</td>
 		<td><i>untested </i></td>
 	</tr>
 	<tr>
-		<td width="247">Sveasoft Talisman</td>
+		<td width="181">Sveasoft Talisman</td>
 		<td><i>untested </i></td>
 	</tr>
 	<tr>
-		<td width="247">HyperWrt</td>
+		<td width="181">HyperWrt</td>
 		<td><i>untested </i></td>
 	</tr>
 	<tr>
-		<td width="247">many others</td>
+		<td width="181">many others</td>
 		<td><i>untested </i></td>
 	</tr>
 </table>
@@ -209,7 +215,8 @@ directory:<br><br>&nbsp;&nbsp;&nbsp; <b>rootfs/ <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 	</b>This is where the file system is. 
 Make modifications here.<br>&nbsp;&nbsp;&nbsp; <b>image_parts/ <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 	</b>This is where intermediate files are stored. If you need to replace the 
-	kernel (not at all recommended), you can do so by replacing vmlinuz here.<br>
+	kernel (not at all recommended), you can do so by replacing the appropriate 
+	file here (usually segment2).<br>
 	<b>&nbsp;&nbsp;&nbsp; installed_packages/<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b>If you use the ipkg_install.sh 
 	tool, this is where packages you've installed after firmware extraction will 
@@ -316,7 +323,7 @@ warned, this section may be technical in parts.</p>
 		different kernel modules installed. If you get too wild with your 
 		mix-and-matching (i.e. use older versions with newer, or mixtures of 
 		different firmwares all-together), problems can result. To install a new 
-		kernel (not at all recommended), replace the vmlinuz file found found in 
+		kernel (not at all recommended), replace the segment2 (or other) file found found in 
 		the intermediate directory with an appropriate one (can be from another 
 		firmware as long as lzma compression is used)</li>
 		<li>Make sure any dependencies are also installed to the file system, 
@@ -335,7 +342,8 @@ warned, this section may be technical in parts.</p>
 </ul>
 <p><b>B. <a name="Maximum_firmware_size">Maximum firmware size</a></b></p>
 <p>Currently, the maximum firmware image size supported by this kit is 5,898,240 
-(0x5A0000) bytes. If you need me to expand this, let me know.</p>
+(0x5A0000) bytes, but can be adjusted through the &quot;-m [size]&quot; parameter of the 
+asustrx tool.</p>
 <p><br>
 <b>C. <a name="Solutions_to_case_sensitivity">Solutions to file system 
 incompatibilities</a></b></p>
@@ -427,15 +435,35 @@ note that you are using this toolkit and what you are using it for so I know its
 getting good use by somebody and so that Brainslayer sees that user's are 
 enjoying this tool and that he should continue to maintain compatibility with 
 it.</p>
+<p><b>Other credits:</b></p>
+<p>TexHex<b> - </b>DD-WRT<b> </b>Samba Package</p>
+<p>&nbsp;</p>
 <p><b><font size="5">X. <a name="Links">Links</a></font></b></p>
 <ul>
 	<li><i>&nbsp;<a href="creating_ipk_packages.htm">IPK Creation Kit</a> (alpha 
 	testing)</i></li>
 </ul>
 <p><b><font size="5">X. <a name="Revision_history">Revision history</a></font></b></p>
+<p>0.45:</p>
+<ul>
+	<li>untrx: added support for attempted detection of file system and version 
+	and emission of appropriately named segment.</li>
+	<li>untrx: can now handle trx's that have less than 3 segments.</li>
+	<li>untrx: complete overhauled (needed it). many changes.</li>
+	<li>sources: moved squashfs 3.0 stuff to a dedicated directory.</li>
+	<li>packages: added dd-wrt package for Samba (thanks TexHex)</li>
+	<li>asustrx: updated to add -b switch for padding segments (used by 
+	ASUS).</li>
+	<li>asustrx: other misc. enhancements.</li>
+	<li>scripts: added check_for_upgrade.sh which automatically checks for a 
+	newer version of the kit. It's launched when you use extract or build 
+	firmware.</li>
+	<li>scripts: many other fixes and enhancements.</li>
+</ul>
 <p>0.43:</p>
 <ul>
-	<li>scripts: ipkg_remove.sh - it actually works now.</li>
+	<li>scripts: ipkg_remove.sh - rewritten core templated file removal. It 
+	actually works now.</li>
 	<li>scripts: moved build stuff to shared.inc, as appropriate.</li>
 	<li>packages: added dd-wrt package KAID, mainly for removal of this 
 	gargantuan (nearly 1MB uncompressed) package. Note: you can easily create 
