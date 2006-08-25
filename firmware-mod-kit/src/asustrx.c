@@ -43,6 +43,22 @@
  *
  * asustrx -p WL500g -v 1.9.2.7 -o image.trx file [ file [ file ] ]  
  */
+ 
+ /* September 22, 2006
+ *
+ * Copyright(c) 2006 Jeremy Collake <jeremy.collake@gmail.com>
+ *
+ * Added -b switch to force a segment start offset, padding up 
+ * to that point. This switch should immediately preceed filenames.
+ *
+ * Example of ASUS calls to their trx (addver called sperately):
+ *
+ *   trx -o WL530g_$(KVER).$(FVER)_$(LANGUAGE).bin -b 32 zImage -b 655360 target.cramfs
+ * 
+ *
+ * Also several other misc. changes where I saw appropriate.
+ * 
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,11 +98,14 @@ u_int32_t flip_endian(u_int32_t nValue)
 
 #if __BYTE_ORDER == __BIG_ENDIAN
 #define STORE32_LE(X)		bswap_32(X)
+#define READ32_LE(X)		bswap_32(X)
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
 #define STORE32_LE(X)		(X)
+#define READ32_LE(X)		(X)
 #else
 #error unkown endianness!
 #endif
+/*jc end */
 
 uint32_t crc32buf(char *buf, size_t len);
 
@@ -112,7 +131,7 @@ void usage(void) __attribute__ (( __noreturn__ ));
 
 void usage(void)
 {
-	fprintf(stderr, "Usage: trx [-p product_id] [-v version] [-o outfile] [-m maxlen] file [file [file]]\n");
+	fprintf(stderr, "Use: trx [-p prod_id] [-v ver] [-o ofile] [-m maxlen] [-b seg1size] file [file [file]]\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -125,9 +144,12 @@ int main(int argc, char **argv)
 	char *e;
 	int c, i;
 	size_t n;
-	uint32_t cur_len;
+	uint32_t cur_len;	
+	int boolSegmentSizesGiven=0; /* jc */
+	int nSegementCount=0;
 	unsigned long maxlen = TRX_MAX_LEN;
 	struct trx_header *p;
+	struct trx_header trxtemp;
 	
 	struct {
 		uint8_t version[4];	/* Firmware version */
@@ -135,6 +157,7 @@ int main(int argc, char **argv)
 		uint8_t comp_hw[4][4];	/* Compatible hw list maj-min min/maj-min max */
 		uint8_t	pad[32];	/* Padding */
 	} asus = {
+		.prod_id    = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, /* jc: initialize .prod_id */
 		.version 	= { 1, 9, 2, 7 }, /* version is set to 1.9.2.7 by default */
 		.comp_hw[0]	= { 0, 2, 2, 99 } /* hardcoded hw compat list 0.02 - 2.99 */
 	};
@@ -142,8 +165,19 @@ int main(int argc, char **argv)
 
 	fprintf(stderr, "mjn3's trx replacement - v0.81, modified to pack ASUS compatible trx\n");
 	
-	while ((c = getopt(argc, argv, "o:m:p:v:")) != -1) {
+	while ((c = getopt(argc, argv, "b:o:m:p:v:")) != -1) {
 		switch (c) {
+			/* jc */
+			case 'b':			
+				boolSegmentSizesGiven=1;			 			
+				trxtemp.offsets[nSegementCount++]=STORE32_LE(strtoul(optarg, &e, 0));
+				if ((e == optarg) || *e) 
+				{
+					fprintf(stderr, "illegal numeric string\n");
+					usage();
+				}			
+				break;
+			/* jc end */			
 			case 'o':
 				ofn = optarg;
 				break;
@@ -191,45 +225,65 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (ofn && !(out = fopen(ofn, "w"))) {
+	if (ofn && !(out = fopen(ofn, "w"))) 
+	{
 		fprintf(stderr, "can not open \"%s\" for writing\n", ofn);
 		usage();
 	}
 
-	if (optind == argc) {
+	if (optind == argc) 
+	{
 		fprintf(stderr, "we require at least one arg\n");
 		usage();
 	}
 
-	if (argc - optind > 3) {
+	if (argc - optind > 3) 
+	{
 		fprintf(stderr, "too many args: %d > 3\n", argc - optind);
 		usage();
 	}
 
-	if (maxlen > TRX_MAX_LEN) {
+	if (maxlen > TRX_MAX_LEN) 	
+	{
 		fprintf(stderr, "WARNING: maxlen exceeds default maximum!  Beware of overwriting nvram!\n");
 	}
 
-	if (!(buf = malloc(maxlen))) {
+	if (!(buf = malloc(maxlen))) 
+	{
 		fprintf(stderr, "malloc failed\n");
 		return EXIT_FAILURE;
 	}
+	memset(buf,0,maxlen); /* jc */
 
 	p = (struct trx_header *) buf;
-
+	memcpy(p,&trxtemp,sizeof(struct trx_header)); /* jc */
 	p->magic = STORE32_LE(TRX_MAGIC);
 	cur_len = sizeof(struct trx_header);
 	p->flag_version = STORE32_LE((TRX_VERSION << 16));
 
 	i = 0;
 
-	while (optind < argc) {
-		p->offsets[i++] = STORE32_LE(cur_len);
+	while (optind < argc) {		
+		/* jc */
+		if(!READ32_LE(p->offsets[i])) 
+		{			
+			p->offsets[i] = STORE32_LE(cur_len);
+		}
+		else
+		{			
+			if(cur_len>READ32_LE(p->offsets[i]))
+			{
+				fprintf(stderr, "offset too large\n");
+				return EXIT_FAILURE;			
+			}
+			cur_len=READ32_LE(p->offsets[i]);
+		}
+		/* jc end */
 
 		if (!(in = fopen(argv[optind], "r"))) {
 			fprintf(stderr, "can not open \"%s\" for reading\n", argv[optind]);
 			usage();
-		}
+		}			
 
 		n = fread(buf + cur_len, 1, maxlen - cur_len, in);
 		if (!feof(in)) {
@@ -240,7 +294,7 @@ int main(int argc, char **argv)
 		}
 
 		fclose(in);
-
+		
 		++optind;
 
 		if (optind < argc) {
@@ -253,6 +307,7 @@ int main(int argc, char **argv)
 		}
 
 		cur_len += n;
+		i++;
 	}
 	
 	/* reserve space for asus footer */
