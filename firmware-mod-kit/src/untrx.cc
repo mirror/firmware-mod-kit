@@ -80,6 +80,33 @@ SEGMENT_TYPE IdentifySegment(unsigned char *pData, unsigned long nLength)
 	return SEGMENT_TYPE_UNTYPED;
 }
 
+/*************************************************************************
+* EmitSquashfsMagic
+*
+* writes the squashfs root block signature to a file, as a fix for
+* Brainslayer of DD-WRT deciding to change it to some arbitrary value
+* to break compatibility with this kit.
+*
+**************************************************************************/
+bool EmitSquashfsMagic(squashfs_super_block *pSuper, char *pszOutFile)
+{
+	fprintf(stderr, "  Writing %s\n", pszOutFile);
+	FILE *fOut=fopen(pszOutFile,"wb");
+	if(!fOut) return false;
+	if(fwrite(pSuper,1,4,fOut)!=4)
+	{
+		fclose(fOut);
+		return false;
+	}
+	fclose(fOut);	
+	return true;
+}
+
+/*************************************************************************
+* ShowUsage
+*
+*
+**************************************************************************/
 void ShowUsage()
 {			
 	fprintf(stderr, " ERROR: Invalid usage.\n"		
@@ -87,7 +114,11 @@ void ShowUsage()
 	exit(9);
 }
 
-/* main */
+/*************************************************************************
+* main
+*
+*
+**************************************************************************/
 int main(int argc, char **argv)
 {
 	printf(" untrx v0.45 beta - (c)2006 Jeremy Collake\n");
@@ -166,19 +197,28 @@ int main(int argc, char **argv)
 			nEndOffset-READ32_LE(trx->offsets[nI])))
 		{
 			case SEGMENT_TYPE_SQUASHFS_3_0:
+				sprintf(pszTemp,"%s/squashfs_magic",pszOutFolder);				
+				if(!EmitSquashfsMagic((squashfs_super_block *)pData,pszTemp))
+				{
+					fprintf(stderr," ERROR - writing %s\n", pszTemp);
+					free(pDataOrg);
+					free(pszOutFolder);	
+					free(pszTemp);
+					exit(3);		
+				}
 				fprintf(stderr, " SQUASHFS v3.0 image detected\n");
-				sprintf(pszTemp,"%s/squashfs-lzma-image_3-0",pszOutFolder);
+				sprintf(pszTemp,"%s/squashfs-lzma-image-3_0",pszOutFolder);				
 				break;
 			case SEGMENT_TYPE_SQUASHFS_3_1:
 				fprintf(stderr, " SQUASHFS v3.1 image detected\n");
-				sprintf(pszTemp,"%s/squashfs-lzma-image_3-1",pszOutFolder);
+				sprintf(pszTemp,"%s/squashfs-lzma-image-3_1",pszOutFolder);
 				break;
 			case SEGMENT_TYPE_SQUASHFS_OTHER:
 				fprintf(stderr, " ! WARNING: Unknown squashfs version.\n");
-				sprintf(pszTemp,"%s/squashfs-lzma-image_x-x",pszOutFolder);
+				sprintf(pszTemp,"%s/squashfs-lzma-image-x_x",pszOutFolder);
 				break;
 			default:
-				sprintf(pszTemp,"%s/segment%d",pszOutFolder,nI);
+				sprintf(pszTemp,"%s/segment%d",pszOutFolder,nI+1);
 				break;			
 		}		
 		fprintf(stderr," Writing %s\n    size %d from offset %d ...\n", 

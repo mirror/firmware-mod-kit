@@ -150,6 +150,7 @@ int main(int argc, char **argv)
 	unsigned long maxlen = TRX_MAX_LEN;
 	struct trx_header *p;
 	struct trx_header trxtemp;
+	memset(&trxtemp,0,sizeof(struct trx_header));
 	
 	struct {
 		uint8_t version[4];	/* Firmware version */
@@ -287,8 +288,8 @@ int main(int argc, char **argv)
 
 		n = fread(buf + cur_len, 1, maxlen - cur_len, in);
 		if (!feof(in)) {
-			fprintf(stderr, "fread failure or file \"%s\" too large\n",
-					argv[optind]);
+			fprintf(stderr, "fread failure or file \"%s\" too large cur:%d max: %d\n",
+					argv[optind], cur_len, maxlen);
 			fclose(in);
 			return EXIT_FAILURE;
 		}

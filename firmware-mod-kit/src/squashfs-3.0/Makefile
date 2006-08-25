@@ -30,4 +30,12 @@ unsquashfs.o: unsquashfs.c squashfs_fs.h read_fs.h global.h
 
 clean:
 	rm -f *.o
+	rm -f mksquashfs
+	rm -f unsquashfs
+	rm -f mksquashfs-lzma
+	rm -f unsquashfs-lzma
+	rm -f mksquashfs.exe
+	rm -f unsquashfs.exe
+	rm -f mksquashfs-lzma.exe
+	rm -f unsquashfs-lzma.exe
 	make -C $(LZMAPATH) clean

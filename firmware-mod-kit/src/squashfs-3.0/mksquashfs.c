@@ -1985,7 +1985,7 @@ int main(int argc, char *argv[])
 				ERROR("%s: -magic missing signature file\n", argv[0]);
 				exit(1);
 			}
-			ERROR(" debug.mksquashfs-magic: reading %s\n", argv[i]);
+			TRACE(" debug.mksquashfs-magic: reading %s\n", argv[i]);
 			FILE *fMagic=fopen(argv[i],"rb");			
 			if(!fMagic)
 			{
@@ -2005,7 +2005,7 @@ int main(int argc, char *argv[])
 			/* changes were he didn't also update the _ALT endian-flipped */
 			/* version of the signature? doesn't matter, I fix it here. */
 			#if __BYTE_ORDER == __BIG_ENDIAN
-			ERROR(" debug.mksquashfs-magic: flipping endian\n");
+			TRACE(" debug.mksquashfs-magic: flipping endian\n");
 			g_nMagic=flip_endian(g_nMagic);
 			#endif
 			TRACE(" debug.mksquashfs-magic: signature is 0x%x\n", g_nMagic);

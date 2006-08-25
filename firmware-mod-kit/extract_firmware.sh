@@ -33,13 +33,14 @@ echo "$0 v$VERSION, (c)2006 Jeremy Collake"
 #################################################################
 
 if [ $# = 2 ]; then
+	sh ./check_for_upgrade.sh
 	#################################################################
 	PlatformIdentify
 	#################################################################
 	TestFileSystemExit $1 $2
 	#################################################################
 	if [ -f "$1" ]; then
-		if [ ! -e "./extract_firmware.sh" ]; then
+		if [ ! -f "./extract_firmware.sh" ]; then
 			echo "  ERROR - You must run this script from the same directory as it is in!"
 			exit 1
 		fi
@@ -64,10 +65,11 @@ if [ $# = 2 ]; then
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
 		echo "  Extracting firmware ..."
 		"src/untrx" "$1" "$2/image_parts" >> extract.log
-		if [ -f "$2/image_parts/squashfs-lzma-image" ]; then	
+		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then	
 	 		"src/squashfs-3.0/unsquashfs-lzma" \
-			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image" >> extract.log	
+			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" >> extract.log	
 		else
+			echo "  Possibly unsupported firmware filesystem image.."
 			echo "  Error extracting firmware. Check extract.log."
 			exit 1
 		fi

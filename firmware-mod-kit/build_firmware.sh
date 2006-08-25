@@ -33,27 +33,33 @@ echo "$0 v$VERSION, (c)2006 Jeremy Collake"
 #################################################################
 # Build_WRT_Images( OutputDir, WorkingDir )
 #################################################################
-Build_WRT_Images( )
+Build_WRT_Images ()
 {
 	echo "  Building squashfs-lzma filesystem ..."
-	if [ -e "$2/image_parts/squashfs-lzma-image" ]; then	
+	if [ -e "$2/image_parts/squashfs-lzma-image-3_0" ]; then	
 		# -magic to fix brainslayer changing squashfs signature in 08/10/06+ firmware images
 	 	"src/squashfs-3.0/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 		-noappend -root-owned -le -magic "$2/image_parts/squashfs_magic" >> build.log
+		if [ $? != 0 ]; then
+			echo "  ERROR - mksquashfs failed."
+			exit 1	
+		fi
 	else
 		echo "  ERROR - Working directory contains no sqfs filesystem?"
 		exit 1
-	fi
+	fi	
 	#################################################################
 	echo "  Building base firmware image (generic) ..."	
 	# I switched to asustrx due to bug in trx with big endian OS X. Without version specification it won't 
  	#  add addversion type headers at the end.
 	"src/asustrx" -o "$1/$FIRMARE_BASE_NAME.trx" \
-		"$2/image_parts/segment1" "$2/image_parts/segment2" "$2/image_parts/squashfs-lzma-image-new" \
+		"$2/image_parts/segment1" "$2/image_parts/segment2" \
+		"$2/image_parts/squashfs-lzma-image-new" \
 			>> build.log 2>&1
 	echo "  Building base firmware image (asus) ..."	
 	"src/asustrx" -p WL500gx -v 1.9.2.7 -o "$1/$FIRMARE_BASE_NAME-asus.trx" \
-		"$2/image_parts/segment1" "$2/image_parts/segment3" "$2/image_parts/squashfs-lzma-image-new" \
+		"$2/image_parts/segment1" "$2/image_parts/segment3" \
+		"$2/image_parts/squashfs-lzma-image-new" \
 		 >> build.log 2>&1
 	echo "  Making $1/$FIRMARE_BASE_NAME-wrtsl54gs.bin"
 	"src/addpattern" -4 -p W54U -v v4.20.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
@@ -76,12 +82,13 @@ Build_WRT_Images( )
 #################################################################
 
 if [ $# = 2 ]; then
+	sh ./check_for_upgrade.sh
 	#################################################################
 	PlatformIdentify 
 	#################################################################
 	TestFileSystemExit "$1" "$2"
 	#################################################################
-	if [ ! -e "./build_firmware.sh" ]; then
+	if [ ! -f "./build_firmware.sh" ]; then
 		echo "  ERROR - You must run this script from the same directory as it is in!"
 		exit 1
 	fi
@@ -100,9 +107,12 @@ if [ $# = 2 ]; then
 	mkdir -p $1 >> build.log 2>&1
 	rm "$1/$FIRMWARE_BASE_NAME*.*" "$1" >> build.log 2>&1
 	
-	if [ -f "$2/image_parts/segment2" ] && [ -f "$2/image_parts/squashfs-lzma-image" ]; then
+	if [ -f "$2/image_parts/segment2" ] && [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then
 		echo "  Detected WRT squashfs-lzma style."
-		Build_WRT_Images ($1, $2)	
+		Build_WRT_Images "$1" "$2"
+	else
+		echo "  ERROR: Unknown or unsupported firmware image."
+		exit 1
 	fi
 
 	echo "  Firmware images built."
