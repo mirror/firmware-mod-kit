@@ -163,8 +163,7 @@ int main(int argc, char **argv)
 		.comp_hw[0]	= { 0, 2, 2, 99 } /* hardcoded hw compat list 0.02 - 2.99 */
 	};
 
-
-	fprintf(stderr, "mjn3's trx replacement - v0.81, modified to pack ASUS compatible trx\n");
+	fprintf(stderr, "mjn3's trx replacement - v0.90, modified to pack ASUS compatible trx\n");
 	
 	while ((c = getopt(argc, argv, "b:o:m:p:v:")) != -1) {
 		switch (c) {

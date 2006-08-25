@@ -121,14 +121,14 @@ void ShowUsage()
 **************************************************************************/
 int main(int argc, char **argv)
 {
-	printf(" untrx v0.45 beta - (c)2006 Jeremy Collake\n");
+	fprintf(stderr, " untrx v0.45 beta - (c)2006 Jeremy Collake\n");
 	
 	if(argc<3)
 	{
 		ShowUsage();
 	}
 	
-	printf(" Opening %s\n", argv[1]);
+	fprintf(stderr, " Opening %s\n", argv[1]);
 	FILE *fIn=fopen(argv[1],"rb");
 	if(!fIn)
 	{
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}	
 	fclose(fIn);	
-	printf(" read %u bytes\n", nFilesize);
+	fprintf(stderr, " read %u bytes\n", nFilesize);
 	
 	// uf U2ND header present, skip past it (pData is preserved above)
 	unsigned long nDataSkip=0;
@@ -197,31 +197,32 @@ int main(int argc, char **argv)
 			nEndOffset-READ32_LE(trx->offsets[nI])))
 		{
 			case SEGMENT_TYPE_SQUASHFS_3_0:
-				sprintf(pszTemp,"%s/squashfs_magic",pszOutFolder);				
-				if(!EmitSquashfsMagic((squashfs_super_block *)pData,pszTemp))
+				fprintf(stderr, "  SQUASHFS v3.0 image detected\n");	
+				sprintf(pszTemp,"%s/squashfs_magic",pszOutFolder);								
+				if(!EmitSquashfsMagic((squashfs_super_block *)((char *)pData
+					+READ32_LE(trx->offsets[nI])),pszTemp))
 				{
-					fprintf(stderr," ERROR - writing %s\n", pszTemp);
+					fprintf(stderr,"  ERROR - writing %s\n", pszTemp);
 					free(pDataOrg);
 					free(pszOutFolder);	
 					free(pszTemp);
 					exit(3);		
-				}
-				fprintf(stderr, " SQUASHFS v3.0 image detected\n");
+				}				
 				sprintf(pszTemp,"%s/squashfs-lzma-image-3_0",pszOutFolder);				
 				break;
 			case SEGMENT_TYPE_SQUASHFS_3_1:
-				fprintf(stderr, " SQUASHFS v3.1 image detected\n");
+				fprintf(stderr, "  SQUASHFS v3.1 image detected\n");
 				sprintf(pszTemp,"%s/squashfs-lzma-image-3_1",pszOutFolder);
 				break;
 			case SEGMENT_TYPE_SQUASHFS_OTHER:
-				fprintf(stderr, " ! WARNING: Unknown squashfs version.\n");
+				fprintf(stderr, "  ! WARNING: Unknown squashfs version.\n");
 				sprintf(pszTemp,"%s/squashfs-lzma-image-x_x",pszOutFolder);
 				break;
 			default:
 				sprintf(pszTemp,"%s/segment%d",pszOutFolder,nI+1);
 				break;			
 		}		
-		fprintf(stderr," Writing %s\n    size %d from offset %d ...\n", 
+		fprintf(stderr,"  Writing %s\n    size %d from offset %d ...\n", 
 			pszTemp, 
 			nEndOffset-READ32_LE(trx->offsets[nI]),
 			READ32_LE(trx->offsets[nI]));		
@@ -229,7 +230,7 @@ int main(int argc, char **argv)
 		fOut=fopen(pszTemp,"wb");
 		if(!fOut)
 		{
-			fprintf(stderr," ERROR could not open %s\n", pszTemp);
+			fprintf(stderr,"  ERROR could not open %s\n", pszTemp);
 			free(pDataOrg);
 			free(pszOutFolder);	
 			free(pszTemp);
@@ -251,6 +252,6 @@ int main(int argc, char **argv)
 	free(pDataOrg);
 	free(pszOutFolder);	
 	free(pszTemp);
-	printf(" Done!\n");
+	printf("  Done!\n");
 	exit(0);
 }

@@ -58,7 +58,7 @@ Build_WRT_Images ()
 			>> build.log 2>&1
 	echo "  Building base firmware image (asus) ..."	
 	"src/asustrx" -p WL500gx -v 1.9.2.7 -o "$1/$FIRMARE_BASE_NAME-asus.trx" \
-		"$2/image_parts/segment1" "$2/image_parts/segment3" \
+		"$2/image_parts/segment1" "$2/image_parts/segment2" \
 		"$2/image_parts/squashfs-lzma-image-new" \
 		 >> build.log 2>&1
 	echo "  Making $1/$FIRMARE_BASE_NAME-wrtsl54gs.bin"

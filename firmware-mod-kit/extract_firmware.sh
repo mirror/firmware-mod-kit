@@ -41,7 +41,7 @@ if [ $# = 2 ]; then
 	#################################################################
 	if [ -f "$1" ]; then
 		if [ ! -f "./extract_firmware.sh" ]; then
-			echo "  ERROR - You must run this script from the same directory as it is in!"
+			echo " ERROR - You must run this script from the same directory as it is in!"
 			exit 1
 		fi
 		#################################################################
@@ -69,24 +69,24 @@ if [ $# = 2 ]; then
 	 		"src/squashfs-3.0/unsquashfs-lzma" \
 			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" >> extract.log	
 		else
-			echo "  Possibly unsupported firmware filesystem image.."
-			echo "  Error extracting firmware. Check extract.log."
+			echo " Possibly unsupported firmware filesystem image.."
+			echo " Error extracting firmware. Check extract.log."
 			exit 1
 		fi
 		if [ -e "$2/rootfs" ]; then
-			echo "  Firmware appears extracted correctly!"
-			echo "  Now make changes and run build_firmware.sh."
+			echo " Firmware appears extracted correctly!"
+			echo " Now make changes and run build_firmware.sh."
 		else
-			echo "  Error: Squashfs filesystem not extracted properly."
-			echo "  Make sure the firmware image format is right."
+			echo " Error: Squashfs filesystem not extracted properly."
+			echo " Make sure the firmware image format is right."
 			exit 1
 		fi	
 	else
-		echo "  $1 does not exist.. give me something to work with man!"
+		echo " $1 does not exist.. give me something to work with man!"
 	fi
 else
-	echo "  Incorrect usage."
-	echo "  USAGE: $0 FIRMWARE_IMAGE.BIN WORKING_DIR"
+	echo " Incorrect usage."
+	echo " USAGE: $0 FIRMWARE_IMAGE.BIN WORKING_DIR"
 	exit 1
 fi
 exit 0

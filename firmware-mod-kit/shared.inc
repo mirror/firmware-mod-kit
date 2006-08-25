@@ -38,7 +38,7 @@ TestFileSystemExit ()
 {
 INPUT_FILE=$1
 WORKING_DIR=$2
-	echo "  Testing file system of $WORKING_DIR ..."
+	echo " Testing file system of $WORKING_DIR ..."
 	mkdir -p "$WORKING_DIR" >> /dev/null 2>&1
 	rm "$WORKING_DIR/test12345612.tmp" >> /dev/null 2>&1
 	echo test > "$WORKING_DIR/test12345612.tmp"
@@ -80,6 +80,7 @@ WORKING_DIR=$2
 CleanCWD ()
 {
 	make clean >> cleanup.log 2>&1
+	rm -f src/*.log  >> cleanup.log 2>&1
 	rm -f *.log  >> cleanup.log 2>&1
 	rm -f *.o >> cleanup.log 2>&1
 	rm -f asustrx >> cleanup.log 2>&1
@@ -120,7 +121,7 @@ BuildTools ()
 {
 	local LOG_FILE="$1"
 	#################################################################
-	echo "  Building tools ..."
+	echo " Building tools ..."
 	make -C src > $LOG_FILE 2>&1
 	if [ $? = 0 ]; then
 		echo "  Build seems successful."
