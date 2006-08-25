@@ -45,19 +45,14 @@ if [ $# = 2 ]; then
 		fi
 		#################################################################
 		# remove deprecated stuff
-		if [ -e "./asustrx.c" ]; then 
-			mkdir "src_backup"
-			mv "*.c" "src_old_backup"
-			mv "*.h" "src_old_backup"
-			mv "lzma" "src_old_backup"
-			mv "Makefile" "src_old_backup"
-			Cleanup			
+		if [ -f "./src/mksquashfs.c" ] || [ -f "mksquashfs.c" ]; then
+			DeprecateOldVersion
 		fi
 		#################################################################
 		# Invoke BuildTools, which tries to build everything and then
 		# sets up appropriate symlinks.
 		#
-		BuildTools "extract.log"					     
+		BuildTools "extract.log"				     					
 		#################################################################		
 		echo "  Preparing working directory ..."
 		echo "   Removing any previous files ..."
@@ -69,8 +64,9 @@ if [ $# = 2 ]; then
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
 		echo "  Extracting firmware ..."
 		"src/untrx" "$1" "$2/image_parts" >> extract.log
-		if [ -e "$2/image_parts/squashfs-lzma-image" ]; then	
-	 		"src/unsquashfs-lzma" -dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image" >> extract.log	
+		if [ -f "$2/image_parts/squashfs-lzma-image" ]; then	
+	 		"src/squashfs-3.0/unsquashfs-lzma" \
+			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image" >> extract.log	
 		else
 			echo "  Error extracting firmware. Check extract.log."
 			exit 1

@@ -1,5 +1,5 @@
 #!/bin/sh
-SHARED_VERSION='0.43 beta'
+SHARED_VERSION='0.44 beta'
 #
 # Title: shared.inc
 # Author: Jeremy Collake <jeremy@bitsum.com>
@@ -63,47 +63,46 @@ WORKING_DIR=$2
 }
 #################################################################
 # LinkToolsBinraries (srcfolder, destfolder)
-LinkToolsBinaries ()
-{
-	ln -s -f $1/asustrx $2/asustrx
-	ln -s -f $1/untrx $2/untrx
-	ln -s -f $1/mksquashfs $2/mksquashfs
-	ln -s -f $1/mksquashfs-lzma $2/mksquashfs-lzma	
-	ln -s -f $1/unsquashfs $2/unsquashfs
-	ln -s -f $1/unsquashfs-lzma $2/unsquashfs-lzma
-	ln -s -f $1/addpattern $2/addpattern	
-}
-
-
+#LinkToolsBinaries ()
+#{
+## deprecated v0.44
+#	ln -s -f $1/asustrx $2/asustrx
+#	ln -s -f $1/untrx $2/untrx
+#	ln -s -f $1/mksquashfs $2/mksquashfs
+#	ln -s -f $1/mksquashfs-lzma $2/mksquashfs-lzma	
+#	ln -s -f $1/unsquashfs $2/unsquashfs
+#	ln -s -f $1/unsquashfs-lzma $2/unsquashfs-lzma
+#	ln -s -f $1/addpattern $2/addpattern	
+#}
 
 #################################################################
 
 CleanCWD ()
 {
-make clean >> cleanup.log 2>&1
-rm -f *.log
-rm -f *.o
-rm -f asustrx
-rm -f trx
-rm -f untrx
-rm -f addpattern
-rm -f mksquashfs
-rm -f mksquashfs-lzma
-rm -f unsquashfs
-rm -f unsquashfs-lzma
-# cygwin
-rm -f asustrx.exe
-rm -f trx.exe
-rm -f untrx.edxe
-rm -f addpattern.exe
-rm -f mksquashfs.exe
-rm -f mksquashfs-lzma.exe
-rm -f unsquashfs.exe
-rm -f unsquashfs-lzma.exe
-# old name for untrx, deprecated
-rm -f extfirmware*
-# trx replaced with asustrx
-rm -f trx.c
+	make clean >> cleanup.log 2>&1
+	rm -f *.log  >> cleanup.log 2>&1
+	rm -f *.o >> cleanup.log 2>&1
+	rm -f asustrx >> cleanup.log 2>&1
+	rm -f trx >> cleanup.log 2>&1
+	rm -f untrx >> cleanup.log 2>&1
+	rm -f addpattern >> cleanup.log 2>&1
+	rm -f mksquashfs >> cleanup.log 2>&1
+	rm -f mksquashfs-lzma >> cleanup.log 2>&1
+	rm -f unsquashfs >> cleanup.log 2>&1
+	rm -f unsquashfs-lzma >> cleanup.log 2>&1
+	# cygwin
+	rm -f asustrx.exe >> cleanup.log 2>&1
+	rm -f trx.exe >> cleanup.log 2>&1
+	rm -f untrx.edxe >> cleanup.log 2>&1
+	rm -f addpattern.exe >> cleanup.log 2>&1
+	rm -f mksquashfs.exe >> cleanup.log 2>&1
+	rm -f mksquashfs-lzma.exe >> cleanup.log 2>&1
+	rm -f unsquashfs.exe >> cleanup.log 2>&1
+	rm -f unsquashfs-lzma.exe >> cleanup.log 2>&1
+	# old name for untrx, deprecated
+	rm -f extfirmware* >> cleanup.log 2>&1
+	# trx replaced with asustrx
+	rm -f trx.c >> cleanup.log 2>&1
 }
 Cleanup ()
 {
@@ -123,10 +122,10 @@ BuildTools ()
 	#################################################################
 	echo "  Building tools ..."
 	make -C src > $LOG_FILE 2>&1
-	if [ -e "src/untrx.o" ] && [ -e "src/asustrx.o" ] && [ -e "src/mksquashfs-lzma" ] && [ -e "src/unsquashfs-lzma" ]; 		then
+	if [ $? = 0 ]; then
 		echo "  Build seems successful."
 	else
-		echo "  ERROR - Build did not succeed. Check build.log, you are probably"
+		echo "  ERROR - Build did not succeed. Check log file, you are probably"
 		echo "          missing one or more necessary pre-requisites. See docs for"
 		echo "          a list of pre-requsites."
 		if [ -e "src/untrx" ]; then
@@ -141,12 +140,43 @@ BuildTools ()
 		ln -s -f "src/asustrx.exe" "src/asustrx" >> $LOG_FILE 2>&1
 		ln -s -f "src/untrx.exe" "src/untrx" >> $LOG_FILE 2>&1
 		ln -s -f "src/addpattern.exe" "src/addpattern" >> $LOG_FILE 2>&1
-		ln -s -f "src/mksquashfs-lzma.exe" "src/mksquashfs-lzma"  >> $LOG_FILE 2>&1
-		ln -s -f "src/unsquashfs-lzma.exe" "src/unsquashfs-lzma"  >> $LOG_FILE 2>&1
-		ln -s -f "src/mksquashfs.exe" "src/mksquashfs"  >> $LOG_FILE 2>&1
-		ln -s -f "src/unsquashfs.exe" "src/unsquashfs"  >> $LOG_FILE 2>&1
+		ln -s -f "src/squashfs-3.0/mksquashfs-lzma.exe" "src/squashfs-3.0/mksquashfs-lzma"  >> $LOG_FILE 2>&1
+		ln -s -f "src/squashfs-3.0/unsquashfs-lzma.exe" "src/squashfs-3.0/unsquashfs-lzma"  >> $LOG_FILE 2>&1
+		ln -s -f "src/squashfs-3.0/mksquashfs.exe" "src/squashfs-3.0/mksquashfs"  >> $LOG_FILE 2>&1
+		ln -s -f "src/squashfs-3.0/unsquashfs.exe" "src/squashfs-3.0/unsquashfs"  >> $LOG_FILE 2>&1
 	fi
 	#################################################################
 	# cygwin: this can not be called before above block (no *. bins exist)
-	LinkToolsBinaries "src" "."
+	#LinkToolsBinaries "src" "."
+}
+#################################################################
+# DeprecateOldVersion ()
+#
+# This is to automatically cleanup stuff that's been moved or removed
+#  since older versions. Aren't I nice?
+# 
+DeprecateOldVersion ()
+{
+		echo " Detected leftover stuff from an old version, cleaning"
+		mkdir "src_backup"  >> upgrade.log 2>&1
+		mv "*.c" "src_old_backup"  >> upgrade.log 2>&1
+		mv "*.h" "src_old_backup" >> upgrade.log 2>&1
+		mv "lzma" "src_old_backup" >> upgrade.log 2>&1
+		mv "Makefile" "src_old_backup" >> upgrade.log 2>&1
+		# remove symbolic links from v0.43 and below
+		rm "mksquashfs" >> upgrade.log 2>&1
+		rm "unsquashfs" >> upgrade.log 2>&1
+		rm "mksquashfs-lzma" >> upgrade.log 2>&1
+		rm "unsquashfs-lzma" >> upgrade.log 2>&1
+		rm "untrx" >> upgrade.log 2>&1
+		rm "asustrx" >> upgrade.log 2>&1
+		rm "addpattern" >> upgrade.log 2>&1
+		# remove old sources
+		mv src/untrx.c src_old_backup >> upgrade.log 2>&1
+		mv src/mksquashfs* src_old_backup >> upgrade.log 2>&1
+		mv src/unsquashfs* src_old_backup >> upgrade.log 2>&1
+		mv src/read_* src_old_backup >> upgrade.log 2>&1
+		mv src/sort* src_old_backup >> upgrade.log 2>&1
+		mv src/global.h src_old_backup >> upgrade.log 2>&1
+		Cleanup			
 }

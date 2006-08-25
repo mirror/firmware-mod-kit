@@ -1,5 +1,6 @@
 #!/bin/sh
 VERSION='0.43 beta'
+##################################################
 #
 # Title: ipkg_remove.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
