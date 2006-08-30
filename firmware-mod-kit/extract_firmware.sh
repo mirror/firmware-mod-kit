@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.45 beta'
+VERSION='0.46 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -64,10 +64,14 @@ if [ $# = 2 ]; then
 		mkdir -p "$2/image_parts" >> extract.log 2>&1
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
 		echo "  Extracting firmware ..."
-		"src/untrx" "$1" "$2/image_parts" >> extract.log
+		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then	
 	 		"src/squashfs-3.0/unsquashfs-lzma" \
 			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" >> extract.log	
+		elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
+			TestIsRootAndExitIfNot
+			"src/uncramfs/uncramfs" \
+				"$2/rootfs" "$2/image_parts/cramfs-image-x_x" >> extract.log 2>&1			
 		else
 			echo " Possibly unsupported firmware filesystem image.."
 			echo " Error extracting firmware. Check extract.log."
@@ -77,8 +81,8 @@ if [ $# = 2 ]; then
 			echo " Firmware appears extracted correctly!"
 			echo " Now make changes and run build_firmware.sh."
 		else
-			echo " Error: Squashfs filesystem not extracted properly."
-			echo " Make sure the firmware image format is right."
+			echo " Error: filesystem not extracted properly."
+			echo "   firmware image format not compatible?"
 			exit 1
 		fi	
 	else

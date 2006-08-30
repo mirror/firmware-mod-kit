@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.45 beta'
+VERSION='0.46 beta'
 #
 # Title: build_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -31,6 +31,60 @@ EXIT_ON_FS_PROBLEM="0"
 echo "$0 v$VERSION, (c)2006 Jeremy Collake"
 
 #################################################################
+# InvokeTRX ( OutputDir, WorkingDir, filesystem image filename )
+#################################################################
+InvokeTRX ()
+{
+	echo "  Building base firmware image (generic) ..."	
+	SEGMENT_1="$2/image_parts/segment1"
+	if [ -f "$2/image_parts/segment2" ]; then
+		SEGMENT_2="$2/image_parts/segment2"
+	else
+		SEGMENT_2=""
+	fi
+	# I switched to asustrx due to bug in trx with big endian OS X.
+	#  it works just like trx if you don't supply a version number (skips addver appendage)
+	"src/asustrx" -o "$1/$FIRMARE_BASE_NAME.trx" \
+		$SEGMENT_1 $SEGMENT_2 \
+		"$2/image_parts/$3" \
+			>> build.log 2>&1
+	echo "  Building base firmware image (asus) ..."	
+	"src/asustrx" -p WL500gx -v 1.9.2.7 -o "$1/$FIRMARE_BASE_NAME-asus.trx" \
+		$SEGMENT_1 $SEGMENT_2 \
+		"$2/image_parts/$3" \
+		 >> build.log 2>&1
+
+}
+
+#################################################################
+# CreateTargetImages ( OutputDir, WorkingDir )
+#
+# addpattern (HDR0) images. Maybe other model specific stuff
+# later.
+#################################################################
+CreateTargetImages ()
+{
+	echo "  Making $1/$FIRMARE_BASE_NAME-wrtsl54gs.bin"
+	if [ ! -f "$1/$FIRMARE_BASE_NAME.trx" ]; then
+		echo "  ERROR: Sanity check failed."
+		exit 1
+	fi
+	"src/addpattern" -4 -p W54U -v v4.20.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
+		 -o "$1/$FIRMARE_BASE_NAME-wrtsl54gs.bin" -g >> build.log 2>&1
+	echo "  Making $1/$FIRMARE_BASE_NAME-wrt54g.bin"
+	"src/addpattern" -4 -p W54G -v v4.20.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
+		-o "$1/$FIRMARE_BASE_NAME-wrt54g.bin" -g >> build.log 2>&1
+	echo "  Making $1/$FIRMARE_BASE_NAME-wrt54gs.bin"
+	"src/addpattern" -4 -p W54S -v v4.70.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
+		-o "$1/$FIRMARE_BASE_NAME-wrt54gs.bin" -g >> build.log 2>&1
+	echo "  Making $1/$FIRMARE_BASE_NAME-wrt54gsv4.bin"
+	"src/addpattern" -4 -p W54s -v v1.05.0 -i "$1/$FIRMARE_BASE_NAME.trx" \
+		-o "$1/$FIRMARE_BASE_NAME-wrt54gsv4.bin" -g >> build.log 2>&1
+	echo "  Making $1/$FIRMARE_BASE_NAME-generic.bin"
+	ln -s "$1/$FIRMARE_BASE_NAME.trx" "$1/$FIRMARE_BASE_NAME-generic.bin" >> build.log 2>&1
+}
+
+#################################################################
 # Build_WRT_Images( OutputDir, WorkingDir )
 #################################################################
 Build_WRT_Images ()
@@ -49,35 +103,42 @@ Build_WRT_Images ()
 		exit 1
 	fi	
 	#################################################################
-	echo "  Building base firmware image (generic) ..."	
-	# I switched to asustrx due to bug in trx with big endian OS X. Without version specification it won't 
- 	#  add addversion type headers at the end.
-	"src/asustrx" -o "$1/$FIRMARE_BASE_NAME.trx" \
-		"$2/image_parts/segment1" "$2/image_parts/segment2" \
-		"$2/image_parts/squashfs-lzma-image-new" \
-			>> build.log 2>&1
-	echo "  Building base firmware image (asus) ..."	
-	"src/asustrx" -p WL500gx -v 1.9.2.7 -o "$1/$FIRMARE_BASE_NAME-asus.trx" \
-		"$2/image_parts/segment1" "$2/image_parts/segment2" \
-		"$2/image_parts/squashfs-lzma-image-new" \
-		 >> build.log 2>&1
-	echo "  Making $1/$FIRMARE_BASE_NAME-wrtsl54gs.bin"
-	"src/addpattern" -4 -p W54U -v v4.20.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		 -o "$1/$FIRMARE_BASE_NAME-wrtsl54gs.bin" -g >> build.log 2>&1
-	echo "  Making $1/$FIRMARE_BASE_NAME-wrt54g.bin"
-	"src/addpattern" -4 -p W54G -v v4.20.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		-o "$1/$FIRMARE_BASE_NAME-wrt54g.bin" -g >> build.log 2>&1
-	echo "  Making $1/$FIRMARE_BASE_NAME-wrt54gs.bin"
-	"src/addpattern" -4 -p W54S -v v4.70.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		-o "$1/$FIRMARE_BASE_NAME-wrt54gs.bin" -g >> build.log 2>&1
-	echo "  Making $1/$FIRMARE_BASE_NAME-wrt54gsv4.bin"
-	"src/addpattern" -4 -p W54s -v v1.05.0 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		-o "$1/$FIRMARE_BASE_NAME-wrt54gsv4.bin" -g >> build.log 2>&1
-	echo "  Making $1/$FIRMARE_BASE_NAME-generic.bin"
-	mv "$1/$FIRMARE_BASE_NAME.trx" "$1/$FIRMARE_BASE_NAME-generic.bin" >> build.log 2>&1
+	InvokeTRX "$1" "$2" "squashfs-lzma-image-new"
+	CreateTargetImages "$1" "$2" 	
 }
-#################################################################
 
+#################################################################
+# MakeCramfs (output file, root dir)
+#
+# invokes mkcramfs
+#
+#################################################################
+MakeCramfs ()
+{
+	echo "  Building cramfs file system ..."
+	./src/cramfs-1.1/mkcramfs "$2" "$1" >> build.log 2>&1
+	if [ $? != 0 ]; then
+		echo "  ERROR: creating cramfs file system failed.".
+		exit "$?"
+	else
+		echo "  Successfully creted cramfs image."
+	fi
+}
+
+#################################################################
+# Build_WL530G_Image (OutputDir, WorkingDir, fs image filename [only] )
+#
+# Builds an ASUS WL530/520/550G image.
+#
+#################################################################
+Build_WL530G_Image ()
+{
+	echo "  Building wl-530/520/550g style image (static TRX offsets)."
+	./src/asustrx -p WL530g -v 1.9.4.6 -o "$1/$FIRMARE_BASE_NAME-wl530g.trx" -b 32 "$2/image_parts/segment1" -b 655360 "$2/image_parts/$3"
+}
+
+
+#################################################################
 #################################################################
 #################################################################
 
@@ -110,7 +171,31 @@ if [ $# = 2 ]; then
 	if [ -f "$2/image_parts/segment2" ] && [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then
 		echo "  Detected WRT squashfs-lzma style."
 		Build_WRT_Images "$1" "$2"
-	else
+	elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
+		echo "  Detected cramfs file system."
+		TestIsRootAndExitIfNot
+		MakeCramfs "$2/image_parts/cramfs-image-1.1-new" "$2/rootfs"
+		# todo: rewrite this terrible test
+		grep "530g" "$2/image_parts/cramfs-image-x_x"				
+		if [ $? = "0" ]; then
+			IS_530G_STYLE=1
+		fi
+		grep "550g" "$2/image_parts/cramfs-image-x_x"				
+		if [ $? = "0" ]; then
+			IS_530G_STYLE=1
+		fi
+		grep "520g" "$2/image_parts/cramfs-image-x_x"				
+		if [ $? = "0" ]; then
+			IS_530G_STYLE=1
+		fi
+		if [ "$IS_530G_STYLE" = "1" ]; then		
+			Build_WL530G_Image "$1" "$2" "cramfs-image-1.1-new"
+		else
+			echo "  No specific firmware type known, so am making standard images."
+			InvokeTRX "$1" "$2" "cramfs-image-1.1-new"
+			CreateTargetImages "$1" "$2"			
+		fi 
+	else		
 		echo "  ERROR: Unknown or unsupported firmware image."
 		exit 1
 	fi
