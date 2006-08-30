@@ -106,7 +106,7 @@ typedef enum _SEGMENT_TYPE
 	SEGMENT_TYPE_SQUASHFS_3_0,
 	SEGMENT_TYPE_SQUASHFS_3_1,
 	SEGMENT_TYPE_SQUASHFS_OTHER,
-	SEGMENT_TYPE_CRAMFS_1_0,
+	SEGMENT_TYPE_CRAMFS_x_x,
 	SEGMENT_TYPE_CRAMFS_OTHER	
 } SEGMENT_TYPE, *PSEGMENT_TYPE;
 	
@@ -166,6 +166,24 @@ struct squashfs_super_block {
 // jc: for dd-wrt build as of 09/10/06
 #define SQUASHFS_MAGIC_ALT		0x74717368
 #define SQUASHFS_MAGIC_ALT_SWAP	0x68737174
+
+/************************************************************
+	cramfs v? stuff
+************************************************************/
+#define CRAMFS_MAGIC 0x28cd3d45
+#define CRAMFS_MAGIC_SWAP 0x453dcd28 
+
+struct cramfs_super {
+	u_int32_t magic;		/* 0x28cd3d45 - random number */
+	u_int32_t size;		/* Not used.  mkcramfs currently
+                                   writes a constant 1<<16 here. */
+	u_int32_t flags;		/* 0 */
+	u_int32_t future;		/* 0 */
+	u_int8_t signature[16];	/* "Compressed ROMFS" */
+	u_int8_t fsid[16];		/* random number */
+	u_int8_t name[16];		/* user-defined name */
+	//struct cramfs_inode root;	/* Root inode data */
+};
 
 #ifdef __cplusplus
 }

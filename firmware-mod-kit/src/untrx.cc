@@ -1,7 +1,7 @@
 /* untrx
  * Copyright (C) 2006  Jeremy Collake  <jeremy@bitsum.com>
  *
- *	version: 0.45 beta		
+ *	version: 0.47 beta		
  *	Quick and dirty tool to find and extract parts of a TRX style firmware		
  *	I whipped this out quickly. Didn't spend much/any time on polishing.
  *
@@ -45,6 +45,8 @@
 SEGMENT_TYPE IdentifySegment(unsigned char *pData, unsigned long nLength)
 {
 	squashfs_super_block *sqblock=(squashfs_super_block *)pData;
+	cramfs_super *crblock=(cramfs_super *)pData;
+	
 	if(sqblock->s_magic==SQUASHFS_MAGIC 
 		|| sqblock->s_magic==SQUASHFS_MAGIC_SWAP
 		|| sqblock->s_magic==SQUASHFS_MAGIC_ALT
@@ -76,7 +78,10 @@ SEGMENT_TYPE IdentifySegment(unsigned char *pData, unsigned long nLength)
 				return SEGMENT_TYPE_SQUASHFS_OTHER;				
 		}
 	}	
-	
+	else if(crblock->magic==CRAMFS_MAGIC || crblock->magic==CRAMFS_MAGIC_SWAP)
+	{
+		return SEGMENT_TYPE_CRAMFS_x_x;	
+	}	
 	return SEGMENT_TYPE_UNTYPED;
 }
 
@@ -121,7 +126,7 @@ void ShowUsage()
 **************************************************************************/
 int main(int argc, char **argv)
 {
-	fprintf(stderr, " untrx v0.45 beta - (c)2006 Jeremy Collake\n");
+	fprintf(stderr, " untrx v0.47 beta - (c)2006 Jeremy Collake\n");
 	
 	if(argc<3)
 	{
@@ -179,14 +184,14 @@ int main(int argc, char **argv)
 		malloc(strlen(pszOutFolder)*sizeof(char)+128*sizeof(char));			
 	
 	/* Extract the segments */
-	for(int nI=0;nI<3;nI++)
+	for(int nI=0;nI<3 && READ32_LE(trx->offsets[nI]);nI++)
 	{
 		FILE *fOut;			
 		
 		unsigned long nEndOffset=0;
 		if(nI<2)
 		{
-			nEndOffset=trx->offsets[nI+1];
+			nEndOffset=READ32_LE(trx->offsets[nI+1]);
 		}
 		if(!nEndOffset)
 		{
@@ -218,6 +223,10 @@ int main(int argc, char **argv)
 				fprintf(stderr, "  ! WARNING: Unknown squashfs version.\n");
 				sprintf(pszTemp,"%s/squashfs-lzma-image-x_x",pszOutFolder);
 				break;
+			case SEGMENT_TYPE_CRAMFS_x_x:
+				fprintf(stderr, "  CRAMFS v? image detected\n");
+				sprintf(pszTemp,"%s/cramfs-image-x_x",pszOutFolder);
+				break;				
 			default:
 				sprintf(pszTemp,"%s/segment%d",pszOutFolder,nI+1);
 				break;			
