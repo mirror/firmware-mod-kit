@@ -181,3 +181,13 @@ DeprecateOldVersion ()
 		mv src/global.h src_old_backup >> upgrade.log 2>&1
 		Cleanup			
 }
+
+
+TestIsRootAndExitIfNot()
+{
+	CUR_USER=$(whoami)
+	if [ $CUR_USER != "root" ]; then
+		echo " ERROR: You must be 'root' when extracting and building cramfs images."
+		exit 1
+	fi
+}
