@@ -131,7 +131,7 @@ void usage(void) __attribute__ (( __noreturn__ ));
 
 void usage(void)
 {
-	fprintf(stderr, "Use: trx [-p prod_id] [-v ver] [-o ofile] [-m maxlen] [-b seg1size] file [file [file]]\n");
+	fprintf(stderr, "Use: trx [-p prodid] [-v ver] [-o ofile] [-m maxlen] [-b offs] file [-b offs] [file [file]]\n");
 	exit(EXIT_FAILURE);
 }
 
