@@ -134,7 +134,7 @@ MakeCramfs ()
 Build_WL530G_Image ()
 {
 	echo "  Building wl-530/520/550g style image (static TRX offsets)."
-	./src/asustrx -p WL530g -v 1.9.4.6 -o "$1/$FIRMARE_BASE_NAME-wl530g.trx" -b 32 "$2/image_parts/segment1" -b 655360 "$2/image_parts/$3"
+	./src/asustrx -p WL530g -v 1.9.4.6 -o "$1/$FIRMARE_BASE_NAME-wl530g.trx" -b 32 "$2/image_parts/segment1" -b 655360 "$2/image_parts/$3"  >> build.log 2>&1	
 }
 
 
@@ -176,15 +176,15 @@ if [ $# = 2 ]; then
 		TestIsRootAndExitIfNot
 		MakeCramfs "$2/image_parts/cramfs-image-1.1-new" "$2/rootfs"
 		# todo: rewrite this terrible test
-		grep "530g" "$2/image_parts/cramfs-image-x_x"				
+		grep "530g" "$2/image_parts/cramfs-image-x_x" >> build.log 2>&1				
 		if [ $? = "0" ]; then
 			IS_530G_STYLE=1
 		fi
-		grep "550g" "$2/image_parts/cramfs-image-x_x"				
+		grep "550g" "$2/image_parts/cramfs-image-x_x" >> build.log 2>&1			
 		if [ $? = "0" ]; then
 			IS_530G_STYLE=1
 		fi
-		grep "520g" "$2/image_parts/cramfs-image-x_x"				
+		grep "520g" "$2/image_parts/cramfs-image-x_x" >> build.log 2>&1		
 		if [ $? = "0" ]; then
 			IS_530G_STYLE=1
 		fi
