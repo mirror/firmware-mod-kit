@@ -15,11 +15,10 @@
 <a href="http://code.google.com/p/firmware-mod-kit/">
 http://code.google.com/p/firmware-mod-kit/</a><i><b><br>
 Giving YOU the power to customize your firmware<br>
-</b>[documentation version 0.461 beta]<br>
+</b>[documentation version 0.463 beta]<br>
 all scripts, untrx tool, and docs (c) Jeremy Collake &lt;jeremy@bitsum.com&gt;
 <a href="http://www.bitsum.com">http://www.bitsum.com</a><br>
-other portions (c) their respective holders (squashfs, asustrx, addpattern 
-tools)</i></p>
+other portions (c) their respective holders</i></p>
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 <input type="hidden" name="cmd0" value="_s-xclick">
 <input type="image" src="x-click-but21.gif" border="0" name="submit0" alt="Make payments with PayPal - it's fast, free and secure!">
@@ -60,13 +59,11 @@ XI. <a href="#About_the_author">About the author</a></p>
 </font><br>
 This kit gives the user the ability to make changes to a firmware image without 
 recompiling the firmware sources. It works by extracting the firmware into 
-its component parts, then extracting the squashfs-lzma based file system (other 
-file systems can be supported with tweaks). The user can then make modifications 
-to the extracted file system, then rebuild the firmware image.</p>
-<p>I am currently in the process of extending this kit to support many other 
-firmware images. If you want YOUR device supported, please send me information 
-at <a href="mailto:jeremy@bitsum.com">jeremy@bitsum.com</a>.</p>
-<p>The following utilities are included in this kit, along with scripts to 
+its component parts, then extracting the file system image (assuming its in one 
+the supported formats). The user can then make modifications 
+to the extracted file system, and rebuild the firmware image.</p>
+<p>Although this kit completely automates the process, it is also useful for 
+those who need a handy collection of utilities to manipulate firmware images. The following utilities are included in this kit, along with scripts to 
 automate their use:</p>
 <table border="0" width="100%" id="table8">
 	<tr>
@@ -119,26 +116,20 @@ automate their use:</p>
 		<td width="1457">&nbsp;</td>
 	</tr>
 </table>
-<p>Centralizing storage of these utilities is somewhat useful itself. You can 
-always use these tools manually even if the scripts don't support the firmware 
-image you want to work with.</p>
 <p>&nbsp;</p>
 <p><b><font size="5">II. <a name="Why_is_this_useful">Why is this useful?</a></font></b><br>
 <br>
 A list of some of the many reasons this might be desired are:</p>
 <ul>
 	<li>add initialization scripts</li>
-	<li>install new packages (remember, packages pre-installed are compressed 
-	much better)</li>
-	<li>extend web UI</li>
+	<li>install new packages</li>
+	<li>extend/change HTTP managed console</li>
 	<li>remove un-needed packages</li>
 	<li>mix-and-match packages from various flavors of the firmware image.</li>
 </ul>
 <p>
 <br>
-<b>UPDATE: </b>Squashfs v3.1 has been released. Eventually I'll release a new firmware mod kit to 
-support it.</p>
-<p>&nbsp;</p>
+&nbsp;</p>
 <p><b><font size="5">III. <a name="Where_to_get_the_kit">Where to get the ki</a>t</font></b></p>
 <p><br>
 <b><font size="4">Kit downloads and links:</font></b></p>
@@ -252,7 +243,7 @@ re-branding the web UI.</td>
 	</tr>
 	<tr>
 		<td width="183">WL-550G (vendor)</td>
-		<td><i>untested - should work ok</i></td>
+		<td><i>untested&nbsp; - should work ok</i></td>
 	</tr>
 	<tr>
 		<td width="183">many others</td>
