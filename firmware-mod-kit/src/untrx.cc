@@ -1,7 +1,6 @@
 /* untrx
- * Copyright (C) 2006  Jeremy Collake  <jeremy@bitsum.com>
+ * Copyright (C) 2006 Jeremy Collake  <jeremy@bitsum.com>
  *
- *	version: 0.47 beta		
  *	Quick and dirty tool to find and extract parts of a TRX style firmware		
  *	I whipped this out quickly. Didn't spend much/any time on polishing.
  *
@@ -19,6 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
+ 
+ #define _VERSION_ "0.48 beta"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -126,7 +127,7 @@ void ShowUsage()
 **************************************************************************/
 int main(int argc, char **argv)
 {
-	fprintf(stderr, " untrx v0.47 beta - (c)2006 Jeremy Collake\n");
+	fprintf(stderr, " untrx " _VERSION_ " - (c)2006 Jeremy Collake\n");
 	
 	if(argc<3)
 	{
@@ -150,8 +151,9 @@ int main(int argc, char **argv)
 	
 	fseek(fIn,0,SEEK_END);
 	size_t nFilesize=ftell(fIn);
-	fseek(fIn,0,SEEK_SET);	
-	unsigned char *pDataOrg,*pData=(unsigned char *)malloc(nFilesize);	
+	fseek(fIn,0,SEEK_SET);		
+	unsigned char *pData=(unsigned char *)malloc(nFilesize);	
+	unsigned char *pDataOrg=pData;
 	if(fread(pData,1,nFilesize,fIn)!=nFilesize)
 	{
 		fprintf(stderr," ERROR reading %s\n", argv[1]);		
