@@ -7,6 +7,7 @@ all: asustrx addpattern untrx
 	make -C ./uncramfs/
 	make -C ./cramfs-1.1/
 	make -C ./squashfs-3.0/
+	make -C ./wrt_vx_imgtool/
 
 addpattern: addpattern.o
 	$(CC) addpattern.o -lz -o $@
@@ -22,3 +23,4 @@ clean:
 	make -C squashfs-3.0 clean
 	make -C cramfs-1.1 clean
 	make -C uncramfs clean
+	make -C wrt_vx_imgtool clean
