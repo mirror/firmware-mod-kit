@@ -55,15 +55,15 @@ if [ $# = 2 ]; then
 		#
 		BuildTools "extract.log"				     					
 		#################################################################		
-		echo "  Preparing working directory ..."
-		echo "   Removing any previous files ..."
+		echo " Preparing working directory ..."
+		echo "  Removing any previous files ..."
 		rm -rf "$2/rootfs" >> extract.log 2>&1
 		rm -rf "$2/image_parts" >> extract.log 2>&1
 		rm -rf "$2/installed_packages" >> extract.log 2>&1
-		echo "   Creating directories ..."
+		echo "  Creating directories ..."
 		mkdir -p "$2/image_parts" >> extract.log 2>&1
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
-		echo "  Extracting firmware ..."
+		echo " Extracting firmware ..."
 		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then	
 	 		"src/squashfs-3.0/unsquashfs-lzma" \

@@ -19,17 +19,17 @@ PlatformIdentify ()
 {
 SYSNAME=`uname`
 	if [ "$SYSNAME" = "Linux" ]; then
-		echo "  LINUX system detected. Compatibility ok."	
+		echo " LINUX system detected. Compatibility ok."	
 	elif [ `expr "$SYSNAME" : "Darwin"` = 6 ]; then
-		echo "  OS X system detected. **BETA TESTING**"
-		echo "  This platform is not well tested."
+		echo " OS X system detected. **BETA TESTING**"
+		echo " This platform is not well tested."
 		WarningPrompt				
 	elif [ `expr "$SYSNAME" : "CYGWIN"` = 6 ]; then
-		echo "  CYGWIN system detected. **BETA TESTING** Built images may have problems."
-		echo "  This platform is not well tested."
+		echo " CYGWIN system detected. **BETA TESTING** Built images may have problems."
+		echo " This platform is not well tested."
 		WarningPrompt			
 	else
-		echo "  Unknown system detected. Compatibility state is unknown."
+		echo " Unknown system detected. Compatibility state is unknown."
 		WarningPrompt
 	fi
 }
@@ -124,13 +124,13 @@ BuildTools ()
 	echo " Building tools ..."
 	make -C src > $LOG_FILE 2>&1
 	if [ $? = 0 ]; then
-		echo "  Build seems successful."
+		echo " Build seems successful."
 	else
-		echo "  ERROR - Build did not succeed. Check log file, you are probably"
-		echo "          missing one or more necessary pre-requisites. See docs for"
-		echo "          a list of pre-requsites."
+		echo " ERROR - Build did not succeed. Check log file, you are probably"
+		echo "         missing one or more necessary pre-requisites. See docs for"
+		echo "         a list of pre-requsites."
 		if [ -e "src/untrx" ]; then
-			echo "  CONTINUING anyway, attempting to use pre-built binaries (x32 linux)"	
+			echo " CONTINUING anyway, attempting to use pre-built binaries (x32 linux)"	
 		else
 			exit 1
 		fi
