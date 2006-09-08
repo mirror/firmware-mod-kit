@@ -3,7 +3,7 @@ CXX := g++
 INCLUDEDIR = .
 CFLAGS := -I$(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2
 
-all: asustrx addpattern untrx
+all: asustrx addpattern untrx motorola-bin
 	make -C ./uncramfs/
 	make -C ./cramfs-1.1/
 	make -C ./squashfs-3.0/
@@ -18,8 +18,15 @@ untrx: untrx.o
 asustrx: asustrx.o
 	$(CC) asustrx.o -lz -o $@
 
+motorola-bin: motorola-bin.o
+	$(CC) motorola-bin.o -o $@
+
 clean:
 	rm -f *.o
+	rm motorola-bin
+	rm untrx
+	rm asustrx
+	rm addpattern
 	make -C squashfs-3.0 clean
 	make -C cramfs-1.1 clean
 	make -C uncramfs clean
