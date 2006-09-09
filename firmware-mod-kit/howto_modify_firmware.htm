@@ -14,9 +14,8 @@
 </font></b>
 <a href="http://code.google.com/p/firmware-mod-kit/">
 http://code.google.com/p/firmware-mod-kit/</a><i><b><br>
-Giving YOU the power to customize your firmware<br>
-<br>
-</b><font size="2">documentation version 0.471 beta<br>
+Giving YOU the power to customize your firmware</b></i></p><hr>
+<p><i><font size="2">documentation version 0.48 beta<br>
 all scripts, untrx tool, and docs (c) Jeremy Collake &lt;jeremy@bitsum.com&gt;
 <a href="http://www.bitsum.com">http://www.bitsum.com</a><br>
 other portions (c) their respective holders</font></i></p>
@@ -34,6 +33,7 @@ and/or modify<br>
 &nbsp;You should have received a copy of the GNU General Public License<br>
 &nbsp;along with this program; if not, write to the Free Software<br>
 &nbsp;Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</font></i></p>
+<hr>
 <p><b><font size="4">Contents</font></b></p>
 <p>I. <a href="#Description">Description</a><br>
 II. <a href="#Why_is_this_useful">Why is this useful?</a><br>
@@ -89,9 +89,17 @@ automate their use:</p>
 		header to a TRX.</td>
 	</tr>
 	<tr>
+		<td><br>
+		<b>ADDVER<br>
+&nbsp;</b></td>
+		<td width="1457">ASUS utility to append a header to a TRX image that 
+		contains version information. ASUSTRX includes this capability. Current 
+		version: unversioned.</td>
+	</tr>
+	<tr>
 		<td><b>CRAMFSCK</b></td>
 		<td width="1457">CRAMFS file system image checker and extractor. Current 
-		versions included are: 1.1.</td>
+		versions included are:&nbsp; 2.4x.</td>
 	</tr>
 	<tr>
 		<td height="23"><b>MKSQUASHFS</b></td>
@@ -101,7 +109,7 @@ automate their use:</p>
 	<tr>
 		<td height="25"><b>MKCRAMFS</b></td>
 		<td width="1457" height="25">Builds a cramfs file system image. Coming 
-		in next version. Current versions included are: 1.1.</td>
+		in next version. Current versions included are: 2.4x.</td>
 	</tr>
 	<tr>
 		<td><b>MOTOROLA_BIN</b></td>
@@ -111,7 +119,8 @@ automate their use:</p>
 	</tr>
 	<tr>
 		<td><b>UNCRAMFS</b></td>
-		<td width="1457">Extracts a cramfs file system image. Current versions 
+		<td width="1457">Alternate tool to extracts a cramfs file system image. 
+		Use cramfsck instead whenever possible as it seems to be more reliable. Current versions 
 		included are: 0.7 (for cramfs v2.x).</td>
 	</tr>
 	<tr>
@@ -166,9 +175,12 @@ Sometimes newer snapshots are posted for testing. When available, they are
 User forums can be found at <a href="http://www.bitsum.com">
 http://www.bitsum.com/smf</a>.</p>
 <p><b><font size="4">Packages:</font></b></p>
-<p>DD-WRT packages for use with the kit:
+<p>All of the many OpenWrt packages should work with OpenWrt images and many 
+other firmware images.</p>
+<p>A specific collection of DD-WRT packages for use with the kit:
 <a href="http://www.bitsum.com/files/ddwrt_packages.tar.gz">
-http://www.bitsum.com/files/ddwrt_packages.tar.gz</a> .</p>
+http://www.bitsum.com/files/ddwrt_packages.tar.gz</a> .<br>
+&nbsp;</p>
 <p>&nbsp;</p>
 <p><b><font size="5">IV. <a name="Requirements">Requirements</a></font></b></p>
 <p>I've worked to make sure the requirements are low enough for anyone to 
@@ -241,10 +253,10 @@ others</u>:</p>
 	<tr>
 		<td width="187">DD-WRT</td>
 		<td>tested&nbsp;- versions v23 SP1 and later are compatible (soon older 
-		versions too). <b>WARNING:</b> The author of DD-WRT wanted to prevent 
-		users from easily changing his web UI for fear of re-branding. Builds of 
+		versions too). <b>WARNING:</b> <i>The author of DD-WRT wanted to prevent 
+		users from easily changing his web UI. Builds of 
 		DD-WRT later than 08/04/2006 (v23 SP2) have some protections against 
-re-branding the web UI.</td>
+re-branding the web UI.</i></td>
 	</tr>
 	<tr>
 		<td width="187">FreeWrt</td>
@@ -449,19 +461,15 @@ warned, this section may be technical in parts.</p>
 		different firmwares all-together), problems can result. To install a new 
 		kernel (not at all recommended), replace the segment2 (or other) file found found in 
 		the intermediate directory with an appropriate one (can be from another 
-		firmware as long as lzma compression is used)</li>
+		firmware as long as lzma compression is used).</li>
 		<li>Make sure any dependencies are also installed to the file system, 
 		along with initialization scripts.</li>
-		<li>LIBNCURSES package for openwrt seems incompatible with dd-wrt at 
-		present, meaning dependent packages like NANO will fail to run 
-		correctly. Someone (me?) needs to build a libncurses package for dd-wrt 
-		if one doesn't already exist somewhere..</li>
 	</ul></li>
 	<li>If making web UI changes:<ul>
-	<li><b>WARNING:</b> Due to abuse by those re-branding DD-WRT and selling it, 
+		<li><b>WARNING:</b> Due to abuse by those re-branding DD-WRT and selling it, 
 	or pre-flashed routers with it on eBay, builds dated later than 08/04/2006 
 	have some protections against re-branding the web UI.</li>
-</ul>
+	</ul>
 	<p>&nbsp;</p></li>
 </ul>
 <p><b>B. <a name="Maximum_firmware_size">Maximum firmware size</a></b></p>
@@ -568,6 +576,13 @@ http://code.google.com/p/firmware-mod-kit/</a> . Developers are welcome.</p>
 	testing)</i></li>
 </ul>
 <p><b><font size="5">X. <a name="Revision_history">Revision history</a></font></b></p>
+<p>0.48</p>
+<ul>
+	<li>scripts: now use cramfsck -x to extract cramfs images instead of 
+	uncramfs. uncramfs proved to fail to extract some images.</li>
+	<li>dirs: renamed cramfs-1.1 to cramfs-2.x to reflect the accurate version 
+	number.</li>
+</ul>
 <p>0.471</p>
 <ul>
 	<li>motorola_bin: added source code.</li>

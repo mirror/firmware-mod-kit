@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.46 beta'
+VERSION='0.48 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -70,8 +70,8 @@ if [ $# = 2 ]; then
 			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" >> extract.log	
 		elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 			TestIsRootAndExitIfNot
-			"src/uncramfs/uncramfs" \
-				"$2/rootfs" "$2/image_parts/cramfs-image-x_x" >> extract.log 2>&1			
+			"src/cramfs-2.x/cramfsck" \
+				-v -x "$2/rootfs" "$2/image_parts/cramfs-image-x_x" >> extract.log 2>&1			
 		else
 			echo " Possibly unsupported firmware filesystem image.."
 			echo " Error extracting firmware. Check extract.log."

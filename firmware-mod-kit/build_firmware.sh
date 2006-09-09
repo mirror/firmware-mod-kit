@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.46 beta'
+VERSION='0.48 beta'
 #
 # Title: build_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -116,7 +116,7 @@ Build_WRT_Images ()
 MakeCramfs ()
 {
 	echo "  Building cramfs file system ..."
-	./src/cramfs-1.1/mkcramfs "$2" "$1" >> build.log 2>&1
+	./src/cramfs-2.x/mkcramfs "$2" "$1" >> build.log 2>&1
 	if [ $? != 0 ]; then
 		echo "  ERROR: creating cramfs file system failed.".
 		exit "$?"
@@ -174,7 +174,9 @@ if [ $# = 2 ]; then
 	elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 		echo "  Detected cramfs file system."
 		TestIsRootAndExitIfNot
-		MakeCramfs "$2/image_parts/cramfs-image-1.1-new" "$2/rootfs"
+		# remove old filename of new image..
+		rm -f "$2/image_parts/cramfs-image-1.1"
+		MakeCramfs "$2/image_parts/cramfs-image-new" "$2/rootfs"
 		# todo: rewrite this terrible test
 		grep "530g" "$2/image_parts/cramfs-image-x_x" >> build.log 2>&1				
 		if [ $? = "0" ]; then
@@ -189,10 +191,10 @@ if [ $# = 2 ]; then
 			IS_530G_STYLE=1
 		fi
 		if [ "$IS_530G_STYLE" = "1" ]; then		
-			Build_WL530G_Image "$1" "$2" "cramfs-image-1.1-new"
+			Build_WL530G_Image "$1" "$2" "cramfs-image-new"
 		else
 			echo "  No specific firmware type known, so am making standard images."
-			InvokeTRX "$1" "$2" "cramfs-image-1.1-new"
+			InvokeTRX "$1" "$2" "cramfs-image-new"
 			CreateTargetImages "$1" "$2"			
 		fi 
 	else		
