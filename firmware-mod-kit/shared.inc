@@ -164,6 +164,7 @@ DeprecateOldVersion ()
 		mv "*.h" "src_old_backup" >> upgrade.log 2>&1
 		mv "lzma" "src_old_backup" >> upgrade.log 2>&1
 		mv "Makefile" "src_old_backup" >> upgrade.log 2>&1
+		mv src/cramfs-1.1 src_backup/  >> upgrade.log 2>&1
 		# remove symbolic links from v0.43 and below
 		rm "mksquashfs" >> upgrade.log 2>&1
 		rm "unsquashfs" >> upgrade.log 2>&1
