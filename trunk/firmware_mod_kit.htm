@@ -12,13 +12,13 @@
 
 <p><b><font size="6">Firmware Modification Kit<br>
 </font></b><i><b>Giving YOU the power to customize your firmware<br>
-</b><font size="2">documentation version 0.51 beta<br>
+</b><font size="2">documentation version 0.50 beta<br>
 all scripts, untrx, wrt_vx_imgtool, and docs (c) 2006,2007 Jeremy Collake &lt;jeremy.collake@gmail.com&gt;
 <a href="http://www.bitsum.com">http://www.bitsum.com</a><br>
 other portions (c) their respective holders</font></i></p>
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 <input type="hidden" name="cmd" value="_xclick">
-<input type="hidden" name="business" value="jcollake@bytescanner.com">
+<input type="hidden" name="business" value="support@bitsum.com">
 <input type="hidden" name="item_name" value="Free. Open Source Work">
 <input type="hidden" name="item_number" value="9090">
 <input type="hidden" name="no_shipping" value="0">
@@ -192,15 +192,19 @@ and the sources are the same as you'll find in the tar.gz archive. </p>
 	<tr>
 		<td><font face="Courier New">&nbsp;mkdir firmware_mod_kit<br>
 &nbsp;cd firmware_mod_kit<br>
-&nbsp;svn checkout svn://svn.berlios.de/firmwaremodkit/trunk</font></td>
+&nbsp;svn checkout http://firmware-mod-kit.googlecode.com/svn/trunk/ firmware-mod-kit-read-only</font></td>
 	</tr>
 </table>
 <p><br>
 <b><font size="4">Kit downloads and links:</font></b></p>
-<p>Project hosting and repository:
+<p>Project hosting and repository (new):
+<a href="http://code.google.com/p/firmware-mod-kit/">
+http://code.google.com/p/firmware-mod-kit/</a><br>
+Anonymous svn checkout: <i>svn checkout http://firmware-mod-kit.googlecode.com/svn/trunk/ firmware-mod-kit-read-only</i><br>
+Project hosting and repository (old - use google code instead):
 <a href="https://developer.berlios.de/projects/firmwaremodkit/">
 https://developer.berlios.de/projects/firmwaremodkit/</a><br>
-Anonymous svn checkout: <i>svn checkout svn://svn.berlios.de/firmwaremodkit/trunk</i><b><i><br>
+Anonymous svn checkout: <i>svn checkout svn://svn.berlios.de/firmwaremodkit/trunk</i><br>
 </i></b>Latest official build:
 <a href="http://www.bitsum.com/files/firmware_mod_tools.tar.gz">
 http://www.bitsum.com/files/firmware_mod_tools.tar.gz</a> <br>
@@ -239,11 +243,9 @@ The few requirements are all basic items that everyone has easy access to:</p>
 	<li>GNU C (gcc)</li>
 	<li>GNU C++ (g++)</li>
 	<li>GNU make</li>
-	<li>zlib development files (zlib1g-dev)</li>
-	<li>Standard C runtime libraries</li>
-	<li>Standard C++ runtime libraries</li>
+	<li>Standard C runtime library development</li>
+	<li>Standard C++ runtime library development</li>
 	<li>TAR and GZIP (optional, used by ipkg_install.sh)</li>
-	<li>And maybe others..</li>
 </ul>
 <p>For OS X, installing the <a href="http://developer.apple.com/tools/xcode/">
 Mac OS X Developer Tools</a> will supply the needed GNU C and C++ compilers and 
@@ -608,10 +610,6 @@ http://code.google.com/p/firmware-mod-kit/</a> . Developers are welcome.</p>
 </ul>
 <p>&nbsp;</p>
 <p><b><font size="5">X. <a name="Revision_history">Revision history</a></font></b></p>
-<p>0.51</p>
-<ul>
-	<li>Increased maximum firmware image size for TRX images. Now supports DD-WRT 'mega' images.</li>
-</ul>
 <p>0.50</p>
 <ul>
 	<li>Removed unnecessary -lz parameter (zlib) from gcc.</li>
@@ -838,7 +836,7 @@ or or donate money to encourage more works like this by donating via Paypal to
 ways to help. Feel free to contact me if interested.</p>
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 <input type="hidden" name="cmd" value="_xclick">
-<input type="hidden" name="business" value="jcollake@bytescanner.com">
+<input type="hidden" name="business" value="support@bitsum.com">
 <input type="hidden" name="item_name" value="Free. Open Source Work">
 <input type="hidden" name="item_number" value="9090">
 <input type="hidden" name="no_shipping" value="0">
