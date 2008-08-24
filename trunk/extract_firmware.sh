@@ -65,6 +65,17 @@ if [ $# = 2 ]; then
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
 		echo " Extracting firmware ..."
 		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1
+		# if squashfs 3.1 or 3.2, symlink it to 3.0 image, since they are compatible
+		if [ -f "$2/image_parts/squashfs-lzma-image-3_1" ]; then	
+			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_1"
+		fi
+		if [ -f "$2/image_parts/squashfs-lzma-image-3_2" ]; then	
+			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_2"
+		fi
+		if [ -f "$2/image_parts/squashfs-lzma-image-3_x" ]; then	
+			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_x"
+		fi
+		# now unsquashfs, if filesystem is squashfs
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then	
 	 		"src/squashfs-3.0/unsquashfs-lzma" \
 			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" >> extract.log	

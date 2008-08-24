@@ -61,9 +61,11 @@ SEGMENT_TYPE IdentifySegment(unsigned char *pData, unsigned long nLength)
 					case 0:						
 						return SEGMENT_TYPE_SQUASHFS_3_0;
 					case 1:						
-						return SEGMENT_TYPE_SQUASHFS_3_1;					
+						return SEGMENT_TYPE_SQUASHFS_3_1;			
+					case 2:
+						return SEGMENT_TYPE_SQUASHFS_3_2;
 					default:
-						return SEGMENT_TYPE_SQUASHFS_OTHER;						
+						return SEGMENT_TYPE_SQUASHFS_3_x;						
 				}
 			case 2:
 				switch (sqblock->s_minor)
@@ -220,6 +222,14 @@ int main(int argc, char **argv)
 			case SEGMENT_TYPE_SQUASHFS_3_1:
 				fprintf(stderr, "  SQUASHFS v3.1 image detected\n");
 				sprintf(pszTemp,"%s/squashfs-lzma-image-3_1",pszOutFolder);
+				break;
+			case SEGMENT_TYPE_SQUASHFS_3_2:
+				fprintf(stderr, "  SQUASHFS v3.2 image detected\n");
+				sprintf(pszTemp,"%s/squashfs-lzma-image-3_2",pszOutFolder);
+				break;
+			case SEGMENT_TYPE_SQUASHFS_3_x:
+				fprintf(stderr, "  SQUASHFS v3.x (>3.2) image detected\n");
+				sprintf(pszTemp,"%s/squashfs-lzma-image-3_x",pszOutFolder);
 				break;
 			case SEGMENT_TYPE_SQUASHFS_OTHER:
 				fprintf(stderr, "  ! WARNING: Unknown squashfs version.\n");
