@@ -23,8 +23,12 @@ if [ ! -e "rootfs/" ]; then
 	#tar -xzvf rootfs.tar.gz
 fi
 mkdir -p "$OUTPUT_PATH"
-rm -f $PARTS_PATH/squashfs-3-lzma.img "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
-../src/squashfs-3.0/mksquashfs-lzma ./rootfs/ $PARTS_PATH/squashfs-3-lzma.img -all-root -be -noappend
-cp $PARTS_PATH/vmlinuz $OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME
-dd if=$PARTS_PATH/squashfs-3-lzma.img "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024
-cat $PARTS_PATH/hwid.txt >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+rm -f "$PARTS_PATH/squashfs-3-lzma.img" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+../src/squashfs-3.0/mksquashfs-lzma "./rootfs/" "$PARTS_PATH/squashfs-3-lzma.img" -all-root -be -noappend
+cp "$PARTS_PATH/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+dd "if=$PARTS_PATH/squashfs-3-lzma.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024
+if [ -f "$PARTS_PATH/hwid.txt" ]; then
+	cat "$PARTS_PATH/hwid.txt" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+else
+	echo "ERROR: hwid.txt not found. This text is found at the very end of a firmware image."
+fi
