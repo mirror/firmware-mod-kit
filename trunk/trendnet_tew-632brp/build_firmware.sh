@@ -7,7 +7,11 @@ PARTS_PATH="./image_parts"
 OUTPUT_PATH="./firmware_image_output"
 OUTPUT_FIRMWARE_FILENAME="tew-632brp-fmk-firmware.bin"
 echo "Building firmware for TEW-632BRP ..."
-echo "NOTE: This script should be run as root!"
+if [ $(id -u) != "0" ]; then
+	echo "ERROR: This script should be run as root to create necessary devices!"
+	exit 1
+fi
+
 if [ ! -e "../src/squashfs-3.0/mksquashfs-lzma" ]; then	
 	make -C "../src" 2>&1 > buildlog.log
 	if [ ! -e "../src/squashfs-3.0/mksquashfs-lzma" ]; then

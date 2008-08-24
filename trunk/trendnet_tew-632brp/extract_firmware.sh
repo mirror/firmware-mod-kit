@@ -2,6 +2,10 @@
 #
 # Script by Jeremy Collake <jeremy.collake@gmail.com> 
 #
+if [ $(id -u) != "0" ]; then
+	echo "ERROR: This script should be run as root to create necessary devices!"
+	exit 1
+fi
 if [ $# = 2 ]; then
 	PARTS_PATH=$2
 	echo "Extracting $1 to $2 ..."
