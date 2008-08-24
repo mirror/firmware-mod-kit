@@ -1,7 +1,7 @@
 #/bin/sh
 # (c)2008 Jeremy Collake
 # Bitsum Technologies http://www.bitsum.com
-# Released as GPL
+# Released under GPL license
 #
 OUTPUT_FIRMWARE_FILENAME="tew-632brp-fmk-firmware.bin"
 if [ $# = 2 ]; then
@@ -20,9 +20,6 @@ if [ ! -e "../src/squashfs-3.0/mksquashfs-lzma" ]; then
 		exit 1
 	fi	
 fi
-#
-# unsquashfs the root filesystem
-#
 if [ ! -e "$PARTS_PATH/rootfs_extracted/" ]; then
 	echo "ERROR: rootfs must exist"
 	exit 1
