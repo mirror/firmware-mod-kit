@@ -1,12 +1,13 @@
 #/bin/sh
-#
-# Script written by Jeremy Collake (jeremy.collake@gmail.com)
+# (c)2008 Jeremy Collake
 # Bitsum Technologies http://www.bitsum.com
+# Released as GPL
 #
-PARTS_PATH="./image_parts"
-OUTPUT_PATH="./firmware_image_output"
 OUTPUT_FIRMWARE_FILENAME="tew-632brp-fmk-firmware.bin"
-echo "Building firmware for TEW-632BRP ..."
+if [ $# = 2 ]; then
+echo "Building firmware from directory $2 ..."
+OUTPUT_PATH=$1
+PARTS_PATH=$2
 if [ $(id -u) != "0" ]; then
 	echo "ERROR: This script should be run as root to create necessary devices!"
 	exit 1
@@ -22,17 +23,25 @@ fi
 #
 # unsquashfs the root filesystem
 #
-if [ ! -e "rootfs/" ]; then
-	"../src/squashfs-3.0/unsquashfs-lzma" "image_parts/squashfs" -dest "./rootfs"
-	#tar -xzvf rootfs.tar.gz
+if [ ! -e "$PARTS_PATH/rootfs_extracted/" ]; then
+	echo "ERROR: rootfs must exist"
+	exit 1
 fi
 mkdir -p "$OUTPUT_PATH"
 rm -f "$PARTS_PATH/squashfs-3-lzma.img" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
-../src/squashfs-3.0/mksquashfs-lzma "./rootfs/" "$PARTS_PATH/squashfs-3-lzma.img" -all-root -be -noappend
+../src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs_extracted/" "$PARTS_PATH/squashfs-3-lzma.img" -all-root -be -noappend
 cp "$PARTS_PATH/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 dd "if=$PARTS_PATH/squashfs-3-lzma.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024
 if [ -f "$PARTS_PATH/hwid.txt" ]; then
 	cat "$PARTS_PATH/hwid.txt" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 else
 	echo "ERROR: hwid.txt not found. This text is found at the very end of a firmware image."
+	exit 1
+fi
+echo "All done."
+echo "Firmware image is at $OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+else
+	echo "ERROR: Invalid usage."
+	echo "Usage: $0 firmware_image_output_dir/ working_dir/"
+	exit 1
 fi
