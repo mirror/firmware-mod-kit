@@ -31,7 +31,7 @@
 #define TRUE 1
 
 /* jc: Define to enable LZMA encoding parameters on command line */
-#define _LZMA_PARAMS 
+//#define _LZMA_PARAMS 
 
 #include <pwd.h>
 #include <grp.h>
