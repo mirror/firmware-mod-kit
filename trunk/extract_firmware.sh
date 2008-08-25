@@ -63,7 +63,7 @@ if [ $# = 2 ]; then
 		echo "  Creating directories ..."
 		mkdir -p "$2/image_parts" >> extract.log 2>&1
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
-		echo " Extracting firmware ..."
+		echo " Extracting firmware"
 		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1
 		# if squashfs 3.1 or 3.2, symlink it to 3.0 image, since they are compatible
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_1" ]; then	
@@ -76,9 +76,19 @@ if [ $# = 2 ]; then
 			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_x"
 		fi
 		# now unsquashfs, if filesystem is squashfs
-		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then	
+		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then
+			echo " Attempting squashfs 3.0 lzma ..."
 	 		"src/squashfs-3.0/unsquashfs-lzma" \
-			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" >> extract.log	
+			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" 2>/dev/null >> extract.log
+			if [ ! -e "$2/rootfs" ]; then
+				echo " Trying alternate squashfs lzma variant ..."								
+	 			"src/squashfs-3.0-lzma-damn-small-variant/unsquashfs-lzma" \
+					-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" 2>/dev/null >> extract.log				
+				if [ -e "$2/rootfs" ]; then
+					# if it worked, then write a tag so we know which squashfs variant to build the fs with
+					touch "$2/.sq_lzma_damn_small_variant_marker"				
+				fi
+			fi
 		elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 			TestIsRootAndExitIfNot
 			"src/cramfs-2.x/cramfsck" \
