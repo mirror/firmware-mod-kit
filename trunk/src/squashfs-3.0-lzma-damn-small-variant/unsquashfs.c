@@ -18,6 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
+ * 08/11/06: this copy modified to handle DD-WRT images with changed
+ *  superblock signature.
+ *
  * unsquash.c
  */
 
@@ -61,7 +64,8 @@
 
 #define EXIT_UNSQUASH(s, args...)	do { \
 						fprintf(stderr, "FATAL ERROR aborting: "s, ## args); \
-					} while(0); exit(1)
+					} while(0); exit(1) 
+					
 
 struct hash_table_entry {
 	int	start;
@@ -805,8 +809,8 @@ int read_super(squashfs_super_block *sBlk, char *source)
 
 	/* Check it is a SQUASHFS superblock */
 	swap = 0;
-	if(sBlk->s_magic != SQUASHFS_MAGIC) {
-		if(sBlk->s_magic == SQUASHFS_MAGIC_SWAP) {
+	if(sBlk->s_magic != SQUASHFS_MAGIC && sBlk->s_magic != SQUASHFS_MAGIC_ALT) {
+		if(sBlk->s_magic == SQUASHFS_MAGIC_SWAP || sBlk->s_magic == SQUASHFS_MAGIC_ALT_SWAP) {
 			squashfs_super_block sblk;
 			ERROR("Reading a different endian SQUASHFS filesystem on %s\n", source);
 			SQUASHFS_SWAP_SUPER_BLOCK(&sblk, sBlk);

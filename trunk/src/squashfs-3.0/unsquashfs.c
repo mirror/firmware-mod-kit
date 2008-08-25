@@ -64,7 +64,7 @@
 
 #define EXIT_UNSQUASH(s, args...)	do { \
 						fprintf(stderr, "FATAL ERROR aborting: "s, ## args); \
-					} while(0); exit(1)
+					} while(0); exit(1) 
 					
 
 struct hash_table_entry {
