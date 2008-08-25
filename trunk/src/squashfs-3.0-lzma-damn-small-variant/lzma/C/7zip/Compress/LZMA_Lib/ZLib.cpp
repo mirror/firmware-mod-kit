@@ -34,7 +34,7 @@
 #include <pthread.h>
 
 /* jc: undef to kill compress2_lzma */
-#define _LZMA_PARAMS 
+//#define _LZMA_PARAMS  // define on command line
 
 #define ZLIB_LC 3
 #define ZLIB_LP 0
@@ -194,7 +194,7 @@ protected:
 #ifdef _LZMA_PARAMS
 
 /* jc: new compress2 proxy that allows lzma param specification */
-extern "C" int compress2_lzma (Bytef *dest,   uLongf *destLen,
+ZEXTERN int ZEXPORT compress2_lzma (Bytef *dest,   uLongf *destLen,
                                   	const Bytef *source, uLong sourceLen,
                                   	int level, int fb, int lc, int lp, int pb)
 {	
