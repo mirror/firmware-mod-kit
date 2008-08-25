@@ -8,6 +8,7 @@ all: asustrx addpattern untrx motorola-bin
 	make -C ./cramfs-2.x/
 	make -C ./squashfs-2.1-r2/
 	make -C ./squashfs-3.0/
+	make -C ./squashfs-3.0-lzma-damn-small-variant/
 	make -C ./wrt_vx_imgtool/
 
 addpattern: addpattern.o
@@ -29,7 +30,8 @@ clean:
 	rm asustrx
 	rm addpattern
 	make -C ./squashfs-2.1-r2/ clean
-	make -C squashfs-3.0 clean
-	make -C cramfs-2.x clean
-	make -C uncramfs clean
-	make -C wrt_vx_imgtool clean
+	make -C ./squashfs-3.0 clean
+	make -C ./squashfs-3.0-lzma-damn-small-variant clean
+	make -C ./cramfs-2.x clean
+	make -C ./uncramfs clean
+	make -C ./wrt_vx_imgtool clean
