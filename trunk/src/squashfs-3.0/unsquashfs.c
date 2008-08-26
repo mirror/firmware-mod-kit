@@ -882,7 +882,7 @@ int main(int argc, char *argv[])
 
 	for(i = 1; i < argc; i++) {
 		if(*argv[i] != '-')
-			continue;
+			continue;		// allow params to be after filename
 		if(strcmp(argv[i], "-version") == 0) {
 			VERSION();
 			version = TRUE;
