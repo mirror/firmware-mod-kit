@@ -238,6 +238,7 @@ void uncompress_inode_table(long long start, long long end, squashfs_super_block
 		if((res = read_block(start, &start, inode_table + bytes, sBlk)) == 0) {
 			free(inode_table);
 			EXIT_UNSQUASH("uncompress_inode_table: failed to read block\n");
+			exit(1);
 		}
 		bytes += res;
 	}
