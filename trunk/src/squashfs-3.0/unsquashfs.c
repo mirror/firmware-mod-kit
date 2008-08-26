@@ -64,7 +64,7 @@
 
 #define EXIT_UNSQUASH(s, args...)	do { \
 						fprintf(stderr, "FATAL ERROR aborting: "s, ## args); \
-					} while(0); exit(1) 
+					} while(0)
 					
 
 struct hash_table_entry {
@@ -239,6 +239,7 @@ void uncompress_inode_table(long long start, long long end, squashfs_super_block
 		if((res = read_block(start, &start, inode_table + bytes, sBlk)) == 0) {
 			free(inode_table);
 			EXIT_UNSQUASH("uncompress_inode_table: failed to read block\n");
+			exit(1);
 		}
 		bytes += res;
 	}
