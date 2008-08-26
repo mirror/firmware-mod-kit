@@ -1,7 +1,0 @@
-
-TODO LIST:
-
-1. I need to create the scripts to automatically unpack vendor firmwares (easily done with 'dd' and unsquashfs-lzma 3.0).
-2. Better organization and integration into main scripts maybe
-
-If you want to submit patches, email jeremy.collake@gmail.com. Send donations to (paypal) jeremy@bitsum.com. I also accept routers. If you brick yours and don't want to fool with it, send it on to me (email me).
