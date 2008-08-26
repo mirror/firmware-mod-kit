@@ -28,7 +28,35 @@ VERSION='0.52 alpha'
 FIRMARE_BASE_NAME=custom_image
 EXIT_ON_FS_PROBLEM="0"
 
-echo "$0 v$VERSION, (c)2006-2008 Jeremy Collake. Please consider donating."
+echo
+echo " Firmware Mod Kit (build) v$VERSION, (c)2006-2008 Jeremy Collake - http://www.bitsum.com"
+echo " !!! Please donate to support this project. How much time/money has it saved you? !!!"
+
+#################################################################
+# function: BuildLinuxRawFirmwareType
+# puts together firmwares types like the TEW-632BRP
+#################################################################
+BuildLinuxRawFirmwareType() {	
+	OUTPUT_PATH=$1
+	PARTS_PATH=$2
+	OUTPUT_FIRMWARE_FILENAME="tew-632brp-fmk-firmware.bin"
+	echo " Building firmware from directory $2 ..."		
+	if [ ! -e "$PARTS_PATH/rootfs/" ]; then
+		echo "ERROR: rootfs must exist"
+		exit 1
+	fi
+	mkdir -p "$OUTPUT_PATH"
+	rm -f "$PARTS_PATH/image_parts/squashfs-3-lzma.img" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+	./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.new" -all-root -be -noappend 2>/dev/null >> build.log
+	cp "$PARTS_PATH/image_parts/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+	dd "if=$PARTS_PATH/image_parts/squashfs-3-lzma.new" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
+	if [ -f "$PARTS_PATH/image_parts/hwid.txt" ]; then
+		cat "$PARTS_PATH/image_parts/hwid.txt" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+	else
+		echo "ERROR: hwid.txt not found. This text is found at the very end of a firmware image."
+		exit 1
+	fi	
+}
 
 #################################################################
 # InvokeTRX ( OutputDir, WorkingDir, filesystem image filename )
@@ -156,6 +184,8 @@ if [ $# = 2 ]; then
 	#################################################################
 	TestFileSystemExit "$1" "$2"
 	#################################################################
+	TestIsRootAndExitIfNot
+	#################################################################
 	if [ ! -f "./build_firmware.sh" ]; then
 		echo "  ERROR - You must run this script from the same directory as it is in!"
 		exit 1
@@ -178,6 +208,9 @@ if [ $# = 2 ]; then
 	if [ -f "$2/image_parts/segment2" ] && [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then
 		echo "  Detected WRT squashfs-lzma style."
 		Build_WRT_Images "$1" "$2"
+	elif [ -f "$2/.linux_raw_type" ]; then
+		echo "  Detected linux raw type firmware."
+		BuildLinuxRawFirmwareType "$1" "$2"		
 	elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 		echo "  Detected cramfs file system."
 		TestIsRootAndExitIfNot

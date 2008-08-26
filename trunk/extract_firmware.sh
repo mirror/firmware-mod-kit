@@ -27,7 +27,8 @@ VERSION='0.52 alpha'
 #
 EXIT_ON_FS_PROBLEM="0"
 
-echo " $0 v$VERSION, (c)2006-2008 Jeremy Collake - http://www.bitsum.com"
+echo
+echo " Firmware Mod Kit (extract) v$VERSION, (c)2006-2008 Jeremy Collake - http://www.bitsum.com"
 echo " !!! Please donate to support this project. How much time/money has it saved you? !!!"
 
 #################################################################
@@ -41,14 +42,6 @@ ExtractLinuxRawFirmwareType ()
 {
 	# $1 = input firmware
 	PARTS_PATH=$2	
-	if [ ! -e "./src/squashfs-3.0/unsquashfs-lzma" ]; then	
-		make -C "./src" 2>&1 > buildlog.log
-		if [ ! -e "./src/squashfs-3.0/unsquashfs-lzma" ]; then
-			echo " Error building unsquashfs-lzma! Check buildlog.log"
-			exit 1
-		fi	
-	fi
-	
 	echo " Extracting $1 to $2 ..."
 	mkdir -p "$PARTS_PATH/image_parts"
 	if [ $? = 0 ]; then
@@ -60,8 +53,9 @@ ExtractLinuxRawFirmwareType ()
 		"./src/squashfs-3.0/unsquashfs-lzma" -dest "$PARTS_PATH/rootfs" \
 			"$PARTS_PATH/image_parts/squashfs-3-lzma.img" 2>/dev/null >> extract.log
 		if [ -e "$PARTS_PATH/rootfs/" ]; then
-			# write a marker to indicate the firmware image type
+			# write a marker to indicate the firmware image type and filesystem type
 			touch "$PARTS_PATH/.linux_raw_type"
+			touch "$PARTS_PATH/.squashfs3_lzma_fs"
 		fi
 	else
 		echo " ERROR: Creating output directory.."
