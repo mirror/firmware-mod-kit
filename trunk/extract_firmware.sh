@@ -27,9 +27,51 @@ VERSION='0.52 alpha'
 #
 EXIT_ON_FS_PROBLEM="0"
 
-echo "$0 v$VERSION, (c)2006-2008 Jeremy Collake"
+echo " $0 v$VERSION, (c)2006-2008 Jeremy Collake - http://www.bitsum.com"
+echo " !!! Please donate to support this project. How much time/money has it saved you? !!!"
 
 #################################################################
+#
+# function: ExtractLinuxRawFirmwareType ()
+# 
+# Extracts essentially 'raw' firmware images with kernel, filesystem, and hardware id
+# Example is the TrendNET TEW-632BRP router.
+#
+ExtractLinuxRawFirmwareType ()
+{
+	# $1 = input firmware
+	PARTS_PATH=$2	
+	if [ ! -e "./src/squashfs-3.0/unsquashfs-lzma" ]; then	
+		make -C "./src" 2>&1 > buildlog.log
+		if [ ! -e "./src/squashfs-3.0/unsquashfs-lzma" ]; then
+			echo " Error building unsquashfs-lzma! Check buildlog.log"
+			exit 1
+		fi	
+	fi
+	
+	echo " Extracting $1 to $2 ..."
+	mkdir -p "$PARTS_PATH/image_parts"
+	if [ $? = 0 ]; then
+ 		dd "if=$1" "of=$PARTS_PATH/image_parts/vmlinuz" bs=1K count=1024 2>/dev/null >> extract.log
+ 		dd "if=$1" "of=$PARTS_PATH/image_parts/squashfs-3-lzma.img" bs=1K skip=1024 2>/dev/null >> extract.log
+		filesize=$(du -b $1 | cut -f 1)
+		filesize=$((filesize - 24))
+		dd "if=$1" "of=$PARTS_PATH/image_parts/hwid.txt" bs=1 skip=$filesize 2>/dev/null >> extract.log
+		"./src/squashfs-3.0/unsquashfs-lzma" -dest "$PARTS_PATH/rootfs" \
+			"$PARTS_PATH/image_parts/squashfs-3-lzma.img" 2>/dev/null >> extract.log
+		if [ -e "$PARTS_PATH/rootfs/" ]; then
+			# write a marker to indicate the firmware image type
+			touch "$PARTS_PATH/.linux_raw_type"
+		fi
+	else
+		echo " ERROR: Creating output directory.."
+	fi	
+}
+
+#################################################################
+#
+# Main script entry 
+#
 #################################################################
 
 if [ $# = 2 ]; then
@@ -38,6 +80,8 @@ if [ $# = 2 ]; then
 	PlatformIdentify
 	#################################################################
 	TestFileSystemExit $1 $2
+	#################################################################
+	TestIsRootAndExitIfNot
 	#################################################################
 	if [ -f "$1" ]; then
 		if [ ! -f "./extract_firmware.sh" ]; then
@@ -94,9 +138,8 @@ if [ $# = 2 ]; then
 			"src/cramfs-2.x/cramfsck" \
 				-v -x "$2/rootfs" "$2/image_parts/cramfs-image-x_x" >> extract.log 2>&1			
 		else
-			echo " Possibly unsupported firmware filesystem image.."
-			echo " Error extracting firmware. Check extract.log."
-			exit 1
+			echo " Attempting raw linux style firmware package (i.e. TEW-632BRP) ..."
+			ExtractLinuxRawFirmwareType "$1" "$2"			
 		fi
 		if [ -e "$2/rootfs" ]; then
 			echo " Firmware appears extracted correctly!"
