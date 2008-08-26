@@ -172,8 +172,10 @@ int read_block(long long start, long long *next, char *block, squashfs_super_blo
 				ERROR("zlib::uncompress failed, not enough memory\n");
 			else if(res == Z_BUF_ERROR)
 				ERROR("zlib::uncompress failed, not enough room in output buffer\n");
-			else
+			else {
 				ERROR("zlib::uncompress failed, unknown error %d\n", res);
+				exit(1);
+			}
 			goto failed;
 		}
 		if(next)
@@ -210,8 +212,10 @@ int read_data_block(long long start, unsigned int size, char *block)
 				ERROR("zlib::uncompress failed, not enough memory\n");
 			else if(res == Z_BUF_ERROR)
 				ERROR("zlib::uncompress failed, not enough room in output buffer\n");
-			else
+			else {
 				ERROR("zlib::uncompress failed, unknown error %d\n", res);
+				exit(1);
+			}
 			return 0;
 		}
 
@@ -237,8 +241,7 @@ void uncompress_inode_table(long long start, long long end, squashfs_super_block
 		add_entry(inode_table_hash, start, bytes);
 		if((res = read_block(start, &start, inode_table + bytes, sBlk)) == 0) {
 			free(inode_table);
-			EXIT_UNSQUASH("uncompress_inode_table: failed to read block\n");
-			exit(1);
+			EXIT_UNSQUASH("uncompress_inode_table: failed to read block\n");			
 		}
 		bytes += res;
 	}
@@ -596,7 +599,10 @@ void uncompress_directory_table(long long start, long long end, squashfs_super_b
 		TRACE("uncompress_directory_table: reading block 0x%llx\n", start);
 		add_entry(directory_table_hash, start, bytes);
 		if((res = read_block(start, &start, directory_table + bytes, sBlk)) == 0)
+		{
 			EXIT_UNSQUASH("uncompress_directory_table: failed to read block\n");
+			exit(1);
+		}
 		bytes += res;
 	}
 }
