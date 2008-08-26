@@ -185,9 +185,8 @@ DeprecateOldVersion ()
 
 
 TestIsRootAndExitIfNot()
-{
-	CUR_USER=$(whoami)
-	if [ $CUR_USER != "root" ]; then
+{	
+	if [ $(id -u) != "0" ]; then
 		echo " ERROR: You must be 'root' when extracting and building cramfs images."
 		exit 1
 	fi
