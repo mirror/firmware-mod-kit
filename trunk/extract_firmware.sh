@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.52 alpha'
+VERSION='0.53 alpha'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -113,12 +113,18 @@ if [ $# = 2 ]; then
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_x" ]; then	
 			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_x"
 		fi
+		if [ -f "$2/image_parts/squashfs-lzma-image-2_0" ]; then	
+			ln -s "$2/image_parts/squashfs-lzma-image-2_0"  "$2/image_parts/squashfs-lzma-image-2_x"
+		fi
+		if [ -f "$2/image_parts/squashfs-lzma-image-2_1" ]; then	
+			ln -s "$2/image_parts/squashfs-lzma-image-2_1"  "$2/image_parts/squashfs-lzma-image-2_x"
+		fi
 		# now unsquashfs, if filesystem is squashfs
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then
 			echo " Attempting squashfs 3.0 lzma ..."
 	 		"src/squashfs-3.0/unsquashfs-lzma" \
 			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" 2>/dev/null >> extract.log
-			if [ ! -e "$2/rootfs" ]; then
+			if [ ! -e "$2/rootfs" ]; then				
 				echo " Trying alternate squashfs lzma variant ..."								
 	 			"src/squashfs-3.0-lzma-damn-small-variant/unsquashfs-lzma" \
 					-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" 2>/dev/null >> extract.log				
@@ -127,6 +133,9 @@ if [ $# = 2 ]; then
 					touch "$2/.sq_lzma_damn_small_variant_marker"				
 				fi
 			fi
+		elif [ -f "$2/image_parts/squashfs-lzma-image-2_0" ]; then
+			"src/squashfs-2.1-r2/unsquashfs-lzma" \
+			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-2_0" 2>/dev/null >> extract.log							
 		elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 			TestIsRootAndExitIfNot
 			"src/cramfs-2.x/cramfsck" \
