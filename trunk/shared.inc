@@ -1,5 +1,5 @@
 #!/bin/sh
-SHARED_VERSION='0.50 beta'
+SHARED_VERSION='0.54 beta'
 #
 # Title: shared.inc
 # Author: Jeremy Collake <jeremy@bitsum.com>
@@ -187,7 +187,7 @@ DeprecateOldVersion ()
 TestIsRootAndExitIfNot()
 {	
 	if [ $(id -u) != "0" ]; then
-		echo " ERROR: You must be 'root' when extracting and building cramfs images."
-		exit 1
+		echo " WARNING: You must be 'root' when extracting and building some images."
+		#exit 1
 	fi
 }

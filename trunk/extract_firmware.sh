@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.53 alpha'
+VERSION='0.54 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -105,19 +105,19 @@ if [ $# = 2 ]; then
 		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1
 		# if squashfs 3.1 or 3.2, symlink it to 3.0 image, since they are compatible
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_1" ]; then	
-			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_1"
+			ln -s "squashfs-lzma-image-3_1" "$2/image_parts/squashfs-lzma-image-3_0"
 		fi
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_2" ]; then	
-			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_2"
+			ln -s "squashfs-lzma-image-3_2" "$2/image_parts/squashfs-lzma-image-3_0"
 		fi
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_x" ]; then	
-			ln -s "$2/image_parts/squashfs-lzma-image-3_0"  "$2/image_parts/squashfs-lzma-image-3_x"
+			ln -s "squashfs-lzma-image-3_x" "$2/image_parts/squashfs-lzma-image-3_0"
 		fi
 		if [ -f "$2/image_parts/squashfs-lzma-image-2_0" ]; then	
-			ln -s "$2/image_parts/squashfs-lzma-image-2_0"  "$2/image_parts/squashfs-lzma-image-2_x"
+			ln -s "squashfs-lzma-image-2_0" "$2/image_parts/squashfs-lzma-image-2_x"
 		fi
 		if [ -f "$2/image_parts/squashfs-lzma-image-2_1" ]; then	
-			ln -s "$2/image_parts/squashfs-lzma-image-2_1"  "$2/image_parts/squashfs-lzma-image-2_x"
+			ln -s "squashfs-lzma-image-2_1" "$2/image_parts/squashfs-lzma-image-2_x"
 		fi
 		# now unsquashfs, if filesystem is squashfs
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then
@@ -133,9 +133,9 @@ if [ $# = 2 ]; then
 					touch "$2/.sq_lzma_damn_small_variant_marker"				
 				fi
 			fi
-		elif [ -f "$2/image_parts/squashfs-lzma-image-2_0" ]; then
+		elif [ -f "$2/image_parts/squashfs-lzma-image-2_x" ]; then
 			"src/squashfs-2.1-r2/unsquashfs-lzma" \
-			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-2_0" 2>/dev/null >> extract.log							
+			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-2_x" 2>/dev/null >> extract.log							
 		elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 			TestIsRootAndExitIfNot
 			"src/cramfs-2.x/cramfsck" \
