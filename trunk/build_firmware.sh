@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.52 alpha'
+VERSION='0.54 beta'
 #
 # Title: build_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -124,7 +124,7 @@ Build_WRT_Images ()
 		   "src/squashfs-3.0-lzma-damn-small-variant/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -root-owned -le >> build.log		
 		else
-		   echo "Utilizing lzma standard variant ..."
+		   echo " Utilizing lzma standard variant ..."
 		   "src/squashfs-3.0/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -root-owned -le -magic "$2/image_parts/squashfs_magic" >> build.log		
 		fi
@@ -133,6 +133,10 @@ Build_WRT_Images ()
 			echo "  ERROR - mksquashfs failed."
 			exit 1	
 		fi
+	elif [ -f "$2/image_parts/squashfs-lzma-image-2_x" ]; then
+		 echo " Utilizing squashfs lzma 2.1-r2 ..."
+		   "src/squashfs-2.1-r2/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
+			-noappend -le >> build.log	
 	else
 		echo "  ERROR - Working directory contains no sqfs filesystem?"
 		exit 1
@@ -205,7 +209,7 @@ if [ $# = 2 ]; then
 	mkdir -p $1 >> build.log 2>&1
 	rm "$1/$FIRMWARE_BASE_NAME*.*" "$1" >> build.log 2>&1
 	
-	if [ -f "$2/image_parts/segment2" ] && [ -f "$2/image_parts/squashfs-lzma-image-3_0" ]; then
+	if [ -f "$2/image_parts/.trx-sqfs" ]; then
 		echo "  Detected WRT squashfs-lzma style."
 		Build_WRT_Images "$1" "$2"
 	elif [ -f "$2/.linux_raw_type" ]; then

@@ -132,10 +132,17 @@ if [ $# = 2 ]; then
 					# if it worked, then write a tag so we know which squashfs variant to build the fs with
 					touch "$2/.sq_lzma_damn_small_variant_marker"				
 				fi
+			else
+				touch "$2/image_parts/.trx-sqfs"			
 			fi
-		elif [ -f "$2/image_parts/squashfs-lzma-image-2_x" ]; then
+		elif [ -f "$2/image_parts/squashfs-lzma-image-2_x" ]; then			
 			"src/squashfs-2.1-r2/unsquashfs-lzma" \
 			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-2_x" 2>/dev/null >> extract.log							
+			if [ -e "$2/rootfs" ]; then							
+				touch "$2/image_parts/.trx-sqfs"
+			else
+				echo " ERROR: extracting filesystem."
+			fi
 		elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 			TestIsRootAndExitIfNot
 			"src/cramfs-2.x/cramfsck" \
