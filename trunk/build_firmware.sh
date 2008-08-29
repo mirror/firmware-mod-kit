@@ -29,7 +29,8 @@ FIRMARE_BASE_NAME=custom_image
 EXIT_ON_FS_PROBLEM="0"
 
 echo
-echo " Firmware Mod Kit (build) v$VERSION, (c)2006-2008 Jeremy Collake - http://www.bitsum.com"
+echo " Firmware Mod Kit (build) v$VERSION, (c)2006-2008 Jeremy Collake"
+echo " http://www.bitsum.com"
 echo " !!! Please donate to support this project !!!"
 
 #################################################################
