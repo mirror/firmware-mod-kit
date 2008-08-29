@@ -1,5 +1,6 @@
 /* untrx
  * Copyright (C) 2006 Jeremy Collake  <jeremy@bitsum.com>
+ * http://www.bitsum.com
  *
  *	Quick and dirty tool to find and extract parts of a TRX style firmware		
  *	I whipped this out quickly. Didn't spend much/any time on polishing.
@@ -19,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
  
- #define _VERSION_ "0.48 beta"
+ #define _VERSION_ "0.53 beta"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,7 +76,7 @@ SEGMENT_TYPE IdentifySegment(unsigned char *pData, unsigned long nLength)
 					case 1:
 						return SEGMENT_TYPE_SQUASHFS_2_1;
 					default:
-						return SEGMENT_TYPE_SQUASHFS_OTHER;						
+						return SEGMENT_TYPE_SQUASHFS_2_x;						
 				}
 			default:
 				return SEGMENT_TYPE_SQUASHFS_OTHER;				
@@ -230,6 +231,18 @@ int main(int argc, char **argv)
 			case SEGMENT_TYPE_SQUASHFS_3_x:
 				fprintf(stderr, "  SQUASHFS v3.x (>3.2) image detected\n");
 				sprintf(pszTemp,"%s/squashfs-lzma-image-3_x",pszOutFolder);
+				break;
+			case SEGMENT_TYPE_SQUASHFS_2_0:
+				fprintf(stderr, "  SQUASHFS v2.0 image detected\n");
+				sprintf(pszTemp,"%s/squashfs-lzma-image-2_0",pszOutFolder);
+				break;
+			case SEGMENT_TYPE_SQUASHFS_2_1:
+				fprintf(stderr, "  SQUASHFS v2.1 image detected\n");
+				sprintf(pszTemp,"%s/squashfs-lzma-image-2_1",pszOutFolder);
+				break;
+			case SEGMENT_TYPE_SQUASHFS_2_x:
+				fprintf(stderr, "  SQUASHFS v2.x image detected\n");
+				sprintf(pszTemp,"%s/squashfs-lzma-image-2_x",pszOutFolder);
 				break;
 			case SEGMENT_TYPE_SQUASHFS_OTHER:
 				fprintf(stderr, "  ! WARNING: Unknown squashfs version.\n");
