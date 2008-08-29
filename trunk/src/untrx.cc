@@ -2,9 +2,6 @@
  * Copyright (C) 2006 Jeremy Collake  <jeremy@bitsum.com>
  * http://www.bitsum.com
  *
- *	Quick and dirty tool to find and extract parts of a TRX style firmware		
- *	I whipped this out quickly. Didn't spend much/any time on polishing.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
