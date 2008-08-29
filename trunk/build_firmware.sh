@@ -121,11 +121,11 @@ Build_WRT_Images ()
 	echo "  Building squashfs-lzma filesystem ..."
 	if [ -e "$2/image_parts/squashfs-lzma-image-3_0" ]; then			
 		if [ -f "$2/.sq_lzma_damn_small_variant_marker" ]; then
-		   echo "Utilizing lzma damn small variant ..."		   
+		   echo "  Utilizing lzma damn small variant ..."		   
 		   "src/squashfs-3.0-lzma-damn-small-variant/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -root-owned -le >> build.log		
 		else
-		   echo " Utilizing lzma standard variant ..."
+		   echo "  Utilizing lzma standard variant ..."
 		   "src/squashfs-3.0/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -root-owned -le -magic "$2/image_parts/squashfs_magic" >> build.log		
 		fi
@@ -135,7 +135,7 @@ Build_WRT_Images ()
 			exit 1	
 		fi
 	elif [ -f "$2/image_parts/squashfs-lzma-image-2_x" ]; then
-		 echo " Utilizing squashfs lzma 2.1-r2 ..."
+		 echo "  Utilizing squashfs lzma 2.1-r2 ..."
 		   "src/squashfs-2.1-r2/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -le >> build.log	
 	else
