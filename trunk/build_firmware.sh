@@ -50,11 +50,13 @@ BuildLinuxRawFirmwareType() {
 	rm -f "$PARTS_PATH/image_parts/squashfs-3-lzma.img" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" "$PARTS_PATH/image_parts/rootfs.img" "$PARTS_PATH/image_parts/*.new"
 	if [ -f "$PARTS_PATH/.squashfs3_lzma_fs" ]; then			
 		# make squashfs image if marker present
+		echo " Building squashfs file system ..."
 		./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.img" -all-root -be -noappend 2>/dev/null >> build.log
 		ln -s "squashfs-3-lzma.img" "$PARTS_PATH/image_parts/rootfs.img"
 	else
 		# make jffs2 image if marker not present
-		./src/jffs2/mkfs.jffs2 -r "$PARTS_PATH/rootfs/" -o "$PARTS_PATH/image_parts/squashfs-3-lzma.img" --big-endian --squash 2>/dev/null >> build.log
+		echo " Building JFFS2 file system ..."
+		./src/jffs2/mkfs.jffs2 -r "$PARTS_PATH/rootfs/" -o "$PARTS_PATH/image_parts/jffs2.img" --big-endian --squash # 2>/dev/null >> build.log
 		ln -s "jffs2.img" "$PARTS_PATH/image_parts/rootfs.img"
 	fi
 	# verify rootfs isn't too big for the Trendnet TEW-632BRP with its default partition mapping
