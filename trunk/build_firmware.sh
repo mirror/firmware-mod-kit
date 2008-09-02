@@ -60,10 +60,10 @@ BuildLinuxRawFirmwareType() {
 		ln -s "jffs2.img" "$PARTS_PATH/image_parts/rootfs.img"
 	fi
 	# verify rootfs isn't too big for the Trendnet TEW-632BRP with its default partition mapping
-	filesize=$(du -b "$PARTS_PATH/image_parts/rootfs.img" | cut -f 1)
-	if [ $filesize -ge 2818049 ]; then
-		echo " WARNING: rootfs image size appears too large ..."
-	fi
+	#filesize=$(du -b "$PARTS_PATH/image_parts/rootfs.img" | cut -f 1)
+	#if [ $filesize -ge 2818049 ]; then
+	#	echo " WARNING: rootfs image size appears too large ..."
+	#fi
 	# build firmware image
 	cp "$PARTS_PATH/image_parts/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 	dd "if=$PARTS_PATH/image_parts/rootfs.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
