@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.54 beta'
+VERSION='0.55 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -76,7 +76,7 @@ if [ $# = 2 ]; then
 	#################################################################
 	TestFileSystemExit $1 $2
 	#################################################################
-	TestIsRootAndExitIfNot
+	TestIsRoot
 	#################################################################
 	if [ -f "$1" ]; then
 		if [ ! -f "./extract_firmware.sh" ]; then
@@ -145,7 +145,7 @@ if [ $# = 2 ]; then
 				echo " ERROR: extracting filesystem."
 			fi
 		elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
-			TestIsRootAndExitIfNot
+			TestIsRoot
 			"src/cramfs-2.x/cramfsck" \
 				-v -x "$2/rootfs" "$2/image_parts/cramfs-image-x_x" >> extract.log 2>&1			
 		else

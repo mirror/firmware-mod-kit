@@ -1,8 +1,10 @@
 #!/bin/sh
-SHARED_VERSION='0.54 beta'
+SHARED_VERSION='0.55 beta'
 #
 # Title: shared.inc
 # Author: Jeremy Collake <jeremy@bitsum.com>
+# Bitsum Technologies
+# http://www.bitsum.com
 #
 # Shared functions
 #
@@ -105,12 +107,13 @@ CleanCWD ()
 	# trx replaced with asustrx
 	rm -f trx.c >> cleanup.log 2>&1
 }
+
 Cleanup ()
 {
-CleanCWD
-cd src
-CleanCWD
-cd ..
+	CleanCWD
+	cd src
+	CleanCWD
+	cd ..
 }
 
 #################################################################
@@ -187,7 +190,16 @@ DeprecateOldVersion ()
 TestIsRootAndExitIfNot()
 {	
 	if [ $(id -u) != "0" ]; then
+		echo " ERROR: You must be 'root' when extracting and building some images."
+		echo "        This is because some images need to create devices in your fs."
+		exit 1
+	fi
+}
+
+TestIsRoot()
+{	
+	if [ $(id -u) != "0" ]; then
 		echo " WARNING: You must be 'root' when extracting and building some images."
-		#exit 1
+		echo "          This is because some images need to create devices in your fs."
 	fi
 }

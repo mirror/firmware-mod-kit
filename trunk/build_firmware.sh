@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.54 beta'
+VERSION='0.55 beta'
 #
 # Title: build_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -43,20 +43,39 @@ BuildLinuxRawFirmwareType() {
 	OUTPUT_FIRMWARE_FILENAME="tew-632brp-fmk-firmware.bin"
 	echo " Building firmware from directory $2 ..."		
 	if [ ! -e "$PARTS_PATH/rootfs/" ]; then
-		echo "ERROR: rootfs must exist"
+		echo " ERROR: rootfs must exist"
 		exit 1
 	fi
 	mkdir -p "$OUTPUT_PATH"
-	rm -f "$PARTS_PATH/image_parts/squashfs-3-lzma.img" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
-	./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.new" -all-root -be -noappend 2>/dev/null >> build.log
+	rm -f "$PARTS_PATH/image_parts/squashfs-3-lzma.img" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" "$PARTS_PATH/image_parts/rootfs.img" "$PARTS_PATH/image_parts/*.new"
+	if [ -f "$PARTS_PATH/.squashfs3_lzma_fs" ]; then			
+		# make squashfs image if marker present
+		./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.img" -all-root -be -noappend 2>/dev/null >> build.log
+		ln -s "squashfs-3-lzma.img" "$PARTS_PATH/image_parts/rootfs.img"
+	else
+		# make jffs2 image if marker not present
+		./src/jffs2/mkfs.jffs2 -r "$PARTS_PATH/rootfs/" -o "$PARTS_PATH/image_parts/squashfs-3-lzma.img" --big-endian --squash 2>/dev/null >> build.log
+		ln -s "jffs2.img" "$PARTS_PATH/image_parts/rootfs.img"
+	fi
+	# verify rootfs isn't too big for the Trendnet TEW-632BRP with its default partition mapping
+	filesize=$(du -b "$PARTS_PATH/image_parts/rootfs.img" | cut -f 1)
+	if [ $filesize -ge 2818049 ]; then
+		echo " WARNING: rootfs image size appears too large ..."
+	fi
+	# build firmware image
 	cp "$PARTS_PATH/image_parts/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
-	dd "if=$PARTS_PATH/image_parts/squashfs-3-lzma.new" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
+	dd "if=$PARTS_PATH/image_parts/rootfs.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
 	if [ -f "$PARTS_PATH/image_parts/hwid.txt" ]; then
 		cat "$PARTS_PATH/image_parts/hwid.txt" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 	else
-		echo "ERROR: hwid.txt not found. This text is found at the very end of a firmware image."
+		echo " ERROR: hwid.txt not found. This image needs a TARGET."
 		exit 1
 	fi	
+	filesize=$(du -b "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" | cut -f 1)
+	if [ $filesize -ge 3866649 ]; then
+		echo " WARNING: firmware image appears to be too large ..."
+	fi
+
 }
 
 #################################################################
@@ -189,7 +208,7 @@ if [ $# = 2 ]; then
 	#################################################################
 	TestFileSystemExit "$1" "$2"
 	#################################################################
-	TestIsRootAndExitIfNot
+	TestIsRoot
 	#################################################################
 	if [ ! -f "./build_firmware.sh" ]; then
 		echo "  ERROR - You must run this script from the same directory as it is in!"
@@ -218,7 +237,7 @@ if [ $# = 2 ]; then
 		BuildLinuxRawFirmwareType "$1" "$2"		
 	elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 		echo "  Detected cramfs file system."
-		TestIsRootAndExitIfNot
+		TestIsRoot
 		# remove old filename of new image..
 		rm -f "$2/image_parts/cramfs-image-1.1"
 		MakeCramfs "$2/image_parts/cramfs-image-new" "$2/rootfs"
