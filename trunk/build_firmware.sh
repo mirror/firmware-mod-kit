@@ -53,17 +53,18 @@ BuildLinuxRawFirmwareType() {
 		echo " Building squashfs file system ..."
 		./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.img" -all-root -be -noappend 2>/dev/null >> build.log
 		ln -s "squashfs-3-lzma.img" "$PARTS_PATH/image_parts/rootfs.img"
+		filesize=$(du -b "$PARTS_PATH/image_parts/squashfs-3-lzma.img" | cut -f 1)
 	else
 		# make jffs2 image if marker not present
 		echo " Building JFFS2 file system ..."
 		./src/jffs2/mkfs.jffs2 -r "$PARTS_PATH/rootfs/" -o "$PARTS_PATH/image_parts/jffs2.img" --big-endian --squash # 2>/dev/null >> build.log
 		ln -s "jffs2.img" "$PARTS_PATH/image_parts/rootfs.img"
+		filesize=$(du -b "$PARTS_PATH/image_parts/jffs2.img" | cut -f 1)
 	fi
-	# verify rootfs isn't too big for the Trendnet TEW-632BRP with its default partition mapping
-	#filesize=$(du -b "$PARTS_PATH/image_parts/rootfs.img" | cut -f 1)
-	#if [ $filesize -ge 2818049 ]; then
-	#	echo " WARNING: rootfs image size appears too large ..."
-	#fi
+	# verify rootfs isn't too big for the Trendnet TEW-632BRP with its default partition mapping	
+	if [ $filesize -ge 2818049 ]; then
+		echo " WARNING: rootfs image size appears too large ..."
+	fi
 	# build firmware image
 	cp "$PARTS_PATH/image_parts/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 	dd "if=$PARTS_PATH/image_parts/rootfs.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
