@@ -142,8 +142,10 @@ Build_WRT_Images ()
 {
 	echo "  Building squashfs-lzma filesystem ..."
 	if [ -e "$2/image_parts/squashfs-lzma-image-3_0" ]; then			
-		if [ -f "$2/.sq_lzma_damn_small_variant_marker" ]; then
+		if [ -f "$2/image_parts/.sq_lzma_damn_small_variant_marker" ]; then
 		   echo "  Utilizing lzma damn small variant ..."		   
+		   echo "  WARNING: Support for these recently added, not fully tested... be careful."
+		   echo "           Please report to jeremy.collake@gmail.com success or failure."
 		   "src/squashfs-3.0-lzma-damn-small-variant/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -root-owned -le >> build.log		
 		else

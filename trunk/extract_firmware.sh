@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.55 beta'
+VERSION='0.56 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -126,12 +126,13 @@ if [ $# = 2 ]; then
 	 		"src/squashfs-3.0/unsquashfs-lzma" \
 			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" 2>/dev/null >> extract.log
 			if [ ! -e "$2/rootfs" ]; then				
-				echo " Trying alternate squashfs lzma variant ..."								
+				echo " Trying 'damn small' variant - used by DD-WRT v24 ..."								
 	 			"src/squashfs-3.0-lzma-damn-small-variant/unsquashfs-lzma" \
 					-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-3_0" 2>/dev/null >> extract.log				
 				if [ -e "$2/rootfs" ]; then
 					# if it worked, then write a tag so we know which squashfs variant to build the fs with
-					touch "$2/.sq_lzma_damn_small_variant_marker"				
+					touch "$2/image_parts/.sq_lzma_damn_small_variant_marker"
+					touch "$2/image_parts/.trx-sqfs"			
 				fi
 			else
 				touch "$2/image_parts/.trx-sqfs"			
