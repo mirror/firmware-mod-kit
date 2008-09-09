@@ -95,11 +95,11 @@ if [ $# = 2 ]; then
 		BuildTools "extract.log"				     					
 		#################################################################		
 		echo " Preparing working directory ..."
-		echo "  Removing any previous files ..."
+		echo " Removing any previous files ..."
 		rm -rf "$2/rootfs" >> extract.log 2>&1
 		rm -rf "$2/image_parts" >> extract.log 2>&1
 		rm -rf "$2/installed_packages" >> extract.log 2>&1
-		echo "  Creating directories ..."
+		echo " Creating directories ..."
 		mkdir -p "$2/image_parts" >> extract.log 2>&1
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
 		echo " Extracting firmware"
@@ -158,7 +158,7 @@ if [ $# = 2 ]; then
 			echo " Now make changes and run build_firmware.sh."
 		else
 			echo " Error: filesystem not extracted properly."
-			echo "   firmware image format not compatible?"
+			echo "  firmware image format not compatible?"
 			exit 1
 		fi	
 	else
