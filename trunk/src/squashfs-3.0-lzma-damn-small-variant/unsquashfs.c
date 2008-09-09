@@ -18,6 +18,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
+ *
+ * 09/09/08 - jc - modified to decode LZMA data streams with parameters prepended
+ *                 now supports DD-WRT v24 images
+ *              
+ *
  * unsquash.c
  */
 
@@ -47,6 +52,8 @@
 
 #include <stdlib.h>
 
+#include "lzma/C/7zip/Compress/LZMA_C/LzmaDecode.h"
+
 #ifdef SQUASHFS_TRACE
 #define TRACE(s, args...)		do { \
 						printf("mksquashfs: "s, ## args); \
@@ -62,6 +69,14 @@
 #define EXIT_UNSQUASH(s, args...)	do { \
 						fprintf(stderr, "FATAL ERROR aborting: "s, ## args); \
 					} while(0)
+
+#define LZMA_LC 3
+#define LZMA_LP 3
+#define LZMA_PB 2
+
+#define LZMA_WORKSPACE_SIZE (((LZMA_BASE_SIZE + \
+      (LZMA_LIT_SIZE << (LZMA_LC + LZMA_LP))) * sizeof(CProb))*2)
+
 
 struct hash_table_entry {
 	int	start;
@@ -136,6 +151,7 @@ int read_bytes(long long byte, int bytes, char *buff)
 	return TRUE;
 }
 
+static unsigned char lzma_workspace[LZMA_WORKSPACE_SIZE];
 
 int read_block(long long start, long long *next, char *block, squashfs_super_block *sBlk)
 {
@@ -158,21 +174,24 @@ int read_block(long long start, long long *next, char *block, squashfs_super_blo
 	if(SQUASHFS_COMPRESSED(c_byte)) {
 		char buffer[SQUASHFS_METADATA_SIZE];
 		int res;
-		unsigned long bytes = SQUASHFS_METADATA_SIZE;
+		unsigned int bytes = SQUASHFS_METADATA_SIZE;
 
 		c_byte = SQUASHFS_COMPRESSED_SIZE(c_byte);
 		if(read_bytes(start + offset, c_byte, buffer) == FALSE)
 			goto failed;
 
-		if((res = uncompress((unsigned char *) block, &bytes, (const unsigned char *) buffer, c_byte)) != Z_OK) {
-			if(res == Z_MEM_ERROR)
-				ERROR("zlib::uncompress failed, not enough memory\n");
-			else if(res == Z_BUF_ERROR)
-				ERROR("zlib::uncompress failed, not enough room in output buffer\n");
-			else
-				ERROR("zlib::uncompress failed, unknown error %d\n", res);
-			goto failed;
+		// jc: modified to decode LZMA data streams with parameters prepended
+		unsigned char *pCompSrc=(unsigned char *)buffer; // for clarity
+		unsigned char *pUncDest=(unsigned char *)block;
+		if ((res = LzmaDecode((unsigned char *)&lzma_workspace, LZMA_WORKSPACE_SIZE, 
+			pCompSrc[1], pCompSrc[2], pCompSrc[0], 
+			pCompSrc+4, c_byte-4, 
+			pUncDest, SQUASHFS_METADATA_SIZE, &bytes)) != LZMA_RESULT_OK)
+		{
+			ERROR("[1] lzma returned unexpected result 0x%x\n", res);
+			bytes = 0;
 		}
+
 		if(next)
 			*next = start + offset + c_byte;
 		return bytes;
@@ -193,7 +212,7 @@ failed:
 int read_data_block(long long start, unsigned int size, char *block)
 {
 	int res;
-	unsigned long bytes = block_size;
+	unsigned int bytes = block_size;
 	int c_byte = SQUASHFS_COMPRESSED_SIZE_BLOCK(size);
 
 	TRACE("read_data_block: block @0x%llx, %d %s bytes\n", start, SQUASHFS_COMPRESSED_SIZE_BLOCK(c_byte), SQUASHFS_COMPRESSED_BLOCK(c_byte) ? "compressed" : "uncompressed");
@@ -202,14 +221,16 @@ int read_data_block(long long start, unsigned int size, char *block)
 		if(read_bytes(start, c_byte, data) == FALSE)
 			return 0;
 
-		if((res = uncompress((unsigned char *) block, &bytes, (const unsigned char *) data, c_byte)) != Z_OK) {
-			if(res == Z_MEM_ERROR)
-				ERROR("zlib::uncompress failed, not enough memory\n");
-			else if(res == Z_BUF_ERROR)
-				ERROR("zlib::uncompress failed, not enough room in output buffer\n");
-			else
-				ERROR("zlib::uncompress failed, unknown error %d\n", res);
-			return 0;
+		// jc: modified to decode LZMA data streams with parameters prepended
+		unsigned char *pCompSrc=(unsigned char *)data; // for clarity
+		unsigned char *pUncDest=(unsigned char *)block;
+		if ((res = LzmaDecode((unsigned char *)&lzma_workspace, LZMA_WORKSPACE_SIZE, 
+			pCompSrc[1], pCompSrc[2], pCompSrc[0], 
+			pCompSrc+4, c_byte-4, 
+			pUncDest, bytes, &bytes)) != LZMA_RESULT_OK)
+		{
+			ERROR("lzma returned unexpected result 0x%x\n", res);
+			bytes = 0;
 		}
 
 		return bytes;
