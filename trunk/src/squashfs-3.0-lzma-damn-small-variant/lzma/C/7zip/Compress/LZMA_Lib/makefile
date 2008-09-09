@@ -1,5 +1,5 @@
 PROG = liblzma.a
-CXX = g++ -O3 -Wall -finline-functions -D_LZMA_PARAMS
+CXX = g++ -O3 -Wall -finline-functions
 AR = ar
 RM = rm -f
 CFLAGS = -c  -I ../../../

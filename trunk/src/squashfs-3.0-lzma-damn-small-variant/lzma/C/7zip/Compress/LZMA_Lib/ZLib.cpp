@@ -20,6 +20,9 @@
  * the Free Software Foundation, Inc., 59 Temple Place, 
  * Suite 330, Boston, MA 02111-1307 USA 
  *
+ * 09/09/06 - jc - Cleaned up previous modder's code a bit.. needs more work
+ * xx/xx/xx - brainslayer? - Added multi-threaded testing of various LZMA parameters
+ * 			     on input data to determine the most optimal.
  * 07/10/06 - jc - Added LZMA encoding parameter specification (_LZMA_PARAMS)
  *				   contact: jeremy@bitsum.com
  */
@@ -29,12 +32,9 @@
  */
 
 #include <zlib.h>
-#include <malloc.h>
-#include <stdio.h>
-#include <pthread.h>
 
-/* jc: undef to kill compress2_lzma */
-//#define _LZMA_PARAMS  // define on command line
+/* jc: define to enable compress2_lzma /w lzma params */
+#define _LZMA_PARAMS   // should define on compiler command line
 
 #define ZLIB_LC 3
 #define ZLIB_LP 0
@@ -193,8 +193,10 @@ protected:
 
 #ifdef _LZMA_PARAMS
 
+
+
 /* jc: new compress2 proxy that allows lzma param specification */
-ZEXTERN int ZEXPORT compress2_lzma (Bytef *dest,   uLongf *destLen,
+extern "C" int compress2_lzma_test (Bytef *dest,   uLongf *destLen,
                                   	const Bytef *source, uLong sourceLen,
                                   	int level, int fb, int lc, int lp, int pb)
 {	
@@ -261,6 +263,146 @@ ZEXTERN int ZEXPORT compress2_lzma (Bytef *dest,   uLongf *destLen,
 	return Z_OK;
 }
 
+#include <malloc.h>
+#include <stdio.h>
+#include <pthread.h>
+
+
+unsigned char pbmatrix[3]={0,1,2};
+unsigned char lcmatrix[4]={0,1,2,3};
+unsigned char lpmatrix[4]={0,1,2,3};
+
+struct MATRIXENTRY
+{
+int pb;
+int lc;
+int lp;
+};
+
+struct MATRIXENTRY matrix[]={
+{2,0,0},
+{2,0,1},
+{2,0,2},
+{2,1,0},
+{2,1,2},
+{2,2,0},
+{2,3,0},
+{0,2,0},
+{0,2,1},
+{0,3,0},
+{0,0,0},
+{0,0,2},
+{1,0,1},
+{1,2,0},
+{1,3,0}
+};
+
+
+
+int pbsave = -1;
+int lcsave = -1;
+int lpsave = -1;
+
+/* jc: Brainslayer or someone inserted all these globals (and code) for the multi-threaded trial of lzma params. */
+/* I went through and at least formatted his code a bit .. as it was not formatted at all. I also am/will */
+/* make minor adjustments as I see necessary, though don't want to waste much time on this. */
+int testcount=0;
+int testlevel;
+int testfb;
+pthread_mutex_t	pos_mutex;
+Bytef *test1;
+const Bytef *testsource;
+uLongf test2len;
+uLongf test1len;
+uLongf testsourcelen;
+int running=0;
+
+extern "C" void *brute(void *arg)
+{
+	int oldstate;
+	uLongf test3len = test2len;
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &oldstate);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldstate);
+
+	pthread_mutex_lock(&pos_mutex);
+	int takelcvalue = matrix[testcount].lc;
+	int takepbvalue = matrix[testcount].pb;
+	int takelpvalue = matrix[testcount].lp;
+	testcount++;
+	if (testcount==(sizeof(matrix)/sizeof(struct MATRIXENTRY)))
+	{
+    		running--;
+		pthread_mutex_unlock(&pos_mutex);
+		return NULL;
+	}
+	pthread_mutex_unlock(&pos_mutex);
+	Bytef *test2 = (Bytef*)malloc(test2len);
+	//fprintf(stderr,"try method [pb:%d lc:%d lp:%d fb:%d]\n",pbtest,lctest,lptest,testfb);
+	int ret =  compress2_lzma_test(test2,&test3len,testsource,testsourcelen,testlevel,testfb,takelcvalue,takelpvalue,takepbvalue);
+	//fprintf(stderr,"test return %d\n",ret);
+	pthread_mutex_lock(&pos_mutex);
+	if (test3len<test1len)
+	{
+	    test1len = test3len;
+	    memcpy(test1,test2,test3len);
+	    pbsave = takepbvalue;
+	    lcsave = takelcvalue;
+	    lpsave = takelpvalue;
+	}
+	//fprintf(stderr,"finished %d running\n",running);
+	running--;
+	pthread_mutex_unlock(&pos_mutex);
+	free(test2);
+	return NULL;
+}
+
+extern "C" int compress2_lzma (Bytef *dest,   uLongf *destLen,
+                                  	const Bytef *source, uLong sourceLen,
+                                  	int level, int fb, int lc, int lp, int pb)
+{
+	int i,a;
+	pthread_t *thread;
+	test1 = (Bytef*)malloc(*destLen);
+	test1len = *destLen+*destLen;
+	test2len = *destLen;
+	testsource = source;
+	testfb = fb;
+	testsourcelen = sourceLen;
+	testlevel = level;
+	testcount=0;
+	if((thread = (pthread_t *)malloc((8) * sizeof(pthread_t))) == NULL)
+	{
+		fprintf(stderr,"Out of memory allocating thread descriptors\n");
+		return Z_MEM_ERROR;
+	}	
+	for (a=0;a<2;a++)
+	{
+		running=8;
+		for(i = 0; i < 8; i++) 
+		{
+			if(pthread_create(&thread[i], NULL, brute, NULL) != 0 )
+			{	
+				fprintf(stderr,"Failed to create thread\n");
+			}
+		}
+		for (i=0;i<8;i++)
+		{
+		    pthread_join(thread[i],NULL);
+		}
+	}
+	// fprintf(stderr,"use method [pb:%d lc:%d lp:%d fb:%d] (len %d)\n",pbsave,lcsave,lpsave,fb,test1len);    
+	memcpy(dest+4,test1,test1len);
+	dest[0]=pbsave;
+	dest[1]=lcsave;
+	dest[2]=lpsave;
+	dest[3]=fb;
+	*destLen=test1len+4;
+	free(thread);
+	free(test1);
+	return Z_OK;
+}
+
+
 #endif
 
 ZEXTERN int ZEXPORT compress2 OF((Bytef *dest,   uLongf *destLen,
@@ -310,8 +452,7 @@ ZEXTERN int ZEXPORT compress2 OF((Bytef *dest,   uLongf *destLen,
 		{
 		fprintf(stderr,"coder properties error\n");
 		return Z_MEM_ERROR; // should not happen
-	
-	}
+		}
 	HRESULT result = encoder->Code(inStream, outStream, 0, 0, 0);
 	if (result == E_OUTOFMEMORY)
 	{
