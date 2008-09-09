@@ -18,9 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * 08/11/06: this copy modified to handle DD-WRT images with changed
- *  superblock signature.
- *
  * unsquash.c
  */
 
@@ -65,7 +62,6 @@
 #define EXIT_UNSQUASH(s, args...)	do { \
 						fprintf(stderr, "FATAL ERROR aborting: "s, ## args); \
 					} while(0)
-					
 
 struct hash_table_entry {
 	int	start;
@@ -239,7 +235,6 @@ void uncompress_inode_table(long long start, long long end, squashfs_super_block
 		if((res = read_block(start, &start, inode_table + bytes, sBlk)) == 0) {
 			free(inode_table);
 			EXIT_UNSQUASH("uncompress_inode_table: failed to read block\n");
-			exit(1);
 		}
 		bytes += res;
 	}
@@ -810,8 +805,8 @@ int read_super(squashfs_super_block *sBlk, char *source)
 
 	/* Check it is a SQUASHFS superblock */
 	swap = 0;
-	if(sBlk->s_magic != SQUASHFS_MAGIC && sBlk->s_magic != SQUASHFS_MAGIC_ALT) {
-		if(sBlk->s_magic == SQUASHFS_MAGIC_SWAP || sBlk->s_magic == SQUASHFS_MAGIC_ALT_SWAP) {
+	if(sBlk->s_magic != SQUASHFS_MAGIC) {
+		if(sBlk->s_magic == SQUASHFS_MAGIC_SWAP) {
 			squashfs_super_block sblk;
 			ERROR("Reading a different endian SQUASHFS filesystem on %s\n", source);
 			SQUASHFS_SWAP_SUPER_BLOCK(&sblk, sBlk);
@@ -882,7 +877,7 @@ int main(int argc, char *argv[])
 
 	for(i = 1; i < argc; i++) {
 		if(*argv[i] != '-')
-			continue;		// allow params to be after filename
+			break;
 		if(strcmp(argv[i], "-version") == 0) {
 			VERSION();
 			version = TRUE;

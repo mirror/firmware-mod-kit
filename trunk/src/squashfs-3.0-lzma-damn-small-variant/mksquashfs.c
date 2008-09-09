@@ -18,11 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * minor revisions to base code:
- * 
  * 07/10/06 - jc - Added LZMA encoding parameter specification (_LZMA_PARAMS)
  *				   contact: jeremy@bitsum.com
- *				   Bitsum Technologies http://www.bitsum.com
  *
  * mksquashfs.c
  */
@@ -31,7 +28,7 @@
 #define TRUE 1
 
 /* jc: Define to enable LZMA encoding parameters on command line */
-//#define _LZMA_PARAMS 
+#define _LZMA_PARAMS 
 
 #include <pwd.h>
 #include <grp.h>
