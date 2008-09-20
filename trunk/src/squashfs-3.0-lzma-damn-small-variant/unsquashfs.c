@@ -826,8 +826,8 @@ int read_super(squashfs_super_block *sBlk, char *source)
 
 	/* Check it is a SQUASHFS superblock */
 	swap = 0;
-	if(sBlk->s_magic != SQUASHFS_MAGIC) {
-		if(sBlk->s_magic == SQUASHFS_MAGIC_SWAP) {
+	if(sBlk->s_magic != SQUASHFS_MAGIC && sBlk->s_magic != SQUASHFS_MAGIC_ALT) {
+		if(sBlk->s_magic == SQUASHFS_MAGIC_SWAP || sBlk->s_magic==SQUASHFS_MAGIC_SWAP_ALT) {
 			squashfs_super_block sblk;
 			ERROR("Reading a different endian SQUASHFS filesystem on %s\n", source);
 			SQUASHFS_SWAP_SUPER_BLOCK(&sblk, sBlk);
@@ -837,6 +837,13 @@ int read_super(squashfs_super_block *sBlk, char *source)
 			ERROR("Can't find a SQUASHFS superblock on %s\n", source);
 			goto failed_mount;
 		}
+	}
+
+	if(sBlk->s_magic == SQUASHFS_MAGIC_ALT || sBlk->s_magic == SQUASHFS_MAGIC_SWAP_ALT)
+	{
+		TRACE("WARNING: Alternate squashfs block signature. Do not use this ver of squashfs-tools!!\n")
+		TRACE("         The squashfs-3.0 source has been modified to handle alternate signatures.\n")
+		TRACE("         You should use that version, this one may brick your device when you rebuild.\n")
 	}
 
 	/* Check the MAJOR & MINOR versions */
