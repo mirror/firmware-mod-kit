@@ -143,7 +143,7 @@ Build_WRT_Images ()
 		   echo " Utilizing lzma damn small variant ..."		   
 		   echo " WARNING: Support for these recently added, not fully tested... be careful."
 		   echo "          Please report to jeremy.collake@gmail.com success or failure."
-		   echo " THIS MAY TAKE *SEVERAL* MINUTES BECAUSE OF THE BRUTE FORCE TESTING..."
+		   echo " This may take a while ..."
 		   "src/squashfs-3.0-lzma-damn-small-variant/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -root-owned -le >> build.log		
 		else
