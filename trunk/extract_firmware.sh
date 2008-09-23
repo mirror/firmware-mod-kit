@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.56 beta'
+VERSION='0.58 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>

@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.56 beta'
+VERSION='0.58 beta'
 #
 # Title: build_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -129,7 +129,7 @@ CreateTargetImages ()
 	"src/addpattern" -4 -p W54s -v v1.05.0 -i "$1/$FIRMARE_BASE_NAME.trx" \
 		-o "$1/$FIRMARE_BASE_NAME-wrt54gsv4.bin" -g >> build.log 2>&1
 	echo " Making $1/$FIRMARE_BASE_NAME-generic.bin"
-	ln -s "$1/$FIRMARE_BASE_NAME.trx" "$1/$FIRMARE_BASE_NAME-generic.bin" >> build.log 2>&1
+	ln -s "$FIRMARE_BASE_NAME.trx" "$1/$FIRMARE_BASE_NAME-generic.bin" >> build.log 2>&1
 }
 
 #################################################################
