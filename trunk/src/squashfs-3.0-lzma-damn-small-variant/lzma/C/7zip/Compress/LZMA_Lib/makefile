@@ -2,7 +2,7 @@ PROG = liblzma.a
 CXX = g++
 AR = ar
 RM = rm -f
-CFLAGS = -c -O3 -Wall -finline-functions -lpthread -D_LZMA_PARAMS -I ../../../
+CFLAGS = -c -O3 -Wall -finline-functions -lpthread -D_LZMA_PARAMS -D_THREAD_SAFE -I ../../../
 
 OBJS = \
   ZLib.o \

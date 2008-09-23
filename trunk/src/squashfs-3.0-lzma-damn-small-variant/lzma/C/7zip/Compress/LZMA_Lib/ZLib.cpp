@@ -360,14 +360,11 @@ extern "C" int compress2_lzma (Bytef *dest,   uLongf *destLen,
                                   	const Bytef *source, uLong sourceLen,
                                   	int level, int fb, int lc, int lp, int pb)
 {
+/*
 	int i,a;
 	pthread_t *thread;
-	test1 = (Bytef*)malloc(*destLen);
-	test1len = *destLen+*destLen;
-	test2len = *destLen;
-	testsource = source;
-	testfb = fb;
-	testsourcelen = sourceLen;
+	test1 = (Bytef*)malloc((*destLen)*2);
+	test1len = (*destLen)*2;
 	testlevel = level;
 	testcount=0;
 	if((thread = (pthread_t *)malloc((8) * sizeof(pthread_t))) == NULL)
@@ -391,14 +388,15 @@ extern "C" int compress2_lzma (Bytef *dest,   uLongf *destLen,
 		}
 	}
 	// fprintf(stderr,"use method [pb:%d lc:%d lp:%d fb:%d] (len %d)\n",pbsave,lcsave,lpsave,fb,test1len);    
-	memcpy(dest+4,test1,test1len);
-	dest[0]=pbsave;
-	dest[1]=lcsave;
-	dest[2]=lpsave;
-	dest[3]=fb;
-	*destLen=test1len+4;
-	free(thread);
-	free(test1);
+	*/
+	compress2_lzma_test(dest,destLen,source,sourceLen,level,ZLIB_FB,ZLIB_LC,ZLIB_LP,ZLIB_PB);
+	dest[0]=ZLIB_PB;
+	dest[1]=ZLIB_LC;
+	dest[2]=ZLIB_LP;
+	dest[3]=ZLIB_FB;
+	*destLen+=4;
+	//free(thread);
+	//free(test1);
 	return Z_OK;
 }
 
