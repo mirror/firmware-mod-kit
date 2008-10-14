@@ -45,7 +45,7 @@ ExtractLinuxRawFirmwareType ()
 	if [ $? = 0 ]; then
  		dd "if=$1" "of=$PARTS_PATH/image_parts/vmlinuz" bs=1K count=1024 2>/dev/null >> extract.log
  		dd "if=$1" "of=$PARTS_PATH/image_parts/squashfs-3-lzma.img" bs=1K skip=1024 2>/dev/null >> extract.log
-		filesize=$(du --block-size=1 $1 | cut -f 1)
+		filesize=$(du --apparent-size --block-size=1 $1 | cut -f 1)
 		filesize=$((filesize - 24))
 		dd "if=$1" "of=$PARTS_PATH/image_parts/hwid.txt" bs=1 skip=$filesize 2>/dev/null >> extract.log
 		"./src/squashfs-3.0/unsquashfs-lzma" -dest "$PARTS_PATH/rootfs" \
