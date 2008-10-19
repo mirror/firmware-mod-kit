@@ -1,5 +1,5 @@
 /* untrx
- * Copyright (C) 2006 Jeremy Collake  <jeremy@bitsum.com>
+ * Copyright (C) 2008 Jeremy Collake  <jeremy@bitsum.com>
  * http://www.bitsum.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,9 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * Additional patch contributors (add your own name if you submit a patch): 
+ *
+ *    0.54 - Jiafu Gao (fixed sqfs signature check on big endian CPUs)
+ *
  */
  
- #define _VERSION_ "0.53 beta"
+ #define _VERSION_ "0.54 beta"
 
 #include <stdio.h>
 #include <stdlib.h>
