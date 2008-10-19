@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.59 beta'
+VERSION='0.60'
 #
 # Title: build_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -26,7 +26,7 @@ FIRMARE_BASE_NAME=custom_image
 EXIT_ON_FS_PROBLEM="0"
 
 echo
-echo " Firmware Mod Kit (build) v$VERSION, (c)2006-2008 Jeremy Collake"
+echo " Firmware Mod Kit (build) v$VERSION, (c)2008 Jeremy Collake"
 echo " http://www.bitsum.com"
 echo " !!! Please donate to support this project !!!"
 

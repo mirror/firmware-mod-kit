@@ -1,5 +1,5 @@
 #!/bin/sh
-SHARED_VERSION='0.55 beta'
+SHARED_VERSION='0.60'
 #
 # Title: shared.inc
 # Author: Jeremy Collake <jeremy@bitsum.com>
