@@ -51,10 +51,15 @@ SEGMENT_TYPE IdentifySegment(unsigned char *pData, unsigned long nLength)
 		|| sqblock->s_magic==SQUASHFS_MAGIC_ALT
 		|| sqblock->s_magic==SQUASHFS_MAGIC_ALT_SWAP)
 	{		
-		switch(sqblock->s_major)
+		fprintf(stderr, " SQUASHFS magic: 0x%x\n", sqblock->s_magic);
+		short major = READ16_LE(sqblock->s_major);
+		short minor = READ16_LE(sqblock->s_minor);
+		fprintf(stderr, " SQUASHFS version: %d.%d\n", major, minor);
+	
+		switch(major)
 		{
 			case 3:
-				switch (sqblock->s_minor)
+				switch (minor)
 				{
 					case 0:						
 						return SEGMENT_TYPE_SQUASHFS_3_0;
@@ -66,7 +71,7 @@ SEGMENT_TYPE IdentifySegment(unsigned char *pData, unsigned long nLength)
 						return SEGMENT_TYPE_SQUASHFS_3_x;						
 				}
 			case 2:
-				switch (sqblock->s_minor)
+				switch (minor)
 				{
 					case 0:
 						return SEGMENT_TYPE_SQUASHFS_2_0;

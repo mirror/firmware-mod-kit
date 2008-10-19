@@ -50,6 +50,15 @@ extern "C"
 #define bswap_32 flip_endian
 #endif
 
+#ifndef bswap_16
+#define bswap_16 flip_endian16
+
+short flip_endian16(short n)
+{
+	return (n>>8) | (n<<8);
+}
+#endif
+
 // always flip, regardless of endianness of machine
 u_int32_t flip_endian(u_int32_t nValue)
 {
@@ -69,9 +78,13 @@ u_int32_t flip_endian(u_int32_t nValue)
 #if __BYTE_ORDER == __BIG_ENDIAN
 #define STORE32_LE(X)		bswap_32(X)
 #define READ32_LE(X)        bswap_32(X)
+#define STORE16_LE(X)		bswap_16(X)
+#define READ16_LE(X)        bswap_16(X)
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
 #define STORE32_LE(X)		(X)
 #define READ32_LE(X)        (X)
+#define STORE16_LE(X)        (X)
+#define READ16_LE(X)        (X)
 #else
 #error unkown endianness!
 #endif
