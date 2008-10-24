@@ -1,0 +1,25 @@
+This will indicate what tests have actually been done by me for each version. Note that I don't normally completely regression test, though of course it would be a good idea to do so. I only test if users report problems.
+
+v0.61 beta:
+
+TEW632-BRP     :  untested
+DD-WRT v23     :  untested
+DD-WRT v24     :  untested
+DD-WRT v24 SP1 :  untested
+DD-WRT v24 SP2 :  untested
+OpenWrt WR     :  untested
+OpenWrt Kami   :  untested
+WL-530G        :  untested
+
+v0.60:
+
+TEW632-BRP     :  untested
+DD-WRT v23     :  untested
+DD-WRT v24     :  tested as standard user; extract, build, flash, telnet
+DD-WRT v24 SP1 :  tested as standard user; extract, build, flash, telnet
+DD-WRT v24 SP2 :  tested as standard user; extract, build, flash, telnet
+OpenWrt WR     :  untested
+OpenWrt Kami   :  untested
+WL-530G        :  untested
+
+
