@@ -140,7 +140,7 @@ Build_WRT_Images ()
 	echo " Building squashfs-lzma filesystem ..."
 	if [ -e "$2/image_parts/squashfs-lzma-image-3_0" ]; then			
 		   echo " Changing permissions ... (experimental)"		
-		   chmod -R 777 "$2/rootfs/*" >> build.log 2>&1
+		   chmod -R 777 "$2/rootfs" >> build.log 2>&1
 		if [ -f "$2/image_parts/.sq_lzma_damn_small_variant_marker" ]; then
 		   echo " Utilizing lzma damn small variant ..."		   
 		   echo " WARNING: Support for these recently added, not fully tested... be careful."
