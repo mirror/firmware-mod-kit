@@ -154,10 +154,10 @@ Build_WRT_Images ()
 			-noappend -le >> build.log		
 		else
 		   echo " Utilizing lzma standard variant ..."
-		   "src/squashfs-3.0/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
+			# -magic to fix brainslayer changing squashfs signature in 08/10/06+ firmware images		  
+ 			"src/squashfs-3.0/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
 			-noappend -le -magic "$2/image_parts/squashfs_magic" >> build.log		
 		fi
-		# -magic to fix brainslayer changing squashfs signature in 08/10/06+ firmware images
 	 	if [ $? != 0 ]; then
 			echo " ERROR - mksquashfs failed."
 			exit 1	
