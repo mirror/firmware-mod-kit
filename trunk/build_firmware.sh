@@ -139,6 +139,8 @@ Build_WRT_Images ()
 {
 	echo " Building squashfs-lzma filesystem ..."
 	if [ -e "$2/image_parts/squashfs-lzma-image-3_0" ]; then			
+		   echo " Changing permissions ... (experimental)"		
+		   chmod -R 777 "$2/rootfs/*" >> build.log 2>&1
 		if [ -f "$2/image_parts/.sq_lzma_damn_small_variant_marker" ]; then
 		   echo " Utilizing lzma damn small variant ..."		   
 		   echo " WARNING: Support for these recently added, not fully tested... be careful."
@@ -147,9 +149,9 @@ Build_WRT_Images ()
 		   echo "             http://www.bitsum.com/forum/index.php?topic=118.0"
 		   echo "          User help will determine, and solve, the problem. I don't have"
 		   echo "          as much time as I'd like to test and investigate."
-		   echo " This may take a while ..."
+		   echo " This may take a while ..."	
 		   "src/squashfs-3.0-lzma-damn-small-variant/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
-			-noappend -root-owned -le >> build.log		
+			-noappend -le >> build.log		
 		else
 		   echo " Utilizing lzma standard variant ..."
 		   "src/squashfs-3.0/mksquashfs-lzma" "$2/rootfs/" "$2/image_parts/squashfs-lzma-image-new" \
