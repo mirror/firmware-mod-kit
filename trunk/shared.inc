@@ -1,5 +1,5 @@
 #!/bin/sh
-SHARED_VERSION='0.60'
+SHARED_VERSION='0.61 beta'
 #
 # Title: shared.inc
 # Author: Jeremy Collake <jeremy@bitsum.com>
@@ -192,6 +192,7 @@ TestIsRootAndExitIfNot()
 	if [ $(id -u) != "0" ]; then
 		echo " ERROR: You must be 'root' when extracting and building some images."
 		echo "        This is because some images need to create devices in your fs."
+		echo "        For DD-WRT, do NOT extract or build as root, use standard user."
 		exit 1
 	fi
 }
@@ -201,5 +202,6 @@ TestIsRoot()
 	if [ $(id -u) != "0" ]; then
 		echo " WARNING: You must be 'root' when extracting and building some images."
 		echo "          This is because some images need to create devices in your fs."
+		echo "          For DD-WRT, do NOT extract or build as root, use standard user."
 	fi
 }
