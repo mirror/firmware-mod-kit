@@ -39,6 +39,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <string>
+#include <cstring>
+#include <cstdlib>
+#include <climits>
 #include <vector>
 #include "imghdr.h"
 
