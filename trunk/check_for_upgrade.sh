@@ -2,7 +2,12 @@
 echo " Checking for updates ..."
 mkdir update_check
 cd update_check
-wget --quiet --timeout=4 --tries=1 http://www.bitsum.com/files/firmware_mod_kit_version.txt
+SYSNAME=`uname`
+if [ `expr "$SYSNAME" : "Darwin"` = 6 ]; then
+	curl -O -s --connect-timeout 4 --retry 1 http://www.bitsum.com/files/firmware_mod_kit_version.txt
+else
+	wget --quiet --timeout=4 --tries=1 http://www.bitsum.com/files/firmware_mod_kit_version.txt
+fi
 cd ..
 if [ ! -f "update_check/firmware_mod_kit_version.txt" ]; then
 	echo "  ! WARNING: Could not check for update. No connectivity or server down?"
