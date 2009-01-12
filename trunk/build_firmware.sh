@@ -67,7 +67,7 @@ BuildLinuxRawFirmwareType() {
 	if [ -f "$PARTS_PATH/image_parts/hwid.txt" ]; then
 		# user report: prepend four NULL bytes to the platform ID, causes image to be accepted on 
 		#  either TEW-632BRP A1.0 or A1.1 by effectively nullifying the platform ID
-		#printf "\000\000\000\000" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+		# "\000\000\000\000" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 		# now write platform ID
 		cat "$PARTS_PATH/image_parts/hwid.txt" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 	else
