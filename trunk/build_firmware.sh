@@ -65,7 +65,7 @@ BuildLinuxRawFirmwareType() {
 	cp "$PARTS_PATH/image_parts/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 	dd "if=$PARTS_PATH/image_parts/rootfs.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
 	if [ -f "$PARTS_PATH/image_parts/hwid.txt" ]; then
-		# prepend four NULL bytes to the platform ID, causes image to be accepted on 
+		# user report: prepend four NULL bytes to the platform ID, causes image to be accepted on 
 		#  either TEW-632BRP A1.0 or A1.1 by effectively nullifying the platform ID
 		#printf "\000\000\000\000" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
 		# now write platform ID
