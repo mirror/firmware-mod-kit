@@ -1,5 +1,5 @@
 /* untrx
- * Copyright (C) 2008 Jeremy Collake  <jeremy@bitsum.com>
+ * Copyright (C) 2006-2010 Jeremy Collake  <jeremy@bitsum.com>
  * http://www.bitsum.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -138,7 +138,7 @@ void ShowUsage()
 **************************************************************************/
 int main(int argc, char **argv)
 {
-	fprintf(stderr, " untrx " _VERSION_ " - (c)2006 Jeremy Collake\n");
+	fprintf(stderr, " untrx " _VERSION_ " - (c)2006-2010 Jeremy Collake\n");
 	
 	if(argc<3)
 	{
