@@ -18,6 +18,7 @@
  *
  * Additional patch contributors (add your own name if you submit a patch): 
  *
+ *    0.55 - Jeremy Collake - minor syntax fix in a buffer size calc
  *    0.54 - Jiafu Gao (fixed sqfs signature check on big endian CPUs)
  *
  */
@@ -193,7 +194,7 @@ int main(int argc, char **argv)
 	
 	// allocate filename buffer
 	char *pszTemp=(char *)
-		malloc(strlen(pszOutFolder)*sizeof(char)+128*sizeof(char));			
+		malloc((strlen(pszOutFolder)*sizeof(char))+(128*sizeof(char)));			
 	
 	/* Extract the segments */
 	for(int nI=0;nI<3 && READ32_LE(trx->offsets[nI]);nI++)
