@@ -25,10 +25,12 @@
 #ifndef _UNTRX_H
 #define _UNTRX_H
 
+/*
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+*/
 	
 /************************************************************
 	Various stuff	
@@ -201,8 +203,10 @@ struct cramfs_super {
 	//struct cramfs_inode root;	/* Root inode data */
 };
 
+/*
 #ifdef __cplusplus
 }
 #endif
+*/
 
 #endif /* _UNTRX_H */
