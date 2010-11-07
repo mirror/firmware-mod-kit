@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.62 beta'
+VERSION='0.63 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -25,7 +25,7 @@ VERSION='0.62 beta'
 EXIT_ON_FS_PROBLEM="0"
 
 echo
-echo " Firmware Mod Kit (extract) v$VERSION, (c)2008 Jeremy Collake"
+echo " Firmware Mod Kit (extract) v$VERSION, (c)2010 Jeremy Collake"
 echo " http://www.bitsum.com"
 
 #################################################################
@@ -104,7 +104,21 @@ if [ $# = 2 ]; then
 		mkdir -p "$2/image_parts" >> extract.log 2>&1
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
 		echo " Extracting firmware"
-		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1
+		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1		
+		if [ ! -e "$2/image_parts/squashfs*" ]; then
+			echo "! untrx failed, trying splitter3";
+			"src/splitter3" "$1" "$2/image_parts" >> extract.log 2>&1
+		 	if [ $? != 0 ]; then
+				echo " ERROR: Could not split firmware into component parts (unrecognized)";
+				exit 1
+			fi
+			touch "$2/.linux_raw_type3"
+			touch "$2/.squashfs3_lzma_fs"
+		fi
+		# if unknown version, then we'll just try to use the latest UnSquashFS we have
+		if [ -f "$2/image_parts/squashfs-lzma-image-x_x" ]; then	
+			ln -s "squashfs-lzma-image-x_x" "$2/image_parts/squashfs-lzma-image-3_0"
+		fi
 		# if squashfs 3.1 or 3.2, symlink it to 3.0 image, since they are compatible
 		if [ -f "$2/image_parts/squashfs-lzma-image-3_1" ]; then	
 			ln -s "squashfs-lzma-image-3_1" "$2/image_parts/squashfs-lzma-image-3_0"
@@ -135,7 +149,7 @@ if [ $# = 2 ]; then
 					touch "$2/image_parts/.sq_lzma_damn_small_variant_marker"
 					touch "$2/image_parts/.trx-sqfs"			
 				fi
-			else
+			else				
 				touch "$2/image_parts/.trx-sqfs"			
 			fi
 		elif [ -f "$2/image_parts/squashfs-lzma-image-2_x" ]; then			

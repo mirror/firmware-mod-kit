@@ -26,7 +26,7 @@ FIRMARE_BASE_NAME=custom_image
 EXIT_ON_FS_PROBLEM="0"
 
 echo
-echo " Firmware Mod Kit (build) v$VERSION, (c)2008 Jeremy Collake"
+echo " Firmware Mod Kit (build) v$VERSION, (c)2010 Jeremy Collake"
 echo " http://www.bitsum.com"
 
 #################################################################
@@ -36,7 +36,7 @@ echo " http://www.bitsum.com"
 BuildLinuxRawFirmwareType() {	
 	OUTPUT_PATH=$1
 	PARTS_PATH=$2
-	OUTPUT_FIRMWARE_FILENAME="tew-632brp-fmk-firmware.bin"
+	OUTPUT_FIRMWARE_FILENAME="output-firmware.bin"
 	echo " Building firmware from directory $2 ..."		
 	if [ ! -e "$PARTS_PATH/rootfs/" ]; then
 		echo " ERROR: rootfs must exist"
@@ -46,24 +46,32 @@ BuildLinuxRawFirmwareType() {
 	rm -f "$PARTS_PATH/image_parts/squashfs-3-lzma.img" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" "$PARTS_PATH/image_parts/rootfs.img" "$PARTS_PATH/image_parts/*.new"
 	if [ -f "$PARTS_PATH/.squashfs3_lzma_fs" ]; then			
 		# make squashfs image if marker present
-		echo " Building squashfs file system ..."
-		./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.img" -all-root -be -noappend 2>/dev/null >> build.log
-		ln -s "squashfs-3-lzma.img" "$PARTS_PATH/image_parts/rootfs.img"
+		echo " Building squashfs-lzma file system (big endian) ..."
+		if [ -f "$2/.linux_raw_type3" ]; then
+			echo " !!! WARNING: This raw embedded linux image type is UNTESTED - added Nov 6 2010"
+			echo " !!! DO NOT FLASH UNLESS YOU ARE PREPARED TO RECOVER FROM A BRICKED ROUTER"
+			echo " !!! YOU HAVE BEEN WARNED AND ASSUME LIABILITY FOR DAMAGES IF YOU DO FLASH IT"
+			./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.img" -all-root -be -noappend -b 65536 2>/dev/null >> build.log
+		else
+			./src/squashfs-3.0/mksquashfs-lzma "$PARTS_PATH/rootfs/" "$PARTS_PATH/image_parts/squashfs-3-lzma.img" -all-root -be -noappend 2>/dev/null >> build.log
+		fi
+		ln -s "squashfs-3-lzma.img" "$PARTS_PATH/image_parts/rootfs.img"			
 		filesize=$(du -b "$PARTS_PATH/image_parts/squashfs-3-lzma.img" | cut -f 1)
 	else
 		# make jffs2 image if marker not present
-		echo " Building JFFS2 file system ..."
+		echo " Building JFFS2 file system (big endian) ..."
 		./src/jffs2/mkfs.jffs2 -r "$PARTS_PATH/rootfs/" -o "$PARTS_PATH/image_parts/jffs2.img" --big-endian --squash # 2>/dev/null >> build.log
 		ln -s "jffs2.img" "$PARTS_PATH/image_parts/rootfs.img"
 		filesize=$(du -b "$PARTS_PATH/image_parts/jffs2.img" | cut -f 1)
 	fi
-	# verify rootfs isn't too big for the Trendnet TEW-632BRP with its default partition mapping	
-	if [ $filesize -ge 2818049 ]; then
-		echo " WARNING: rootfs image size appears too large ..."
-	fi
 	# build firmware image
 	cp "$PARTS_PATH/image_parts/vmlinuz" "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
-	dd "if=$PARTS_PATH/image_parts/rootfs.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
+	if [ -f "$2/.linux_raw_type3" ]; then
+		echo " Building RAW IMAGE TYPE 3"	
+		cat "$PARTS_PATH/image_parts/rootfs.img" >> "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME"
+	else
+		dd "if=$PARTS_PATH/image_parts/rootfs.img" "of=$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" bs=1K seek=1024 2>/dev/null >> build.log
+	fi
 	if [ -f "$PARTS_PATH/image_parts/hwid.txt" ]; then
 		# user report: prepend four NULL bytes to the platform ID, causes image to be accepted on 
 		#  either TEW-632BRP A1.0 or A1.1 by effectively nullifying the platform ID
@@ -76,7 +84,7 @@ BuildLinuxRawFirmwareType() {
 	fi	
 	filesize=$(du -b "$OUTPUT_PATH/$OUTPUT_FIRMWARE_FILENAME" | cut -f 1)
 	if [ $filesize -ge 3866649 ]; then
-		echo " WARNING: firmware image appears to be too large ..."
+		echo " WARNING: firmware image may be too large for routers with 4MB ROM ..."
 	fi
 
 }
@@ -235,12 +243,15 @@ if [ $# = 2 ]; then
 	mkdir -p $1 >> build.log 2>&1
 	rm "$1/$FIRMWARE_BASE_NAME*.*" "$1" >> build.log 2>&1
 	
-	if [ -f "$2/image_parts/.trx-sqfs" ]; then
-		echo " Detected WRT squashfs-lzma style."
-		Build_WRT_Images "$1" "$2"
-	elif [ -f "$2/.linux_raw_type" ]; then
+	if [ -f "$2/.linux_raw_type" ]; then
 		echo " Detected linux raw type firmware."
 		BuildLinuxRawFirmwareType "$1" "$2"		
+	elif [ -f "$2/.linux_raw_type3" ]; then
+		echo " Detected linux raw type firmware."
+		BuildLinuxRawFirmwareType "$1" "$2"	
+	elif [ -f "$2/image_parts/.trx-sqfs" ]; then
+		echo " Detected WRT squashfs-lzma style."
+		Build_WRT_Images "$1" "$2"
 	elif [ -f "$2/image_parts/cramfs-image-x_x" ]; then
 		echo " Detected cramfs file system."
 		TestIsRoot
