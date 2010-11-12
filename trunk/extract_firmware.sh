@@ -1,6 +1,6 @@
 #!/bin/sh
 . "./shared.inc"
-VERSION='0.63 beta'
+VERSION='0.64 beta'
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
@@ -105,15 +105,16 @@ if [ $# = 2 ]; then
 		mkdir -p "$2/installed_packages" >> extract.log 2>&1
 		echo " Extracting firmware"
 		"src/untrx" "$1" "$2/image_parts" >> extract.log 2>&1		
-		if [ ! -e "$2/image_parts/squashfs*" ]; then
+	 	if [ $? != 0 ]; then
 			echo "! untrx failed, trying splitter3";
 			"src/splitter3" "$1" "$2/image_parts" >> extract.log 2>&1
 		 	if [ $? != 0 ]; then
 				echo " ERROR: Could not split firmware into component parts (unrecognized)";
 				exit 1
+			else
+				touch "$2/.linux_raw_type3"
+				touch "$2/.squashfs3_lzma_fs"
 			fi
-			touch "$2/.linux_raw_type3"
-			touch "$2/.squashfs3_lzma_fs"
 		fi
 		# if unknown version, then we'll just try to use the latest UnSquashFS we have
 		if [ -f "$2/image_parts/squashfs-lzma-image-x_x" ]; then	
