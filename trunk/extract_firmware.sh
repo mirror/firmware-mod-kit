@@ -109,7 +109,7 @@ if [ $# = 2 ]; then
 			echo "! untrx failed, trying splitter3";
 			"src/splitter3" "$1" "$2/image_parts" >> extract.log 2>&1
 		 	if [ $? != 0 ]; then
-				#echo " WARNING: Not recognized by splitter3";
+				echo " Not recognized by splitter3";
 				# exit 1
 			else
 				touch "$2/.linux_raw_type3"
@@ -155,7 +155,7 @@ if [ $# = 2 ]; then
 			fi
 		elif [ -f "$2/image_parts/squashfs-lzma-image-2_x" ]; then			
 			"src/squashfs-2.1-r2/unsquashfs-lzma" \
-			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-2_x" 2>/dev/null >> extract.log							
+			-dest "$2/rootfs" "$2/image_parts/squashfs-lzma-image-2_x" 2>/dev/null >>extract.log							
 			if [ -e "$2/rootfs" ]; then							
 				touch "$2/image_parts/.trx-sqfs"
 			else
