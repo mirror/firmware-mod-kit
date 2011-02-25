@@ -1,5 +1,10 @@
 #!/bin/sh
-VERSION='0.43 beta'
+#
+# $Id$
+#
+. "./shared.inc"
+### 20110225-MCT The VERSION is set in the shared.inc file from a single external source now.
+VERSION="${SHARED_VERSION}"
 ##################################################
 #
 # Title: ipkg_remove.sh

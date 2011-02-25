@@ -3,7 +3,8 @@
 # $Id$
 #
 . "./shared.inc"
-VERSION='0.66 beta'
+### 20110225-MCT The VERSION is set in the shared.inc file from a single external source now.
+VERSION="${SHARED_VERSION}"
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>

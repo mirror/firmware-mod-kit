@@ -1,5 +1,5 @@
 #!/bin/sh
-SHARED_VERSION='0.66 beta'
+SHARED_VERSION="$( cat firmware_mod_kit_version.txt )"
 #
 # Title: shared.inc
 # Author: Jeremy Collake <jeremy@bitsum.com>
