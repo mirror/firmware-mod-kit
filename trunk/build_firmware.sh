@@ -21,8 +21,19 @@ VERSION='0.66 beta'
 #
 # ./build_firmware.sh new_firmwares/ std_generic/
 #
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# 20110225-0746-MCT - Added rebuild number.
+# + Enhanced previous patch to include a rebuild
+#   number that increments.
+# + Moved this log to below the authors space.
+# 20110224-1507-MCT - Two simple mods.
+# + Put the name of the build into an external file so that
+#   it's easier to customize.
+# + Modified a var to correct the spelling. :)
+#   Changed FIRMARE_BASE_NAME to FIRMWARE_BASE_NAME
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-FIRMARE_BASE_NAME=custom_image
+
 EXIT_ON_FS_PROBLEM="0"
 
 echo
@@ -103,12 +114,12 @@ InvokeTRX ()
 	fi
 	# I switched to asustrx due to bug in trx with big endian OS X.
 	#  it works just like trx if you don't supply a version number (skips addver appendage)
-	"src/asustrx" -o "$1/$FIRMARE_BASE_NAME.trx" \
+	"src/asustrx" -o "$1/$FIRMWARE_BASE_NAME.trx" \
 		$SEGMENT_1 $SEGMENT_2 \
 		"$2/image_parts/$3" \
 			>> build.log 2>&1
 	echo " Building base firmware image (asus) ..."	
-	"src/asustrx" -p WL500gx -v 1.9.2.7 -o "$1/$FIRMARE_BASE_NAME-asus.trx" \
+	"src/asustrx" -p WL500gx -v 1.9.2.7 -o "$1/$FIRMWARE_BASE_NAME-asus.trx" \
 		$SEGMENT_1 $SEGMENT_2 \
 		"$2/image_parts/$3" \
 		 >> build.log 2>&1
@@ -123,24 +134,24 @@ InvokeTRX ()
 #################################################################
 CreateTargetImages ()
 {
-	echo " Making $1/$FIRMARE_BASE_NAME-wrtsl54gs.bin"
-	if [ ! -f "$1/$FIRMARE_BASE_NAME.trx" ]; then
+	echo " Making $1/$FIRMWARE_BASE_NAME-wrtsl54gs.bin"
+	if [ ! -f "$1/$FIRMWARE_BASE_NAME.trx" ]; then
 		echo " ERROR: Sanity check failed."
 		exit 1
 	fi
-	"src/addpattern" -4 -p W54U -v v4.20.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		 -o "$1/$FIRMARE_BASE_NAME-wrtsl54gs.bin" -g >> build.log 2>&1
-	echo " Making $1/$FIRMARE_BASE_NAME-wrt54g.bin"
-	"src/addpattern" -4 -p W54G -v v4.20.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		-o "$1/$FIRMARE_BASE_NAME-wrt54g.bin" -g >> build.log 2>&1
-	echo " Making $1/$FIRMARE_BASE_NAME-wrt54gs.bin"
-	"src/addpattern" -4 -p W54S -v v4.70.6 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		-o "$1/$FIRMARE_BASE_NAME-wrt54gs.bin" -g >> build.log 2>&1
-	echo " Making $1/$FIRMARE_BASE_NAME-wrt54gsv4.bin"
-	"src/addpattern" -4 -p W54s -v v1.05.0 -i "$1/$FIRMARE_BASE_NAME.trx" \
-		-o "$1/$FIRMARE_BASE_NAME-wrt54gsv4.bin" -g >> build.log 2>&1
-	echo " Making $1/$FIRMARE_BASE_NAME-generic.bin"
-	ln -s "$FIRMARE_BASE_NAME.trx" "$1/$FIRMARE_BASE_NAME-generic.bin" >> build.log 2>&1
+	"src/addpattern" -4 -p W54U -v v4.20.6 -i "$1/$FIRMWARE_BASE_NAME.trx" \
+		 -o "$1/$FIRMWARE_BASE_NAME-wrtsl54gs.bin" -g >> build.log 2>&1
+	echo " Making $1/$FIRMWARE_BASE_NAME-wrt54g.bin"
+	"src/addpattern" -4 -p W54G -v v4.20.6 -i "$1/$FIRMWARE_BASE_NAME.trx" \
+		-o "$1/$FIRMWARE_BASE_NAME-wrt54g.bin" -g >> build.log 2>&1
+	echo " Making $1/$FIRMWARE_BASE_NAME-wrt54gs.bin"
+	"src/addpattern" -4 -p W54S -v v4.70.6 -i "$1/$FIRMWARE_BASE_NAME.trx" \
+		-o "$1/$FIRMWARE_BASE_NAME-wrt54gs.bin" -g >> build.log 2>&1
+	echo " Making $1/$FIRMWARE_BASE_NAME-wrt54gsv4.bin"
+	"src/addpattern" -4 -p W54s -v v1.05.0 -i "$1/$FIRMWARE_BASE_NAME.trx" \
+		-o "$1/$FIRMWARE_BASE_NAME-wrt54gsv4.bin" -g >> build.log 2>&1
+	echo " Making $1/$FIRMWARE_BASE_NAME-generic.bin"
+	ln -s "$FIRMWARE_BASE_NAME.trx" "$1/$FIRMWARE_BASE_NAME-generic.bin" >> build.log 2>&1
 }
 
 #################################################################
@@ -207,7 +218,7 @@ MakeCramfs ()
 Build_WL530G_Image ()
 {
 	echo " Building wl-530/520/550g style image (static TRX offsets)."
-	./src/asustrx -p WL530g -v 1.9.4.6 -o "$1/$FIRMARE_BASE_NAME-wl530g.trx" -b 32 "$2/image_parts/segment1" -b 655360 "$2/image_parts/$3"  >> build.log 2>&1	
+	./src/asustrx -p WL530g -v 1.9.4.6 -o "$1/$FIRMWARE_BASE_NAME-wl530g.trx" -b 32 "$2/image_parts/segment1" -b 655360 "$2/image_parts/$3"  >> build.log 2>&1	
 }
 
 
@@ -228,6 +239,24 @@ if [ $# = 2 ]; then
 		echo " ERROR - You must run this script from the same directory as it is in!"
 		exit 1
 	fi
+	#################################################################
+
+	if [ ! -f .firmware_rebuild_number ] ; then
+		FIRMWARE_REBUILD_NUMBER=1
+		echo ${FIRMWARE_REBUILD_NUMBER} > .firmware_rebuild_number
+	else
+		FIRMWARE_REBUILD_NUMBER=$( cat .firmware_rebuild_number )
+		(( FIRMWARE_REBUILD_NUMBER+=1 ))
+		echo ${FIRMWARE_REBUILD_NUMBER} > .firmware_rebuild_number
+	fi
+	if [ ! -f .firmware_base_name ] ; then
+		FIRMWARE_BASE_NAME=custom_image
+		echo $FIRMWARE_BASE_NAME > .firmware_base_name
+	else
+		FIRMWARE_BASE_NAME="$( cat .firmware_base_name )"
+	fi
+	FIRMWARE_BASE_NAME=$( printf "%s_%05d" ${FIRMWARE_BASE_NAME} ${FIRMWARE_REBUILD_NUMBER} )
+
 	#################################################################
 	# remove deprecated stuff
 	if [ -f "./src/mksquashfs.c" ] || [ -f "mksquashfs.c" ]; then
@@ -285,6 +314,7 @@ if [ $# = 2 ]; then
 
 	echo " Firmware images built."
 	ls -l "$1"
+	md5sum -b "$1"/${FIRMWARE_BASE_NAME}* > "$1"/${FIRMWARE_BASE_NAME}.md5sums
 	echo " All done!"
 else
 	#################################################################
