@@ -1,4 +1,7 @@
 #!/bin/sh
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# 20110224-1507-MCT - Needed quotes around a string compare.
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo " Checking for updates ..."
 mkdir update_check
 cd update_check
@@ -16,7 +19,7 @@ if [ ! -f "update_check/firmware_mod_kit_version.txt" ]; then
 fi
 NEW_VERSION=`cat update_check/firmware_mod_kit_version.txt`
 CUR_VERSION=`cat firmware_mod_kit_version.txt`
-if [ $NEW_VERSION != $CUR_VERSION ]; then
+if [ "$NEW_VERSION" != "$CUR_VERSION" ]; then
 	echo "  !!! There is a newer version available: $NEW_VERSION"
 	echo "     You are currently using $CUR_VERSION"
 else
