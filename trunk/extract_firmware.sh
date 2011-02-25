@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# $Id$
+#
 . "./shared.inc"
 VERSION='0.66 beta'
 #
