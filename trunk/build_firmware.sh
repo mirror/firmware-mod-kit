@@ -260,6 +260,7 @@ if [ $# = 2 ]; then
 		FIRMWARE_BASE_NAME="$( cat .firmware_base_name )"
 	fi
 	FIRMWARE_BASE_NAME=$( printf "%s_%05d" ${FIRMWARE_BASE_NAME} ${FIRMWARE_REBUILD_NUMBER} )
+	echo "Rebuilt: ${FIRMWARE_BASE_NAME} With: Firmware Mod Kit (build) v$VERSION, (c)2010 Jeremy Collake" > "$2/rootfs/etc/rebuild_info"
 
 	#################################################################
 	# remove deprecated stuff
