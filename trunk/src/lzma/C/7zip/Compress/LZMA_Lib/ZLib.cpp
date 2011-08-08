@@ -246,6 +246,13 @@ ZEXTERN int ZEXPORT compress2 OF((Bytef *dest,   uLongf *destLen,
 ZEXTERN int ZEXPORT uncompress OF((Bytef *dest,   uLongf *destLen,
                                    const Bytef *source, uLong sourceLen))
 {
+	/* CJH: 7zip ID implemented by some LZMA implementations */
+	if(strncmp((char *) source, "7zip", 4) == 0)
+	{
+		source += 4;
+		sourceLen -= 4;
+	}
+
 	CInMemoryStream *inStreamSpec = new CInMemoryStream(source, sourceLen);
 	CMyComPtr<ISequentialInStream> inStream = inStreamSpec;
 	
