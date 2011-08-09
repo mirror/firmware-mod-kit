@@ -2,16 +2,16 @@ CC := gcc
 CXX := g++
 INCLUDEDIR = .
 CFLAGS := -I$(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2
-LZMAPATH = ../lzma/C/7zip/Compress/LZMA_Lib
+LZMAPATH = ../../lzma/C/7zip/Compress/LZMA_Lib
 
-all: mksquashfs unsquashfs # mksquashfs-lzma unsquashfs-lzma
+all: mksquashfs unsquashfs mksquashfs-lzma unsquashfs-lzma
 
 mksquashfs: mksquashfs.o read_fs.o sort.o
 	$(CC) mksquashfs.o read_fs.o sort.o -lpthread -lz -lm -o $@
 
-#mksquashfs-lzma: mksquashfs.o read_fs.o sort.o
-#	make -C $(LZMAPATH)
-#	$(CXX) -O3 mksquashfs.o read_fs.o sort.o -L$(LZMAPATH) -lpthread -lm -llzma -o $@
+mksquashfs-lzma: mksquashfs.o read_fs.o sort.o
+	make -C $(LZMAPATH)
+	$(CXX) -O3 mksquashfs.o read_fs.o sort.o -L$(LZMAPATH) -lpthread -lm -llzma -o $@
 
 mksquashfs.o: mksquashfs.c squashfs_fs.h mksquashfs.h global.h sort.h
 

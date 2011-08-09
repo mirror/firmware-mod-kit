@@ -23,6 +23,7 @@
 
 #define CONFIG_SQUASHFS_1_0_COMPATIBILITY
 #define CONFIG_SQUASHFS_2_0_COMPATIBILITY
+#define _GNU_SOURCE
 
 #define TRUE 1
 #define FALSE 0
@@ -51,6 +52,7 @@
 
 #include <squashfs_fs.h>
 #include "read_fs.h"
+#include "sqmagic.h"
 #include "global.h"
 
 #include <stdlib.h>
@@ -1776,8 +1778,8 @@ int read_super(char *source)
 
 	/* Check it is a SQUASHFS superblock */
 	swap = 0;
-	if(sBlk.s_magic != SQUASHFS_MAGIC) {
-		if(sBlk.s_magic == SQUASHFS_MAGIC_SWAP) {
+	if(sBlk.s_magic != SQUASHFS_MAGIC && sBlk.s_magic != SQUASHFS_MAGIC_LZMA) {
+		if(sBlk.s_magic == SQUASHFS_MAGIC_SWAP || sBlk.s_magic == SQUASHFS_MAGIC_LZMA_SWAP) {
 			squashfs_super_block sblk;
 			ERROR("Reading a different endian SQUASHFS filesystem on %s\n", source);
 			SQUASHFS_SWAP_SUPER_BLOCK(&sblk, &sBlk);

@@ -8,13 +8,16 @@
 
 # paths
 Sqlzma = ${CURDIR}
-LzmaVer = lzma443
+#LzmaVer = lzma443
+LzmaVer = 
 Lzma = ${Sqlzma}/${LzmaVer}
 SqVer = squashfs3.2-r2
 Squashfs = ${Sqlzma}/${SqVer}
 
-LzmaC = ${Lzma}/C/7zip/Compress/LZMA_C
-LzmaAlone = ${Lzma}/C/7zip/Compress/LZMA_Alone
+#LzmaC = ${Lzma}/C/7zip/Compress/LZMA_C
+#LzmaAlone = ${Lzma}/C/7zip/Compress/LZMA_Alone
+LzmaC = ${Lzma}/C/Compress/Lzma
+LzmaAlone = ${Lzma}/CPP/7zip/Compress/LZMA_Alone
 SqTools = ${Squashfs}/squashfs-tools
 
 # enable it if you want to add -g option when compiling
