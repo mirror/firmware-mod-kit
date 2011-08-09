@@ -2,7 +2,7 @@ CC := gcc
 CXX := g++
 INCLUDEDIR = .
 CFLAGS := -I$(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2
-LZMAPATH = ../lzma/C/7zip/Compress/LZMA_Lib
+LZMAPATH = ../../lzma/C/7zip/Compress/LZMA_Lib
 
 all: mksquashfs unsquashfs # mksquashfs-lzma unsquashfs-lzma
 

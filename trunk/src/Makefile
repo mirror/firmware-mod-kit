@@ -10,6 +10,7 @@ all: asustrx addpattern untrx motorola-bin splitter3
 	make -C ./squashfs-3.0/
 	make -C ./squashfs-3.0-lzma-damn-small-variant/
 	make -C ./wrt_vx_imgtool/
+	make -C ./others/
 
 addpattern: addpattern.o
 	$(CC) addpattern.o -o $@
@@ -39,3 +40,4 @@ clean:
 	make -C ./cramfs-2.x clean
 	make -C ./uncramfs clean
 	make -C ./wrt_vx_imgtool clean
+	make -C ./others clean
