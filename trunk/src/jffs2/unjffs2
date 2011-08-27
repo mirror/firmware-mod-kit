@@ -1,0 +1,41 @@
+#!/bin/bash
+
+IMG="$1"
+DST="$2"
+BLOCK="/dev/mtdblock0"
+
+if [ "$IMG" == "" ] || [ "$IMG" == "-h" ]
+then
+	echo "Usage: $0 <jffs2 image> [output directory]"
+	exit 1
+fi
+
+if [ "$DST" == "" ]
+then
+	DST="jffs2-root"
+fi
+
+TMP="/tmp/$DST"
+
+modprobe mtdblock
+modprobe mtdchar
+modprobe mtdram
+modprobe mtd
+
+mkdir $DST && mkdir $TMP
+
+if [ $? == 0 ]
+then
+	if [ ! -e $BLOCK ]
+	then
+		mknod $BLOCK b 31 0
+	fi
+
+	dd if="$IMG" of=$BLOCK 2>/dev/null && mount -t jffs2 $BLOCK $TMP
+
+	if [ $? == 0 ]
+	then
+		cp -vR $TMP/* $DST
+		umount $TMP && rm -rf $TMP
+	fi
+fi
