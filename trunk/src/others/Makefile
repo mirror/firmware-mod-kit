@@ -1,6 +1,6 @@
 all:
 	make -C ./squashfs-3.2-r2
-#	make -C ./squashfs-3.2-r2-lzma
+	make -C ./squashfs-3.2-r2-lzma
 	make -C ./squashfs-3.3
 	make -C ./squashfs-3.3-lzma
 
