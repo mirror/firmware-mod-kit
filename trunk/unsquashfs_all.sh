@@ -9,7 +9,8 @@ DIR="$2"
 
 ROOT="./src"
 SUBDIRS="squashfs-2.1-r2 squashfs-3.0 squashfs-3.0-lzma-damn-small-variant others/squashfs-3.2-r2 others/squashfs-3.2-r2-lzma others/squashfs-3.2-r2-lzma/squashfs3.2-r2/squashfs-tools others/squashfs-3.3 others/squashfs-3.3-lzma/squashfs3.3/squashfs-tools"
-EXE=""
+TIMEOUT="5"
+MKFS=""
 DEST=""
 
 if [ "$IMG" == "" ] || [ "$IMG" == "-h" ]
@@ -18,40 +19,47 @@ then
 	exit 1
 fi
 
-if [ "$DIR" != "" ]
+if [ "$DIR" == "" ]
 then
-	DEST="-dest $DIR"
+	DIR="squashfs-root"
 fi
+
+DEST="-dest $DIR"
 
 for SUBDIR in $SUBDIRS
 do
 	unsquashfs="$ROOT/$SUBDIR/unsquashfs"
+	mksquashfs="$ROOT/$SUBDIR/mksquashfs"
 
 	if [ -e $unsquashfs ]
 	then
-		echo -n "$unsquashfs: "
-		$unsquashfs $DEST $IMG
-		
-		if [ $? == 0 ]
+		echo -ne "\nTrying $unsquashfs... "
+
+		$unsquashfs $DEST $IMG 2>/dev/null &
+		sleep $TIMEOUT && kill $!
+
+		if [ -d "$DIR" ]
 		then
-			EXE=$unsquashfs
+			MKFS="$mksquashfs"
 		fi
 	fi
 	
-	if [ "$EXE" == "" ] && [ -e $unsquashfs-lzma ]
+	if [ "$MKFS" == "" ] && [ -e $unsquashfs-lzma ]
 	then
-		echo -n "$unsquashfs-lzma: "
-		$unsquashfs-lzma $DEST $IMG
-        
-                if [ $? == 0 ]
+		echo -ne "\nTrying $unsquashfs-lzma... "
+
+		$unsquashfs-lzma $DEST $IMG 2>/dev/null &
+		sleep $TIMEOUT && kill $!
+		
+		if [ -d "$DIR" ]
                 then
-                        EXE="$unsquashfs-lzma"
+                        MKFS="$mksquashfs-lzma"
                 fi
 	fi
 
-	if [ "$EXE" != "" ]
+	if [ "$MKFS" != "" ]
 	then
-		echo "File system sucessfully extracted ($EXE)"
+		echo "File system sucessfully extracted. Rebuild with [$MKFS]."
 		exit 0
 	fi
 done

@@ -880,6 +880,7 @@ int main(int argc, char *argv[])
 	squashfs_super_block sBlk;
 	char *dest = "squashfs-root";
 	int i, version = FALSE;
+	int retval = EXIT_FAILURE;
 
 	for(i = 1; i < argc; i++) {
 		if(*argv[i] != '-')
@@ -949,4 +950,10 @@ options:
 		printf("created %d fifos\n", fifo_count);
 	}
 
+	if(file_count > 0)
+	{
+		retval = EXIT_SUCCESS;
+	}
+
+	return retval;
 }
