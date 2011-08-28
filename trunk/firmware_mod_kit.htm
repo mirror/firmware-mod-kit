@@ -10,44 +10,44 @@
 
 <body>
 
-<p><b><font size="6">Firmware Modification Kit<br>
-</font></b><i><b>Giving YOU the power to customize your firmware<br>
-</b><font size="2">documentation version 0.68 beta<br>
+<p><b><font size="6">Firmware Modification Kit<br />
+</font></b><i><b>Giving YOU the power to customize your firmware<br />
+</b><font size="2">documentation version 0.68 beta<br />
 all scripts, untrx, wrt_vx_imgtool, and docs (c) 2006-2011 Jeremy Collake &lt;jeremy.collake@gmail.com&gt; and other contributors (see project page)
 <br />
 other portions (c) their respective holders</font></i></p>
 
 <p><b><font size="4">Contents</font></b></p>
-<p>I. <a href="#Description">Description</a><br>
-II. <a href="#Why_is_this_useful">Why is this useful?</a><br>
-III. <a href="#Where_to_get_the_kit">Where to get the kit</a><br>
-IV. <a href="#Requirements">Requirements</a><br>
-V. <a href="#Compatibility">Compatibility</a><br>
-VI. <a href="#Instructions">Instructions</a><br>
+<p>I. <a href="#Description">Description</a><br />
+II. <a href="#Why_is_this_useful">Why is this useful?</a><br />
+III. <a href="#Where_to_get_the_kit">Where to get the kit</a><br />
+IV. <a href="#Requirements">Requirements</a><br />
+V. <a href="#Compatibility">Compatibility</a><br />
+VI. <a href="#Instructions">Instructions</a><br />
 &nbsp;&nbsp;&nbsp; A. <a href="#Extracting_the_firmware_(extract_firmware.sh)">
-extracting firmware</a><br>
+extracting firmware</a><br />
 &nbsp;&nbsp;&nbsp; B.
 <a href="#Modifying_the_firmware_(manual_and/or_ipkg_install.sh)">modifying 
-firmware</a><br>
+firmware</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.<a href="#Installing_packages"> 
-installing packages</a><br>
+installing packages</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. <a href="#Removing_packages">
-removing packages</a><br>
+removing packages</a><br />
 &nbsp;&nbsp;&nbsp; C. <a href="#Re-building_the_firmware_(build_firmware.sh)">
-re-building firmware</a><br>
-VII. <a href="#Caveats">Caveats</a><br>
+re-building firmware</a><br />
+VII. <a href="#Caveats">Caveats</a><br />
 &nbsp;&nbsp;&nbsp; A. <a href="#Binary_compatibility_issues">binary 
-compatibility issues</a><br>
-&nbsp;&nbsp;&nbsp; B. <a href="#Maximum_firmware_size">maximum firmware size</a><br>
+compatibility issues</a><br />
+&nbsp;&nbsp;&nbsp; B. <a href="#Maximum_firmware_size">maximum firmware size</a><br />
 &nbsp;&nbsp;&nbsp; C. <a href="#Solutions_to_case_sensitivity">solutions to file 
-system incompatibilities</a><br>
-VIII. <a href="#Acknowledgments">Acknowledgements and more</a><br>
-IX. <a href="#Links">Links</a><br>
-X. <a href="#Revision_history">Revision history</a><br>
+system incompatibilities</a><br />
+VIII. <a href="#Acknowledgments">Acknowledgements and more</a><br />
+IX. <a href="#Links">Links</a><br />
+X. <a href="#Revision_history">Revision history</a><br />
 XI. <a href="#About_the_author">About the author</a></p>
 <p>&nbsp;</p>
-<p><font size="5"><b>I. <a name="Description">Description</a></b><br>
-</font><br>
+<p><font size="5"><b>I. <a name="Description">Description</a></b><br />
+</font><br />
 This kit gives the user the ability to make changes to a firmware image without 
 recompiling the firmware sources. It works by extracting the firmware into 
 its component parts, then extracting the file system image (assuming its in one 
@@ -138,7 +138,7 @@ modifications to existing ones. Custom code currently is:</p>
 <p><b>ASUSTRX - </b>Modified to allow '-b' switch to force segment offsets 
 (needed for some devices, like the WL-530g).<br />
 <b>UNTRX</b> - A new tool to extract the contents of a TRX image into its component 
-parts.<br>
+parts.<br />
 <b>UNSQUASHFS</b> - Custom blend that supports extraction of 2.x squashfs 
 images. This tool wasn't officially made available until squashfs 3.0, so up 
 until now it wasn't available for 2.x images.<br />
@@ -146,8 +146,8 @@ until now it wasn't available for 2.x images.<br />
 compatible firmware images for the WRT54G(S) v5 series.<br />
 <b>SPLITTER3</b> - Custom file splitter for certain types of linux firmware images.
 </p>
-<p><b><font size="5">II. <a name="Why_is_this_useful">Why is this useful?</a></font></b><br>
-<br>
+<p><b><font size="5">II. <a name="Why_is_this_useful">Why is this useful?</a></font></b><br />
+<br />
 A list of some of the many reasons this might be desired are:</p>
 <ul>
 	<li>add initialization scripts</li>
@@ -157,7 +157,7 @@ A list of some of the many reasons this might be desired are:</p>
 	<li>mix-and-match packages from various flavors of the firmware image.</li>
 </ul>
 <p>
-<br>
+<br />
 &nbsp;</p>
 <p><b><font size="5">III. <a name="Where_to_get_the_kit">Where to get the ki</a>t</font></b></p>
 <p>The best way to download and use this kit is to check out the sources from 
@@ -166,20 +166,20 @@ and the sources are the same as you'll find in the tar.gz archive. </p>
 <p>To anonymously check out the firmware-mod-kit:</p>
 <table border="0" width="100%" id="table9" bgcolor="#F6F4EC">
 	<tr>
-		<td><font face="Courier New">&nbsp;mkdir firmware_mod_kit<br>
-&nbsp;cd firmware_mod_kit<br>
+		<td><font face="Courier New">&nbsp;mkdir firmware_mod_kit<br />
+&nbsp;cd firmware_mod_kit<br />
 &nbsp;svn checkout http://firmware-mod-kit.googlecode.com/svn/trunk/ firmware-mod-kit-read-only</font></td>
 	</tr>
 </table>
-<p><br>
+<p><br />
 <b><font size="4">Kit downloads and links:</font></b></p>
 <p>Project hosting and repository (new):
 <a href="http://code.google.com/p/firmware-mod-kit/">
-http://code.google.com/p/firmware-mod-kit/</a><br>
-Anonymous svn checkout: <i>svn checkout http://firmware-mod-kit.googlecode.com/svn/trunk/ firmware-mod-kit-read-only</i><br>
+http://code.google.com/p/firmware-mod-kit/</a><br />
+Anonymous svn checkout: <i>svn checkout http://firmware-mod-kit.googlecode.com/svn/trunk/ firmware-mod-kit-read-only</i><br />
 Latest official build:
 <a href="http://www.bitsum.com/files/firmware_mod_tools.tar.gz">
-Download archive</a> <br>
+Download archive</a> <br />
 User forums can be found <a href="http://www.bitsum.com/forum/index.php?board=12.0">
 here</a>.</p>
 <p><b><font size="4">Packages:</font></b></p>
@@ -187,7 +187,7 @@ here</a>.</p>
 other firmware images.</p>
 <p>A specific collection of DD-WRT packages for use with the kit:
 <a href="http://www.bitsum.com/files/ddwrt_packages.tar.gz">
-http://www.bitsum.com/files/ddwrt_packages.tar.gz</a> .<br>
+http://www.bitsum.com/files/ddwrt_packages.tar.gz</a> .<br />
 &nbsp;</p>
 <p>&nbsp;</p>
 <p><b><font size="5">IV. <a name="Requirements">Requirements</a></font></b></p>
@@ -323,8 +323,8 @@ others</u>:</p>
 you can manually use the tools inside to manipulate many firmware images, or 
 request support be added.</i></b></p>
 <p>&nbsp;</p>
-<p><b><font size="5">VI. <a name="Instructions">Instructions</a><br>
-</font></b><br>
+<p><b><font size="5">VI. <a name="Instructions">Instructions</a><br />
+</font></b><br />
 I've scripts that simply and abstract the firmware modification process. Basically, it's a 
 one-step process to extract the firmware, and a one-step process to rebuild the 
 firmware. There are also scripts to install or remove individual packages or 
@@ -345,16 +345,16 @@ entire directories of packages.</p>
 run this tool from inside the directory it exists in.</b></i></p>
 	<table border="0" width="100%" bgcolor="#F6F4EC" id="table1">
 		<tr>
-			<td><br>$ ./extract_firmware.sh firmware.bin working_directory/<br>&nbsp;</td>
+			<td><br />$ ./extract_firmware.sh firmware.bin working_directory/<br />&nbsp;</td>
 		</tr>
 	</table>
-	<p><br><b>- firmware.bin</b> is the firmware image you want to extract, i.e. 
-DD-WRT.v23_MICRO_GENERIC.BIN. <br><b>- working_directory</b> is the working directory you want to use. This is 
+	<p><br /><b>- firmware.bin</b> is the firmware image you want to extract, i.e. 
+DD-WRT.v23_MICRO_GENERIC.BIN. <br /><b>- working_directory</b> is the working directory you want to use. This is 
 where the intermediate files and the extracted file system will be stored. Note 
-that files in the working directory may be deleted!<br><br>It doesn't matter which firmware image you supply, i.e. for a WRT54G or an ASUS 
+that files in the working directory may be deleted!<br /><br />It doesn't matter which firmware image you supply, i.e. for a WRT54G or an ASUS 
 WL-500G. These images are usually all the same and differ only in the header 
-format. The rebuilding process will create images for the various models.<br>
-	<br>An extraction log is created as <i>extract.log</i>.</p>
+format. The rebuilding process will create images for the various models.<br />
+	<br />An extraction log is created as <i>extract.log</i>.</p>
 </blockquote>
 <p>&nbsp;</p>
 <p><b><font size="4"><u>B.
@@ -363,16 +363,16 @@ to the firmware's file system</a></u></font></b></p>
 <blockquote>
 	<p>Modifying the firmware is simple. The file system is stored in the working 
 directory you supplied to extract_firmware.sh. Here are the subfolders of this 
-directory:<br><br>&nbsp;&nbsp;&nbsp; <b>rootfs/ <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+directory:<br /><br />&nbsp;&nbsp;&nbsp; <b>rootfs/ <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 	</b>This is where the file system is. 
-Make modifications here.<br>&nbsp;&nbsp;&nbsp; <b>image_parts/ <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Make modifications here.<br />&nbsp;&nbsp;&nbsp; <b>image_parts/ <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 	</b>This is where intermediate files are stored. If you need to replace the 
 	kernel (not at all recommended), you can do so by replacing the appropriate 
-	file here (usually segment2).<br>
-	<b>&nbsp;&nbsp;&nbsp; installed_packages/<br>
+	file here (usually segment2).<br />
+	<b>&nbsp;&nbsp;&nbsp; installed_packages/<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b>If you use the ipkg_install.sh 
 	tool, this is where packages you've installed after firmware extraction will 
-	reside.<br><br>One can manually change the files in rootfs and/or use the 
+	reside.<br /><br />One can manually change the files in rootfs and/or use the 
 	automated package scripts.</p>
 	<p>&nbsp;</p>
 	<p><b><a name="Installing_packages">Installing packages</a> (.IPK)</b></p>
@@ -399,10 +399,10 @@ available packages (not all may work), see
 		<p>Example use:</p>
 		<table border="0" width="100%" bgcolor="#F6F4EC" id="table6">
 			<tr>
-				<td><br>$ ./ipkg_install.sh some_package-1.2.5.ipk working_directory/<br>&nbsp;</td>
+				<td><br />$ ./ipkg_install.sh some_package-1.2.5.ipk working_directory/<br />&nbsp;</td>
 			</tr>
 		</table>
-		<p><b>some_package-1.2.5.ipkg </b>would be the filename of the package.<br>
+		<p><b>some_package-1.2.5.ipkg </b>would be the filename of the package.<br />
 		<b>working_directory</b> is the same working directory you supplied to the 
 extract_firmware.sh script.</p>
 		<p><b>Notes:</b></p>
@@ -418,10 +418,10 @@ extract_firmware.sh script.</p>
 		<p>Example use:</p>
 		<table border="0" width="100%" bgcolor="#F6F4EC" id="table7">
 			<tr>
-				<td><br>$ ./ipkg_remove.sh some_package-1.2.5.ipk working_directory/<br>&nbsp;</td>
+				<td><br />$ ./ipkg_remove.sh some_package-1.2.5.ipk working_directory/<br />&nbsp;</td>
 			</tr>
 		</table>
-		<p><b>some_package-1.2.5.ipkg </b>would be the filename of the package.<br>
+		<p><b>some_package-1.2.5.ipkg </b>would be the filename of the package.<br />
 		<b>working_directory</b> is the same working directory you supplied to the 
 extract_firmware.sh script.</p>
 		<p><b>Notes:</b></p>
@@ -443,14 +443,14 @@ tool from inside the directory it exists in.</b></i></p>
 	<p>Example use:</p>
 	<table border="0" width="100%" bgcolor="#F6F4EC" id="table2">
 		<tr>
-			<td><br>$ ./build_firmware.sh output_directory/ working_directory/<br>&nbsp;</td>
+			<td><br />$ ./build_firmware.sh output_directory/ working_directory/<br />&nbsp;</td>
 		</tr>
 	</table>
 	<p><b>- output_directory</b> is the path to which the created firmware images 
 should be stored. If images already exist here, they will be over-written. 
 Firmware images for various models will be emitted (these images are all the 
 same but have different header patterns so they are accepted by the target 
-models).<br><b>- working_directory</b> is the working directory supplied to 
+models).<br /><b>- working_directory</b> is the working directory supplied to 
 extract_firmware.sh.</p>
 	<p>A building log is created as <i>build.log</i>.</p>
 </blockquote>
@@ -491,7 +491,7 @@ warned, this section may be technical in parts.</p>
 <p>Currently, the maximum firmware image size supported by this kit is 5,898,240 
 (0x5A0000) bytes, but can be adjusted through the &quot;-m [size]&quot; parameter of the 
 asustrx tool.</p>
-<p><br>
+<p><br />
 <b>C. <a name="Solutions_to_case_sensitivity">Solutions to file system 
 incompatibilities</a></b></p>
 <p><b>! This section is very much a work in progress !</b></p>
@@ -510,7 +510,7 @@ directory, all should work fine.</p>
 that may not have a case sensitive file system by default. Linux users typically 
 do not have this problem since EXT2 and EXT3 file systems are case sensitive.
 </p>
-<p><br>
+<p><br />
 <b>WARNING: THESE ARE IN EARLY STAGES OF TESTING AND MAY NOT WORK.</b></p>
 <table border="1" width="100%" id="table4" cellpadding="5">
 	<tr>
@@ -523,53 +523,53 @@ do not have this problem since EXT2 and EXT3 file systems are case sensitive.
 		<td width="162" height="30" valign="top">CYGWIN, OTHER</td>
 		<td height="30" valign="top"><b>It's reported this does not work under 
 		CYGWIN</b> due to the CYGWIN utilities all being case INsensitive 
-		(thanks pagedude).<br>
-		<br>
+		(thanks pagedude).<br />
+		<br />
 		Use a network share to a case sensitive file system. This is, by far, 
 		the easiest solution. Simply use an appropriate network share for the 
-		working directory.<br>
+		working directory.<br />
 &nbsp;</td>
 	</tr>
 	<tr>
 		<td width="127" height="30" valign="top"><b>SOLUTION 2</b></td>
 		<td width="162" valign="top">CYGWIN</td>
-		<td valign="top"><br>
+		<td valign="top"><br />
 		For NT partitions it's reported you can enable case sensitivity through 
 		the following registry key, but <b>I do not know if this works or not</b>.<p>&nbsp;\HKLM\SYSTEM\CurrentControlSet\Control\Session 
-		Manager\kernel\obcaseinsensitive [REG_DWORD] = 0<br>
+		Manager\kernel\obcaseinsensitive [REG_DWORD] = 0<br />
 &nbsp;</td>
 	</tr>
 	<tr>
 		<td width="127" height="31" valign="top"><b>SOLUTION 3</b></td>
 		<td width="162" height="31" valign="top">OS X (not usually needed, at 
 		least for DD-WRT)</td>
-		<td height="31" valign="top"><br>
+		<td height="31" valign="top"><br />
 		One can either
 		<a href="http://www.macosxhints.com/article.php?story=200502011939237">
 		Turn on HSFX</a> for the boot disk, or (more easily) create a temporary 
 		HSFX case sensitive file system to use as a working directory.<p>Example 
-		of how to create a temporary HSFX case sensitive file system:<br>
-		<br>
-		<i>to create:<br>
+		of how to create a temporary HSFX case sensitive file system:<br />
+		<br />
+		<i>to create:<br />
 		</i>$ hdiutil create -size 20m -fs HFSX -volname db90h -nouuid 
-		test-image <br>
-		<i>to mount:<br>
-		</i>$ hdiutil attach test-image.dmg <br>
-		<i>to un-mount:</i><br>
+		test-image <br />
+		<i>to mount:<br />
+		</i>$ hdiutil attach test-image.dmg <br />
+		<i>to un-mount:</i><br />
 		$ hdiutil detach /Volumes/db90h </p>
-		<p>(thanks solarflare for this information)<br>
+		<p>(thanks solarflare for this information)<br />
 &nbsp;</td>
 	</tr>
 	<tr>
 		<td width="127" valign="top"><b>SOLUTION 4</b></td>
-		<td width="162" valign="top">CYGWIN<br>
+		<td width="162" valign="top">CYGWIN<br />
 &nbsp;</td>
-		<td valign="top"><br>
+		<td valign="top"><br />
 		Mount an ext2 files system. Eko, of DD-WRT forums, contributes this tip. 
 		Make a partition on a hard drive or USB thumb drive, then install &quot;<a href="http://www.fs-driver.org/">Ext2 
 		Installable File System For Windows</a>&quot;. 10MB should generally be 
 		plenty of working directory space, but 20MB is suggested for more 
-		optimal file system performance.<br>
+		optimal file system performance.<br />
 &nbsp;</td>
 	</tr>
 </table>
@@ -835,7 +835,7 @@ http://code.google.com/p/firmware-mod-kit/</a> . Developers are welcome.</p>
 	<li>Documentation additions</li>
 	<li>Misc. polishing</li>
 </ul>
-<p>v0.13 alpha: Documentation updates, re-included pre-built executables<br>
+<p>v0.13 alpha: Documentation updates, re-included pre-built executables<br />
 v0.10 alpha: First decent public release.</p>
 <p>&nbsp;</p>
 <p><font size="5"><b>XI. <a name="About_the_author">About the author</a></b></font></p>
@@ -871,24 +871,24 @@ ways to help. Feel free to contact me if interested.</p>
 </form>
 
 <p>&nbsp;</p>
-<p><font size="2">This document (c)2006,2007,2008,2009,2010 Jeremy Collake. <br>
+<p><font size="2">This document (c)2006,2007,2008,2009,2010 Jeremy Collake. <br />
 All Rights reserved. This document may be freely republished in its unaltered 
 and whole form only. Alterations or partial publishing requires approval of 
 Jeremy Collake &lt;<a href="mailto:jeremy@bitsum.com">jeremy@bitsum.com</a>&gt;.</font></p>
   
 <p><i><font size="2">&nbsp;This kit is free software; you can redistribute it 
-and/or modify<br>
-&nbsp;it under the terms of the GNU General Public License as published by<br>
-&nbsp;the Free Software Foundation; either version 2 of the License, or<br>
-&nbsp;(at your option) any later version.<br>
-<br>
-&nbsp;This program is distributed in the hope that it will be useful,<br>
-&nbsp;but WITHOUT ANY WARRANTY; without even the implied warranty of<br>
-&nbsp;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU<br>
-&nbsp;General Public License for more details.<br>
-<br>
-&nbsp;You should have received a copy of the GNU General Public License<br>
-&nbsp;along with this program; if not, write to the Free Software<br>
+and/or modify<br />
+&nbsp;it under the terms of the GNU General Public License as published by<br />
+&nbsp;the Free Software Foundation; either version 2 of the License, or<br />
+&nbsp;(at your option) any later version.<br />
+<br />
+&nbsp;This program is distributed in the hope that it will be useful,<br />
+&nbsp;but WITHOUT ANY WARRANTY; without even the implied warranty of<br />
+&nbsp;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU<br />
+&nbsp;General Public License for more details.<br />
+<br />
+&nbsp;You should have received a copy of the GNU General Public License<br />
+&nbsp;along with this program; if not, write to the Free Software<br />
 &nbsp;Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</font></i></p>
   
 </body>
