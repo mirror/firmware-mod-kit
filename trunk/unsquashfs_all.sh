@@ -36,7 +36,7 @@ do
 		echo -ne "\nTrying $unsquashfs... "
 
 		$unsquashfs $DEST $IMG 2>/dev/null &
-		sleep $TIMEOUT && kill $!
+		sleep $TIMEOUT && kill $! 1>&2 >/dev/null
 
 		if [ -d "$DIR" ]
 		then
@@ -49,7 +49,7 @@ do
 		echo -ne "\nTrying $unsquashfs-lzma... "
 
 		$unsquashfs-lzma $DEST $IMG 2>/dev/null &
-		sleep $TIMEOUT && kill $!
+		sleep $TIMEOUT && kill $! 1>&2 >/dev/null
 		
 		if [ -d "$DIR" ]
                 then
@@ -59,7 +59,8 @@ do
 
 	if [ "$MKFS" != "" ]
 	then
-		echo "File system sucessfully extracted. Rebuild with [$MKFS]."
+		echo "File system sucessfully extracted!"
+		echo "MKFS=$MKFS"
 		exit 0
 	fi
 done
