@@ -29,7 +29,7 @@ do
 
 	if [ -e $unsquashfs ]
 	then
-		echo -n "$ROOT/$SUBDIR/unsquashfs: "
+		echo -n "$unsquashfs: "
 		$unsquashfs $DEST $IMG
 		
 		if [ $? == 0 ]
