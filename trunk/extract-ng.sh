@@ -8,6 +8,9 @@ then
 	DIR="fmk"
 fi
 
+# Import shared settings. $DIR MUST be defined prior to this!
+eval $(cat shared-ng.inc)
+
 # Check usage
 if [ "$IMG" == "" ] || [ "$IMG" == "-h" ]
 then
@@ -21,11 +24,12 @@ then
 	exit 1
 fi
 
+# Get the size, in bytes, of the target firmware image
+FW_SIZE=$(ls -l $IMG | cut -d' ' -f5)
+
 # Create output directories
 mkdir -p "$DIR/logs"
 mkdir -p "$DIR/image_parts"
-
-eval $(cat shared-ng.inc)
 
 echo "Scanning firmware..."
 
@@ -33,7 +37,7 @@ echo "Scanning firmware..."
 # lzma/gzip signatures and signatures that have the words "filesystem", "header" or 
 # "footer" in their description. Filter out results whose description/text contains the 
 # word "invalid".
-$BINWALK -f "$BINLOG" -d -x invalid -y gzip -y lzma -y header -y footer -y squashfs -y cramfs "$IMG"
+$BINWALK -f "$BINLOG" -d -x invalid -y header -y footer -y squashfs -y cramfs "$IMG"
 
 IFS=$'\n'
 
@@ -49,13 +53,16 @@ do
 	then
 		HEADER_OFFSET=$OFFSET
 		HEADER_TYPE=$DESCRIPTION
+		HEADER_SIZE=$(echo $LINE | sed -e 's/.*header size: //' | cut -d' ' -f1)
+		((KERNEL_OFFSET=$HEADER_OFFSET+$HEADER_SIZE))
 
-	# If we aren't at offset 0 and haven't yet found a kernel image, consider the next header
-	# or compressed file type to be the kernel image.
-	elif [ "$KERNEL_OFFSET" == "" ] && [ "$(echo $LINE grep -i -e header -e compress)" != "" ]
+	# Some firmware have two headers
+	elif [ "$(echo $LINE | grep -i header)" != "" ]
 	then
-		KERNEL_OFFSET=$OFFSET
-		KERNEL_TYPE=$DESCRIPTION
+		HEADER2_OFFSET=$OFFSET
+		HEADER2_TYPE=$DESCRIPTION
+		HEADER2_SIZE=$(echo $LINE | sed -e 's/.*header size: //' | cut -d' ' -f1)
+		((KERNEL_OFFSET=$HEADER2_OFFSET+$HEADER2_SIZE))
 
 	# Check to see if this line is a file system entry
 	elif [ "$(echo $LINE | grep -i filesystem)" != "" ]
@@ -79,6 +86,19 @@ do
 	fi
 done
 
+if [ "$HEADER_OFFSET" != "0" ]
+then
+        echo "WARNING: Firmware header not recognized! Will not be able to reassemble firmware image."
+fi
+
+if [ "$KERNEL_OFFSET" != "" ]
+then
+        echo "Extracting kernel image at offset $KERNEL_OFFSET"
+        dd if="$IMG" bs=1 skip=$KERNEL_OFFSET count=$(echo "$FS_OFFSET-$KERNEL_OFFSET" | bc -l) of="$KERNEL" 2>/dev/null
+else
+        echo "WARNING: Kernel location unknown! Will not be able to reassemble firmware image."
+fi
+
 if [ "$FS_OFFSET" != "" ]
 then
         echo "Extracting $FS_TYPE file system at offset $FS_OFFSET"
@@ -88,19 +108,6 @@ else
         exit 1
 fi
 
-if [ "$KERNEL_OFFSET" != "" ]
-then
-	echo "Extracting $KERNEL_TYPE kernel image at offset $KERNEL_OFFSET"
-	dd if="$IMG" bs=1 skip=$KERNEL_OFFSET count=$(echo "$FS_OFFSET-$KERNEL_OFFSET" | bc -l) of="$KERNEL" 2>/dev/null
-else
-	echo "WARNING: No known kernel found! Will not be able to reassemble firmware image."
-fi
-
-if [ "$HEADER_OFFSET" != "0" ]
-then
-	echo "WARNING: Firmware header not recognized! Will not be able to reassemble firmware image."
-fi
-
 if [ "$FOOTER_OFFSET" != "" ]
 then
 	echo "Extracting $FOOTER_TYPE footer at offset $FOOTER_OFFSET"
@@ -108,8 +115,11 @@ then
 fi
 
 # Log the parsed values to the CONFLOG for use when re-building the firmware
+echo "FW_SIZE='$FW_SIZE'" >> $CONFLOG
 echo "HEADER_TYPE='$HEADER_TYPE'" >> $CONFLOG
-echo "KERNEL_TYPE='$KERNEL_TYPE'" >> $CONFLOG
+echo "HEADER_SIZE='$HEADER_SIZE'" >> $CONFLOG
+echo "HEADER2_TYPE='$HEADER2_TYPE'" >> $CONFLOG
+echo "HEADER2_SIZE='$HEADER2_SIZE'" >> $CONFLOG
 echo "KERNEL_OFFSET='$KERNEL_OFFSET'" >> $CONFLOG
 echo "FS_TYPE='$FS_TYPE'" >> $CONFLOG
 echo "FS_OFFSET='$FS_OFFSET'" >> $CONFLOG
