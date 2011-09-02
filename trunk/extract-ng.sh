@@ -37,9 +37,10 @@ echo "Scanning firmware..."
 # lzma/gzip signatures and signatures that have the words "filesystem", "header" or 
 # "footer" in their description. Filter out results whose description/text contains the 
 # word "invalid".
-$BINWALK -f "$BINLOG" -d -x invalid -y header -y footer -y squashfs -y cramfs "$IMG"
+$BINWALK -f "$BINLOG" -d -x invalid -y trx -y uimage -y squashfs "$IMG"
 
 IFS=$'\n'
+HEADER_IMAGE_OFFSET=0
 
 # Loop through binwalk log file
 for LINE in $(sort -n $BINLOG | grep -v -e '^DECIMAL' -e '^---')
@@ -54,15 +55,7 @@ do
 		HEADER_OFFSET=$OFFSET
 		HEADER_TYPE=$DESCRIPTION
 		HEADER_SIZE=$(echo $LINE | sed -e 's/.*header size: //' | cut -d' ' -f1)
-		((KERNEL_OFFSET=$HEADER_OFFSET+$HEADER_SIZE))
-
-	# Some firmware have two headers
-	elif [ "$(echo $LINE | grep -i header)" != "" ]
-	then
-		HEADER2_OFFSET=$OFFSET
-		HEADER2_TYPE=$DESCRIPTION
-		HEADER2_SIZE=$(echo $LINE | sed -e 's/.*header size: //' | cut -d' ' -f1)
-		((KERNEL_OFFSET=$HEADER2_OFFSET+$HEADER2_SIZE))
+		HEADER_IMAGE_SIZE=$(echo $LINE | sed -e 's/.*image size: //' | cut -d' ' -f1)
 
 	# Check to see if this line is a file system entry
 	elif [ "$(echo $LINE | grep -i filesystem)" != "" ]
@@ -77,12 +70,6 @@ do
                 else
                         ENDIANESS="-le"
                 fi
-
-	# Check to see if this line is a footer entry
-	elif [ "$(echo $LINE | grep -i footer)" != "" ]
-	then
-		FOOTER_OFFSET=$OFFSET
-		FOOTER_TYPE=$DESCRIPTION
 	fi
 done
 
@@ -91,12 +78,22 @@ then
         echo "WARNING: Firmware header not recognized! Will not be able to reassemble firmware image."
 fi
 
-if [ "$KERNEL_OFFSET" != "" ]
+# If the header only covers the kernel image and not the file system, just copy the header verbatim.
+# Else, we'll have to only copy the header data and re-build the header when the firmware is re-assembled.
+if [ "$HEADER_IMAGE_SIZE" -lt "$FS_OFFSET" ]
 then
-        echo "Extracting kernel image at offset $KERNEL_OFFSET"
-        dd if="$IMG" bs=1 skip=$KERNEL_OFFSET count=$(echo "$FS_OFFSET-$KERNEL_OFFSET" | bc -l) of="$KERNEL" 2>/dev/null
+	HEADER_IMAGE_OFFSET=0
+	((HEADER_IMAGE_SIZE=$HEADER_IMAGE_SIZE+$HEADER_SIZE))
 else
-        echo "WARNING: Kernel location unknown! Will not be able to reassemble firmware image."
+	((HEADER_IMAGE_OFFSET=$HEADER_OFFSET+$HEADER_SIZE))
+fi
+
+if [ "$HEADER_IMAGE_OFFSET" != "" ]
+then
+        echo "Extracting header image at offset $HEADER_IMAGE_OFFSET"
+        dd if="$IMG" bs=1 skip=$HEADER_IMAGE_OFFSET count=$(echo "$FS_OFFSET-$HEADER_IMAGE_OFFSET" | bc -l) of="$HEADER_IMAGE" 2>/dev/null
+else
+        echo "WARNING: Header unknown! Will not be able to reassemble firmware image."
 fi
 
 if [ "$FS_OFFSET" != "" ]
@@ -108,19 +105,40 @@ else
         exit 1
 fi
 
-if [ "$FOOTER_OFFSET" != "" ]
+FOOTER_SIZE=0
+FOOTER_OFFSET=0
+
+# Try to determine if there is a footer at the end of the firmware image.
+# Grap the last 10 lines of a hexdump of the firmware image. Reverse the line order and
+# replace any lines that start with '*' with the word 'FILLER'.
+for LINE in $(hexdump -C $IMG | tail -11 | head -10 | sed -n '1!G;h;$p' | sed -e 's/^*/FILLER/')
+do
+        if [ "$LINE" == "FILLER" ]
+        then
+                break
+        else
+                ((FOOTER_OFFSET=$FOOTER_OFFSET+16))
+        fi
+done
+
+# If a footer was found, dump it out
+if [ "$FOOTER_OFFSET" != "0" ]
 then
-	echo "Extracting $FOOTER_TYPE footer at offset $FOOTER_OFFSET"
-	dd if="$IMG" bs=$FOOTER_OFFSET skip=1 of="$FOOTER" 2>/dev/null
+	((FOOTER_SIZE=$FW_SIZE-$FOOTER_OFFSET))
+	echo "Extracting footer from offset $FOOTER_OFFSET"
+	dd if="$IMG" bs=1 skip=$FOOTER_OFFSET count=$FOOTER_SIZE of="$FOOTER_IMAGE" 2>/dev/null
+else
+	FOOTER_OFFSET=$FW_SIZE
 fi
 
 # Log the parsed values to the CONFLOG for use when re-building the firmware
 echo "FW_SIZE='$FW_SIZE'" >> $CONFLOG
 echo "HEADER_TYPE='$HEADER_TYPE'" >> $CONFLOG
 echo "HEADER_SIZE='$HEADER_SIZE'" >> $CONFLOG
-echo "HEADER2_TYPE='$HEADER2_TYPE'" >> $CONFLOG
-echo "HEADER2_SIZE='$HEADER2_SIZE'" >> $CONFLOG
-echo "KERNEL_OFFSET='$KERNEL_OFFSET'" >> $CONFLOG
+echo "HEADER_IMAGE_SIZE='$HEADER_IMAGE_SIZE'" >> $CONFLOG
+echo "HEADER_IMAGE_OFFSET='$HEADER_IMAGE_OFFSET'" >> $CONFLOG
+echo "FOOTER_SIZE='$FOOTER_SIZE'" >> $CONFLOG
+echo "FOOTER_OFFSET='$FOOTER_OFFSET'" >> $CONFLOG
 echo "FS_TYPE='$FS_TYPE'" >> $CONFLOG
 echo "FS_OFFSET='$FS_OFFSET'" >> $CONFLOG
 echo "ENDIANESS='$ENDIANESS'" >> $CONFLOG
@@ -131,16 +149,16 @@ case $FS_TYPE in
 		echo "Extracting SquashFS file system..."
 		./unsquashfs_all.sh "$FSIMG" "$ROOTFS" 2>/dev/null | grep MKFS >> $CONFLOG
 		;;
-	"cramfs")
-		echo "Extracting CramFS file system..."
-		if [ "$ENDIANESS" == "-be" ]
-		then
-			mv "$FSIMG" "$FSIMG.be"
-			cramfsswap "$FSIMG.be" "$FSIMG" && rm "$FSIMG.be"
-		fi
-		./src/cramfs-2.x/cramfsck -x "$ROOTFS" "$FSIMG"
-		echo "MKFS=./src/cramfs-2.x/mkcramfs" >> $CONFLOG
-		;;
+#	"cramfs")
+#		echo "Extracting CramFS file system..."
+#		if [ "$ENDIANESS" == "-be" ]
+#		then
+#			mv "$FSIMG" "$FSIMG.be"
+#			cramfsswap "$FSIMG.be" "$FSIMG" && rm "$FSIMG.be"
+#		fi
+#		./src/cramfs-2.x/cramfsck -x "$ROOTFS" "$FSIMG"
+#		echo "MKFS=./src/cramfs-2.x/mkcramfs" >> $CONFLOG
+#		;;
 esac
 
 # Check if file system extraction was successful

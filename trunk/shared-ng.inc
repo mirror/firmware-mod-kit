@@ -1,9 +1,10 @@
+VERSION=$(cat firmware_mod_kit_version.txt)
 IMAGE_PARTS="$DIR/image_parts"
 LOGS="$DIR/logs"
 CONFLOG="$LOGS/config.log"
 BINLOG="$LOGS/binwalk.log"
 ROOTFS="$DIR/rootfs"
 FSIMG="$IMAGE_PARTS/rootfs.img"
-KERNEL="$IMAGE_PARTS/kernel.img"
-FOOTER="$IMAGE_PARTS/footer.img"
+HEADER_IMAGE="$IMAGE_PARTS/header.img"
+FOOTER_IMAGE="$IMAGE_PARTS/footer.img"
 BINWALK="binwalk"
