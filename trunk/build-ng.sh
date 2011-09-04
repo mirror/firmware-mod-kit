@@ -34,7 +34,7 @@ cat $FSOUT >> $FWOUT
 
 # Calculate and create any filler bytes required between the end of the file system and the footer / EOF.
 CUR_SIZE=$(ls -l $FWOUT | awk '{print $5}')
-((FILLER_SIZE=$FW_SIZE-$CUR_SIZE-$FOOTER_SIZE-$HEADER_SIZE))
+((FILLER_SIZE=$FW_SIZE-$CUR_SIZE-$FOOTER_SIZE))
 echo "FS FILLER SIZE: $FILLER_SIZE"
 perl -e "print \"\xFF\"x$FILLER_SIZE" >> $FWOUT
 
@@ -45,7 +45,7 @@ then
 fi
 
 # Calculate new checksum values for the firmware header
-./crcalc/crcalc $FWOUT
+./src/crcalc/crcalc $FWOUT
 
 if [ $? -eq 0 ]
 then
