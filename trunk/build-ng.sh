@@ -15,6 +15,7 @@ FWOUT="$DIR/fw.img"
 
 echo "Building new $FS_TYPE file system..."
 
+# Build the appropriate file system
 case $FS_TYPE in
 	"squashfs")
 		$MKFS $ROOTFS $FSOUT $ENDIANESS -all-root
@@ -27,31 +28,30 @@ then
 	exit 1
 fi
 
+# Append the new file system to the first part of the original firmware file
 cp $HEADER_IMAGE $FWOUT
-
-((FILLER_SIZE=$FS_OFFSET-$HEADER_IMAGE_OFFSET-$HEADER_IMAGE_SIZE))
-perl -e "print \"\xFF\"x$FILLER_SIZE" >> $FWOUT
-
 cat $FSOUT >> $FWOUT
 
+# Calculate and create any filler bytes required between the end of the file system and the footer / EOF.
 CUR_SIZE=$(ls -l $FWOUT | awk '{print $5}')
-((FILLER_SIZE=$FOOTER_OFFSET-$CUR_SIZE))
-echo "$FOOTER_OFFSET-$CUR_SIZE=$FILLER_SIZE"
+((FILLER_SIZE=$FW_SIZE-$CUR_SIZE-$FOOTER_SIZE-$HEADER_SIZE))
+echo "FS FILLER SIZE: $FILLER_SIZE"
 perl -e "print \"\xFF\"x$FILLER_SIZE" >> $FWOUT
 
+# Append the footer to the new firmware image, if there is any footer
 if [ "$FOOTER_SIZE" -gt "0" ]
 then
 	cat $FOOTER_IMAGE >> $FWOUT
 fi
 
-if [ "$HEADER_IMAGE_SIZE" -gt "$FS_OFFSET" ]
+# Calculate new checksum values for the firmware header
+./crcalc/crcalc $FWOUT
+
+if [ $? -eq 0 ]
 then
-	case $HEADER_TYPE in
-		"trx")
-			mv $FWOUT $FWOUT.tmp && ./src/asustrx -o $FWOUT $FWOUT.tmp && rm -f $FWOUT.tmp
-			;;
-	esac
+	echo -n "Finished! "
+else
+	echo -n "Firmware header not supported; firmware checksums may be incorrect. "
 fi
 
-echo "Finished! New firmware image has been saved to: $FWOUT"
-
+echo "New firmware image has been saved to: $FWOUT"

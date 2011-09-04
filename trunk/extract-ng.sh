@@ -40,6 +40,8 @@ echo "Scanning firmware..."
 $BINWALK -f "$BINLOG" -d -x invalid -y trx -y uimage -y squashfs "$IMG"
 
 IFS=$'\n'
+
+# Header image offset is ALWAYS 0. Header checksums are simply updated by build-ng.sh.
 HEADER_IMAGE_OFFSET=0
 
 # Loop through binwalk log file
@@ -73,27 +75,15 @@ do
 	fi
 done
 
-if [ "$HEADER_OFFSET" != "0" ]
+# Header image size is everything from the header image offset (0) up to the file system
+((HEADER_IMAGE_SIZE=$FS_OFFSET-$HEADER_IMAGE_OFFSET))
+
+if [ "$HEADER_OFFSET" == "0" ] && [ "$HEADER_IMAGE_SIZE" -gt "$HEADER_SIZE" ]
 then
+        echo "Extracting $HEADER_IMAGE_SIZE bytes of $HEADER_TYPE header image at offset $HEADER_IMAGE_OFFSET"
+        dd if="$IMG" bs=$HEADER_IMAGE_SIZE skip=$HEADER_IMAGE_OFFSET count=1 of="$HEADER_IMAGE" 2>/dev/null
+else
         echo "WARNING: Firmware header not recognized! Will not be able to reassemble firmware image."
-fi
-
-# If the header only covers the kernel image and not the file system, just copy the header verbatim.
-# Else, we'll have to only copy the header data and re-build the header when the firmware is re-assembled.
-if [ "$HEADER_IMAGE_SIZE" -lt "$FS_OFFSET" ]
-then
-	HEADER_IMAGE_OFFSET=0
-	((HEADER_IMAGE_SIZE=$HEADER_IMAGE_SIZE+$HEADER_SIZE))
-else
-	((HEADER_IMAGE_OFFSET=$HEADER_OFFSET+$HEADER_SIZE))
-fi
-
-if [ "$HEADER_IMAGE_OFFSET" != "" ]
-then
-        echo "Extracting header image at offset $HEADER_IMAGE_OFFSET"
-        dd if="$IMG" bs=1 skip=$HEADER_IMAGE_OFFSET count=$(echo "$FS_OFFSET-$HEADER_IMAGE_OFFSET" | bc -l) of="$HEADER_IMAGE" 2>/dev/null
-else
-        echo "WARNING: Header unknown! Will not be able to reassemble firmware image."
 fi
 
 if [ "$FS_OFFSET" != "" ]
@@ -117,15 +107,15 @@ do
         then
                 break
         else
-                ((FOOTER_OFFSET=$FOOTER_OFFSET+16))
+                ((FOOTER_SIZE=$FOOTER_SIZE+16))
         fi
 done
 
 # If a footer was found, dump it out
-if [ "$FOOTER_OFFSET" != "0" ]
+if [ "$FOOTER_SIZE" != "0" ]
 then
-	((FOOTER_SIZE=$FW_SIZE-$FOOTER_OFFSET))
-	echo "Extracting footer from offset $FOOTER_OFFSET"
+	((FOOTER_OFFSET=$FW_SIZE-$FOOTER_SIZE))
+	echo "Extracting $FOOTER_SIZE byte footer from offset $FOOTER_OFFSET"
 	dd if="$IMG" bs=1 skip=$FOOTER_OFFSET count=$FOOTER_SIZE of="$FOOTER_IMAGE" 2>/dev/null
 else
 	FOOTER_OFFSET=$FW_SIZE
@@ -146,7 +136,7 @@ echo "ENDIANESS='$ENDIANESS'" >> $CONFLOG
 # Extract the file system and save the MKFS variable to the CONFLOG
 case $FS_TYPE in
 	"squashfs")
-		echo "Extracting SquashFS file system..."
+		echo "Extracting squashfs files..."
 		./unsquashfs_all.sh "$FSIMG" "$ROOTFS" 2>/dev/null | grep MKFS >> $CONFLOG
 		;;
 #	"cramfs")
