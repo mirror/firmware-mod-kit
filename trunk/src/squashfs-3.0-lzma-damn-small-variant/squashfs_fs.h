@@ -28,8 +28,6 @@
 #define SQUASHFS_MINOR			0
 #define SQUASHFS_MAGIC			0x74717368
 #define SQUASHFS_MAGIC_SWAP		0x68737174
-#define SQUASHFS_MAGIC_ALT		0x73717368
-#define SQUASHFS_MAGIC_SWAP_ALT		0x68737173
 #define SQUASHFS_START			0
 
 /* size of metadata (inode and directory) blocks */
