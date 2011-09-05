@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
+#include <getopt.h>
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <magic.h>
 #include "update.h"
@@ -24,6 +23,32 @@ int main(int argc, char *argv[])
 	struct magic_filter *filters[MAX_FILTERS];
 	struct binconf config = { 0 };
 
+	int long_opt_index = 0;
+	char *short_options = "b:l:m:o:f:y:x:i:aAcCdkstvquh";
+	struct option long_options[] = {
+			{ "align", required_argument, NULL, 'b' },
+			{ "length", required_argument, NULL, 'l' },
+			{ "magic", required_argument, NULL, 'm' },
+			{ "offset", required_argument, NULL, 'o' },
+			{ "file", required_argument, NULL, 'f' },
+			{ "search", required_argument, NULL, 'y' },
+			{ "exclude", required_argument, NULL, 'x' },
+			{ "include", required_argument, NULL, 'i' },
+			{ "all", no_argument, NULL, 'a' },
+			{ "opcodes", no_argument, NULL, 'A' },
+			{ "validate", no_argument, NULL, 'c' },
+			{ "cast", no_argument, NULL, 'C' },
+			{ "defaults", no_argument, NULL, 'd' },
+			{ "keep-going", no_argument, NULL, 'k' },
+			{ "smart", no_argument, NULL, 's' },
+			{ "fast", no_argument, NULL, 't' },
+			{ "verbose", no_argument, NULL, 'v' },
+			{ "quiet", no_argument, NULL, 'q' },
+			{ "update", no_argument, NULL, 'u' },
+			{ "help", no_argument, NULL, 'h' },
+			{ 0, 0, 0, 0 }
+	};
+	
 	/* Need at least one argument: the target file */
 	if(argc == 1)
 	{
@@ -39,7 +64,7 @@ int main(int argc, char *argv[])
 	config.align = DEFAULT_BYTE_ALIGN;
 	config.smart = 1;
 
-	while((c = getopt(argc,argv,"b:l:m:o:f:y:x:i:aAcCdksTvquh")) != -1)
+	while((c = getopt_long(argc, argv, short_options, long_options, &long_opt_index)) != -1)
 	{
 		switch(c)
 		{
@@ -81,7 +106,7 @@ int main(int argc, char *argv[])
 			case 's':
 				config.smart = 0;
 				break;
-			case 'T':
+			case 't':
 				fast_filter = 1;
 				break;
 			case 'k':
@@ -153,7 +178,7 @@ int main(int argc, char *argv[])
 	config.cookie = magic_open(config.flags);
 	if(!config.cookie)
 	{
-		fprintf(stderr,"ERROR: Failed to initialize libmagic: %s\n",magic_error(config.cookie));
+		fprintf(stderr,"ERROR: Failed to initialize libmagic: %s\n", magic_error(config.cookie));
 		goto end;
 	}
 
@@ -185,7 +210,7 @@ int main(int argc, char *argv[])
 	/* Load the magic signatures file */
 	if(magic_load(config.cookie, config.magic) == -1)
 	{
-		fprintf(stderr,"ERROR: Failed to load magic file '%s': %s\n",config.magic,magic_error(config.cookie));
+		fprintf(stderr,"ERROR: Failed to load magic file '%s': %s\n", config.magic, magic_error(config.cookie));
 		goto end;
 	}
 
@@ -235,7 +260,7 @@ int main(int argc, char *argv[])
         {
 		/* If we've gotten to the arguments, we're done */
                 if((argv[i][0] == '-') ||
-                   (last_optarg && (memcmp(argv[i], last_optarg, strlen(last_optarg)) == 0))
+                   ((last_optarg != NULL) && (strcmp(argv[i], last_optarg) == 0))
 		)
                 {
                         break;

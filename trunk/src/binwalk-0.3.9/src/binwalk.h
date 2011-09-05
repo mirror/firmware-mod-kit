@@ -34,25 +34,25 @@
 
 #define USAGE_OPTIONS		"\
 OPTIONS\n\
-\t-o <int>      File offset to start searching at\n\
-\t-l <int>      Number of bytes to search\n\
-\t-b <int>      Set byte alignment\n\
-\t-f <file>     Log results to file\n\
-\t-m <file>     Magic file to use [%s]\n\
-\t-y <filter>   Only search for matches that have <filter> in their description (implies -d, -T)\n\
-\t-x <filter>   Exclude matches that have <filter> in their description\n\
-\t-i <filter>   Include matches that are normally excluded and that have <filter> in their description *\n\
-\t-a            Search for all matches, including those that are normally excluded *\n\
-\t-d            Speed up scan by disabling default filters **\n\
-\t-T            Speed up scan by only loading signatures specified by -i or -y\n\
-\t-u            Update magic signature files\n\
-\t-v            Enable verbose mode\n\
-\t-s            Disable smart matching (implies -a)\n\
-\t-k            Don't stop at the first match\n\
-\t-c            Validate magic file\n\
-\t-q            Supress output to stdout\n\
-\t-A            Scan for executable code (implies -a)\n\
-\t-C            Cast file contents as various data types (implies -k)\n\
+\t-o, --offset=<int>            File offset to start searching at\n\
+\t-l, --length=<int>            Number of bytes to search\n\
+\t-b, --align=<int>             Set byte alignment\n\
+\t-f, --file=<file>             Log results to file\n\
+\t-m, --magic=<file>            Magic file to use [%s]\n\
+\t-y, --search=<filter>         Only search for matches that have <filter> in their description (implies -n, -t)\n\
+\t-x, --exclude=<filter>        Exclude matches that have <filter> in their description\n\
+\t-i, --include=<filter>        Include matches that are normally excluded and that have <filter> in their description *\n\
+\t-a, --all                     Search for all matches, including those that are normally excluded *\n\
+\t-d, --defaults                Speed up scan by disabling default filters **\n\
+\t-t, --fast                    Speed up scan by only loading signatures specified by -i or -y\n\
+\t-u, --update                  Update magic signature files\n\
+\t-v, --verbose                 Enable verbose mode\n\
+\t-s, --smart                   Disable smart matching (implies -a)\n\
+\t-k, --keep-going              Don't stop at the first match\n\
+\t-c, --validate                Validate magic file\n\
+\t-q, --quiet                   Supress output to stdout\n\
+\t-A, --opcodes                 Scan for executable code (implies -a)\n\
+\t-C, --cast                    Cast file contents as various data types (implies -k)\n\
 \n\n\
 *  Signatures of two bytes or less are excluded by default. Use -i or -a to include them in the search.\n\
 \n\

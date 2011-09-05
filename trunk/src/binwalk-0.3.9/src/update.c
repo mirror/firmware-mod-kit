@@ -1,6 +1,10 @@
 #include <stdio.h>
+
+#ifndef NOCURL
 #include <curl/curl.h>
 #include <curl/easy.h>
+#endif
+
 #include "update.h"
 
 size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *fp)
@@ -14,10 +18,12 @@ size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *fp)
 
 int update_magic_file(char *url, char *outfile) 
 {
+	int retval = 0;
+
+#ifndef NOCURL
 	CURLcode res;
 	CURL *curl = NULL;
 	FILE *fp = NULL;
-	int retval = 0;
     
 	curl = curl_easy_init();
 	if(curl) 
@@ -38,6 +44,9 @@ int update_magic_file(char *url, char *outfile)
 			perror(outfile);
 		}
     	}
+#else
+	fprintf(stderr, "Sorry, this feature has been disabled!\n");
+#endif
 
     	return retval;
 }

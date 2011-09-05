@@ -29,7 +29,7 @@ motorola-bin: motorola-bin.o
 	$(CC) motorola-bin.o -o $@
 
 binwalk:
-	(cd ./binwalk*/src && ./configure && make && cp binwalk ../../)
+	(cd ./binwalk*/src && ./configure --disable-updates && make && cp binwalk ../../)
 
 clean:
 	rm -f *.o

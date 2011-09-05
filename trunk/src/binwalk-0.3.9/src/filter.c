@@ -16,6 +16,7 @@ void add_filter(struct magic_filter *filters[], int *filter_count, enum filter_t
 
                         filters[*filter_count]->type = type;
                         filters[*filter_count]->filter = strdup(filter);
+			uppercase(filters[*filter_count]->filter);
                         *filter_count = *filter_count+1;
                 }
                 else
@@ -41,7 +42,7 @@ enum filter_result_t filter_check(struct magic_filter *filters[], int filter_cou
 	{
 		if(filters[i]->type == FILTER_INCLUDE || filters[i]->type == FILTER_ADD)
 		{
-			/* If and explicit include filter was specified, then default to RESULT_EXCLUDE unless a match is found */
+			/* If an explicit include filter was specified, then default to RESULT_EXCLUDE unless a match is found */
 			if(filters[i]->type == FILTER_INCLUDE)
 			{
 				found = RESULT_EXCLUDE;
@@ -75,43 +76,45 @@ enum filter_result_t filter_check(struct magic_filter *filters[], int filter_cou
 /* Performs a case-insensitive string search */
 int string_contains(char *haystack, char *needle)
 {
-	char *my_haystack = NULL, *my_needle = NULL;
-	int retval = 0, i = 0;
+	char *my_haystack = NULL;
+	int retval = 0;
 	size_t haystack_size = 0, needle_size = 0;
 
-	/* Duplicate the input strings */
+	/* Duplicate the haystack string, as we will be converting it to all uppercase */
 	my_haystack = strdup(haystack);
-	my_needle = strdup(needle);
 
-	if(!my_haystack || !my_needle)
+	if(!my_haystack)
 	{
 		perror("strdup");
 	}
 	else
 	{
 		haystack_size = strlen(my_haystack);
-		needle_size = strlen(my_needle);
-
-		/* Convert needle to all upper case */
-		for(i=0; i<needle_size; i++)
-		{
-			my_needle[i] = toupper(my_needle[i]);
-		}
+		needle_size = strlen(needle);
 
 		/* Convert haystack to all upper case */
-		for(i=0; i<haystack_size; i++)
-		{
-			my_haystack[i] = toupper(my_haystack[i]);
-		}
+		uppercase(my_haystack);
 
 		/* Search for needle in haystack */
-		if(strstr(my_haystack, my_needle) != NULL)
+		if(strstr(my_haystack, needle) != NULL)
 		{
 			retval = 1;
 		}
 	}
 
 	if(my_haystack) free(my_haystack);
-	if(my_needle) free(my_needle);
 	return retval;
+}
+
+/* Convert a given string to all upper case */
+void uppercase(char *string)
+{
+	int i = 0;
+
+	for(i=0; i<strlen(string); i++)
+	{
+		string[i] = toupper(string[i]);
+	}
+
+	return;
 }

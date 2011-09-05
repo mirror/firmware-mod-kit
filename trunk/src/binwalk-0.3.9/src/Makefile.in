@@ -9,7 +9,7 @@ MAGICPATH=@sysconfdir@/binwalk/$(MAGIC)
 ETC=$(DESTDIR)@sysconfdir@/binwalk
 BIN=$(DESTDIR)@bindir@
 
-all: binwalk
+all: magi binwalk
 
 binwalk: file common.o md5.o mparse.o filter.o update.o
 	$(CC) $(CFLAGS) -DMAGIC='"$(MAGICPATH).binwalk"' -DMAGIC_CAST='"$(MAGICPATH).bincast"' -DMAGIC_ARCH='"$(MAGICPATH).binarch"' binwalk.c -o binwalk *.o $(LDFLAGS)
@@ -32,6 +32,12 @@ filter.o:
 
 update.o:
 	$(CC) $(CFLAGS) -c update.c
+
+magi:
+	echo > $(MAGIC).binwalk
+	for FILE in magic/*; do \
+		cat $$FILE >> $(MAGIC).binwalk ; \
+	done
 
 install:
 	mkdir -p $(ETC)

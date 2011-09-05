@@ -15,7 +15,7 @@ char *parse_magic(char *row, int *offset, int *magic_size, int *wildcard, struct
 	char *offset_str = NULL, *type = NULL, *magic_str = NULL, *magic_literal = NULL, *magic = NULL, *description = NULL;
 	long long_val = 0;
 	short short_val = 0;
-	int literal_size = 0;
+	int literal_size = 0, base = 0;
 
 	/* Get the offset, type and magic values from the row entry */
 	offset_str = get_column(row, 0);
@@ -87,7 +87,7 @@ char *parse_magic(char *row, int *offset, int *magic_size, int *wildcard, struct
 	/* Offsets can be specified in hex or decimal */
 	if(strstr(offset_str, "0x") == offset_str)
 	{	
-		*offset = strtol(offset_str+2, NULL, 16);
+		*offset = strtol(offset_str, NULL, 16);
 	}
 	else
 	{
@@ -99,26 +99,35 @@ char *parse_magic(char *row, int *offset, int *magic_size, int *wildcard, struct
 	{
 		magic = string_literal(magic_str, magic_size);
 	} else {
+		/* Numeric magic strings can be specified in hex or decimal */
+		if(strstr(magic_str, "0x") == magic_str)
+		{
+			base = 16;
+		}
+		else
+		{
+			base = 10;
+		}
+
 		if(memcmp(type, LELONG, LELONG_SIZE) == 0 || memcmp(type, HOST_LONG, HOST_LONG_SIZE) == 0)
 		{
-			/* Use magic_str+2 to skip the leading '0x' characters */
-			long_val = strtol(magic_str+2, NULL, 16);
+			long_val = strtol(magic_str, NULL, base);
 			*magic_size = LONG_SIZE;
 
 		} else if(memcmp(type, LESHORT, LESHORT_SIZE) == 0 || memcmp(type, HOST_SHORT, HOST_SHORT_SIZE) == 0) {
 
-			short_val = (short) strtol(magic_str+2, NULL, 16);
+			short_val = (short) strtol(magic_str, NULL, base);
 			*magic_size = SHORT_SIZE;
 
 		} else if(memcmp(type, BELONG, BELONG_SIZE) == 0) {
 
-			long_val = strtol(magic_str+2, NULL, 16);
+			long_val = strtol(magic_str, NULL, base);
 			long_val = htonl(long_val);
 			*magic_size = LONG_SIZE;
 
 		} else if(memcmp(type, BESHORT, BESHORT_SIZE) == 0) {
 
-			short_val = (short) strtol(magic_str+2, NULL, 16);
+			short_val = (short) strtol(magic_str, NULL, base);
 			short_val = htons(short_val);
 			*magic_size = SHORT_SIZE;
 		}
@@ -159,128 +168,142 @@ char *string_literal(char *string, int *literal_size)
 	char *literal = NULL;
 	char sbyte[4] = { 0 };
 	char byte = 0;
-	int str_size = strlen(string);
+	int str_size = 0;
 	int lsize = 0, i = 0;
 
-	/* The converted string will be as big or smaller than the original string */
-	literal = malloc(str_size+1);
-	if(!literal)
+	if(string != NULL && literal_size != NULL)
 	{
-		perror("malloc");
-	}
-	else
-	{
-		memset(literal, 0, str_size+1);
+		str_size = strlen(string);
 
-		/* Loop through each byte of the original string */
-		for(i=0; i<str_size; i++,lsize++)
+		/* The converted string will be as big or smaller than the original string */
+		literal = malloc(str_size+1);
+		if(!literal)
 		{
-			/* Always zero out sbyte; it's a place holder for the string value of the escaped digit */
-			memset(&sbyte, 0, sizeof(sbyte));
-	
-			/* Check if we've encountered an escaped character and there are at least two trailing characters */
-			if(string[i] == '\\' && i < str_size-2)
+			perror("malloc");
+		}
+		else
+		{
+			memset(literal, 0, str_size+1);
+
+			/* Loop through each byte of the original string */
+			for(i=0; i<str_size; i++,lsize++)
 			{
-				/* Check to see if we've encountered an escaped escape character */
-				if(string[i+1] == '\\')
+				/* Always zero out sbyte; it's a place holder for the string value of the escaped digit */
+				memset(&sbyte, 0, sizeof(sbyte));
+		
+				/* Check if we've encountered an escaped character and there are at least two trailing characters */
+				if(string[i] == '\\' && i < str_size-2)
 				{
-					/* Copy the escape character, and increment i by one to ignore the second */
-					memcpy(literal+lsize, string, 1);
-					i++;
-
-				/* Check to see if we've encountered an esceaped hex value */
-				} 
-				else if(string[i+1] == 'x') 
-				{
-
-					/* Get the two bytes after the '\x' and convert them to an integer */
-					memcpy(&sbyte,string+i+2,2);
-					byte = (char) strtol((const char*) &sbyte,NULL,16);
-					memset(literal+lsize,byte,1);
-					i += 3;
-
-				/* Else, assume this is an escaped octal value */
+					/* Check to see if we've encountered an escaped escape character */
+					if(string[i+1] == '\\')
+					{
+						/* Copy the escape character, and increment i by one to ignore the second */
+						memcpy(literal+lsize, string, 1);
+						i++;
+	
+					/* Check to see if we've encountered an esceaped hex value */
+					} 
+					else if(string[i+1] == 'x') 
+					{
+	
+						/* Get the two bytes after the '\x' and convert them to an integer */
+						memcpy(&sbyte, string+i+2, 2);
+						byte = (char) strtol((const char*) &sbyte, NULL, 16);
+						memset(literal+lsize, byte, 1);
+						i += 3;
+	
+					/* Else, assume this is an escaped octal value */
+					} 
+					else 
+					{
+	
+						memcpy(&sbyte, string+i+1, 3);
+						byte = (char) strtol((const char *) &sbyte, NULL, 8);
+						memset(literal+lsize, byte, 1);
+						i += 3;
+					}
 				} 
 				else 
 				{
-
-					memcpy(&sbyte,string+i+1,3);
-					byte = (char) strtol((const char *) &sbyte,NULL,8);
-					memset(literal+lsize,byte,1);
-					i += 3;
+					memcpy(literal+lsize, string+i, 1);
 				}
-			} 
-			else 
-			{
-				memcpy(literal+lsize,string+i,1);
 			}
 		}
+	
+		*literal_size = lsize;	
 	}
 
-	*literal_size = lsize;	
 	return literal;
 }
 
 /* Retrieves a column value from a given row */
 char *get_column(char *row, int colnum)
 {
-	int row_size = strlen(row);
+	int row_size = 0;
 	int i = 0, j = 0, col_size = 0, count = 0;
 	char *column = NULL;
 
-	for(i=0; i<row_size; i++)
+	if(row != NULL)
 	{
-		/* If this character is a white space, skip it */
-		if(row[i] <= ' ')
-		{
-			continue;
-		}
+		row_size = strlen(row);
 
-		/* Loop through the string until a column delimiter is found.
-		 * A column delimiter is any whitespace character.
-		 */
-		for(j=i; j < row_size; j++)
+		for(i=0; i<row_size; i++)
 		{
-			/* If this character is a white space */
-			if(row[j] <= ' ')
+			/* If this character is a white space, skip it */
+			if(row[i] <= ' ')
 			{
-				/* The last column in the magic file format contains a description which 
-				 * likely will contain numerous whitespace characters. Be sure to get the
-				 * entire last column by looping until a new line character is found.
-				 */
-				if(count == LAST_MAGIC_COLUMN && row[j] != '\n')
-				{
-					continue;
-				}
-				
-				/* Else, we have reached the end of this column */
-				break;
+				continue;
 			}
-		}
 
-		/* Is this the column that we want? */
-		if(count == colnum)
-		{
-			/* Calculate the string length of this column and copy it into a buffer */
-			col_size = j - i;
-			column = malloc(col_size+1);
-			if(!column)
-			{
-				perror("Malloc failure");
-				break;
-			}
-			memset(column,0,col_size+1);
-			memcpy(column,row+i,col_size);
-			break;
-		} else {
-			/* Set i == j to start searching for the next column at the end of this one.
-			 * Increment count to track column count.
+			/* 
+			 * Loop through the string until a column delimiter is found.
+			 * A column delimiter is any whitespace character.
 			 */
-			i = j;
-			count++;
+			for(j=i; j < row_size; j++)
+			{
+				/* If this character is a white space */
+				if(row[j] <= ' ')
+				{
+					/* 
+					 * The last column in the magic file format contains a description which 
+					 * likely will contain numerous whitespace characters. Be sure to get the
+					 * entire last column by looping until a new line character is found.
+					 */
+					if(count == LAST_MAGIC_COLUMN && row[j] != '\n')
+					{
+						continue;
+					}
+					
+					/* Else, we have reached the end of this column */
+					break;
+				}
+			}
+
+			/* Is this the column that we want? */
+			if(count == colnum)
+			{
+				/* Calculate the string length of this column and copy it into a buffer */
+				col_size = j - i;
+				column = malloc(col_size+1);
+				if(!column)
+				{
+					perror("Malloc failure");
+					break;
+				}
+				memset(column,0,col_size+1);
+				memcpy(column,row+i,col_size);
+				break;
+			} else {
+				/* 
+				 * Set i == j to start searching for the next column at the end of this one.
+				 * Increment count to track column count.
+				 */
+				i = j;
+				count++;
+			}
 		}
 	}
-
+	
 	return column;
 }
 
