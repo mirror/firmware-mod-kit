@@ -5,6 +5,7 @@ CFLAGS := -I$(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2
 
 all: asustrx addpattern untrx motorola-bin splitter3 binwalk
 	make -C ./uncramfs/
+	make -C ./uncramfs-lzma/
 	make -C ./cramfs-2.x/
 	make -C ./squashfs-2.1-r2/
 	make -C ./squashfs-3.0/
@@ -44,6 +45,7 @@ clean:
 	make -C ./squashfs-3.0-lzma-damn-small-variant clean
 	make -C ./cramfs-2.x clean
 	make -C ./uncramfs clean
+	make -C ./uncramfs-lzma clean
 	make -C ./wrt_vx_imgtool clean
 	make -C ./others clean
 	make -C ./crcalc clean
