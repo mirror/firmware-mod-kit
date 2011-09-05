@@ -35,10 +35,10 @@ int main(int argc, char *argv[])
 		switch(identify_header(buf))
 		{
 			case TRX:
-				ok = patch_trx(buf);
+				ok = patch_trx(buf, size);
 				break;
 			case UIMAGE:
-				ok = patch_uimage(buf);
+				ok = patch_uimage(buf, size);
 				break;
 			default:
 				fprintf(stderr, "Sorry, this file type is not supported.");

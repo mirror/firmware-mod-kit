@@ -29,7 +29,7 @@ struct uimage_header {
       uint8_t     ih_name[32];          /* Image Name                 */
 };
 
-int patch_trx(char *buf);
-int patch_uimage(char *buf);
+int patch_trx(char *buf, size_t size);
+int patch_uimage(char *buf, size_t size);
 
 #endif
