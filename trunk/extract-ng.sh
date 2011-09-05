@@ -24,6 +24,21 @@ then
 	exit 1
 fi
 
+# Check if FMK has been built, and if not, build it
+if [ ! -e "./src/crcalc/crcalc" ]
+then
+	echo "Firmware-Mod-Kit has not been built yet. Building..."
+	cd src && make
+
+	if [ $? -eq 0 ]
+	then
+		cd -
+	else
+		echo "Build failed! Quitting..."
+		exit 1
+	fi
+fi
+
 # Get the size, in bytes, of the target firmware image
 FW_SIZE=$(ls -l $IMG | cut -d' ' -f5)
 
