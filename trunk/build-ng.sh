@@ -35,8 +35,17 @@ cat $FSOUT >> $FWOUT
 # Calculate and create any filler bytes required between the end of the file system and the footer / EOF.
 CUR_SIZE=$(ls -l $FWOUT | awk '{print $5}')
 ((FILLER_SIZE=$FW_SIZE-$CUR_SIZE-$FOOTER_SIZE))
-echo "FS FILLER SIZE: $FILLER_SIZE"
-perl -e "print \"\xFF\"x$FILLER_SIZE" >> $FWOUT
+
+if [ "$FILLER_SIZE" -lt 0 ]
+then
+	echo "ERROR: New firmware image will be larger than original image! This is not supported."
+	echo -e "\tOriginal file size: $FW_SIZE"
+	echo -e "\tCurrent file size:  $CUR_SIZE"
+	echo "Quitting..."
+	exit 1
+else
+	perl -e "print \"\xFF\"x$FILLER_SIZE" >> $FWOUT
+fi
 
 # Append the footer to the new firmware image, if there is any footer
 if [ "$FOOTER_SIZE" -gt "0" ]
