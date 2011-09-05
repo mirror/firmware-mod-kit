@@ -10,6 +10,14 @@ fi
 eval $(cat shared-ng.inc)
 eval $(cat $CONFLOG)
 
+echo -e "Firmware Mod Kit (build-ng) $VERSION, (c)2011 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
+
+if [ ! -d "$DIR" ]
+then
+	echo -e "Usage: $0 [build directory]\n"
+	exit 1
+fi
+
 FSOUT="$DIR/newfs.$FS_TYPE"
 FWOUT="$DIR/fw.img"
 

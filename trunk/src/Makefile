@@ -3,7 +3,7 @@ CXX := g++
 INCLUDEDIR = .
 CFLAGS := -I$(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2
 
-all: asustrx addpattern untrx motorola-bin splitter3
+all: asustrx addpattern untrx motorola-bin splitter3 binwalk
 	make -C ./uncramfs/
 	make -C ./cramfs-2.x/
 	make -C ./squashfs-2.1-r2/
@@ -28,13 +28,17 @@ asustrx: asustrx.o
 motorola-bin: motorola-bin.o
 	$(CC) motorola-bin.o -o $@
 
+binwalk:
+	(cd ./binwalk*/src && ./configure && make && cp binwalk ../../)
+
 clean:
 	rm -f *.o
-	rm motorola-bin
-	rm untrx
-	rm asustrx
-	rm addpattern
-	rm splitter3
+	rm -f motorola-bin
+	rm -f untrx
+	rm -f asustrx
+	rm -f addpattern
+	rm -f splitter3
+	rm -f binwalk
 	make -C ./squashfs-2.1-r2/ clean
 	make -C ./squashfs-3.0 clean
 	make -C ./squashfs-3.0-lzma-damn-small-variant clean
@@ -43,3 +47,4 @@ clean:
 	make -C ./wrt_vx_imgtool clean
 	make -C ./others clean
 	make -C ./crcalc clean
+	make -C ./binwalk*/src/ cleanall
