@@ -12,7 +12,7 @@ int patch_trx(char *buf, size_t size)
         header->crc32 = 0;
 
 	/* Sanity check on the header length field */
-	if(header->len == size)
+	if(header->len <= size)
 	{
         	/* Checksum is calculated over the image, plus the header offsets (12 bytes into the TRX header) */
         	header->crc32 = crc32(buf+12, (header->len-12));

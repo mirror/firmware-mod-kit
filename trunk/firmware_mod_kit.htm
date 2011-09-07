@@ -13,7 +13,7 @@
 <p><b><font size="6">Firmware Modification Kit<br />
 </font></b><i><b>Giving YOU the power to customize your firmware<br />
 </b><font size="2">documentation version 0.68 beta<br />
-all scripts, untrx, wrt_vx_imgtool, and docs (c) 2006-2011 <a href="http://bitsum.com">Jeremy Collake</a> &lt;jeremy.collake@gmail.com&gt;, Craig Heffner &lt;heffnercj@gmail.com&gt; and other contributors (see project page)
+all scripts, untrx, wrt_vx_imgtool, crcalc, binwalk and docs (c) 2006-2011 <a href="http://bitsum.com">Jeremy Collake</a> &lt;jeremy.collake@gmail.com&gt;, <a href="http://www.devttys0.com">Craig Heffner</a> &lt;heffnercj@gmail.com&gt; and other contributors (see project page)
 <br />
 other portions (c) their respective holders</font></i></p>
 
@@ -79,9 +79,21 @@ automate their use:</p>
 		version: unversioned.</td>
 	</tr>
 	<tr>
+		<td><b>BINWALK</b></td>
+		<td width="1457">Firmware analysis tool, used for searching firmware images
+		for known file types. Used by the extract-ng.sh script to identify valid
+		file systems inside firmware images. Current version included is 0.3.9. 
+		Tool home page: http://binwalk.googlecode.com.</td>
+	</tr>
+	<tr>
 		<td><b>CRAMFSCK</b></td>
 		<td width="1457">CRAMFS file system image checker and extractor. Current 
 		versions included are:&nbsp; 2.4x.</td>
+	</tr>
+	<tr>
+		<td><b>CRCALC</b></td>
+		<td width="1457">Re-calculates and patches header checksums for TRX and 
+		uImage firmware headers.</td>
 	</tr>
 	<tr>
 		<td height="23"><b>MKSQUASHFS</b></td>
@@ -104,6 +116,11 @@ automate their use:</p>
 		<td width="1457">Alternate tool to extracts a cramfs file system image. 
 		Use cramfsck instead whenever possible as it seems to be more reliable. Current versions 
 		included are: 0.7 (for cramfs v2.x).</td>
+	</tr>
+	<tr>
+		<td><b>UNCRAMFS-LZMA</b></td>
+		<td width="1457">Extracts an lzma cramfs file system image, specifically
+		those included in OpenRG based firmware. Current version included is 0.7rg.</td>
 	</tr>
 	<tr>
 		<td><b>UNSQUASHFS</b></td>
@@ -135,8 +152,10 @@ automate their use:</p>
 <p><b><font size="4">Tools/changes unique to this kit</font></b></p>
 <p>This kit doesn't just collect existing tools, it also offers new ones and 
 modifications to existing ones. Custom code currently is:</p>
-<p><b>ASUSTRX - </b>Modified to allow '-b' switch to force segment offsets 
+<p><b>ASUSTRX</b> - Modified to allow '-b' switch to force segment offsets 
 (needed for some devices, like the WL-530g).<br />
+<b>CRCALC</b> - A new tool to re-calculate and patch the checksum fields for common
+firmware headers. Currently TRX and uImage headers are supported.<br />
 <b>UNTRX</b> - A new tool to extract the contents of a TRX image into its component 
 parts.<br />
 <b>UNSQUASHFS</b> - Custom blend that supports extraction of 2.x squashfs 
@@ -213,6 +232,7 @@ The few requirements are all basic items that everyone has easy access to:</p>
 	<li>GNU make</li>
 	<li>Standard C runtime library development</li>
 	<li>Standard C++ runtime library development</li>
+	<li>Zlib library development</li>
 	<li>TAR and GZIP (optional, used by ipkg_install.sh)</li>
 </ul>
 <p>For OS X, installing the <a href="http://developer.apple.com/tools/xcode/">
@@ -339,7 +359,7 @@ entire directories of packages.</p>
 <p>&nbsp;</p>
 <p><u><b><font size="4">A.
 <a name="Extracting_the_firmware_(extract_firmware.sh)">Extracting the firmware 
-(extract_firmware.sh)</a></font></b></u></p>
+(extract_firmware.sh, extract-ng.sh)</a></font></b></u></p>
 <blockquote>
 	<p>Simply run extract_firmware.sh with the following parameters. <i><b>You must 
 run this tool from inside the directory it exists in.</b></i></p>
@@ -355,6 +375,18 @@ that files in the working directory may be deleted!<br /><br />It doesn't matter
 WL-500G. These images are usually all the same and differ only in the header 
 format. The rebuilding process will create images for the various models.<br />
 	<br />An extraction log is created as <i>extract.log</i>.</p>
+
+	<p>If extract_firmware.sh fails, the newer extract-ng.sh can be used. Although newer and 
+	   less thoroughly tested than extract_firmware.sh, it is more flexible and can often
+	   extract file systems that extract_firmware.sh cannot:
+	</p>
+
+	<table border="0" width="100%" bgcolor="#F6F4EC" id="table3">
+		<tr>
+			<td><br />$ ./extract-ng.sh firmware.bin working_directory/<br />&nbsp;</td>
+		</tr>
+	</table>
+	
 </blockquote>
 <p>&nbsp;</p>
 <p><b><font size="4"><u>B.
@@ -435,7 +467,7 @@ extract_firmware.sh script.</p>
 </blockquote>
 <p><b><font size="4"><u>C.
 <a name="Re-building_the_firmware_(build_firmware.sh)">Re-building the firmware 
-(build_firmware.sh)</a></u></font></b></p>
+(build_firmware.sh, build-ng.sh)</a></u></font></b></p>
 <blockquote>
 	<p>Rebuilding the firmware is as easy as extracting it. Use the 
 build_firmware.sh script to automate the process.&nbsp; <i><b>You must run this 
@@ -453,6 +485,16 @@ same but have different header patterns so they are accepted by the target
 models).<br /><b>- working_directory</b> is the working directory supplied to 
 extract_firmware.sh.</p>
 	<p>A building log is created as <i>build.log</i>.</p>
+
+	<p>
+		If extract-ng.sh was used to extract the firmware image, build-ng.sh must be used
+		to rebuild it:
+	</p>
+	<table border="0" width="100%" bgcolor="#F6F4EC" id="table4">
+		<tr>
+			<td><br />$ ./build-ng.sh working_directory/<br />&nbsp;</td>
+		</tr>
+	</table>
 </blockquote>
 <p>&nbsp;</p>
 <p><font size="5"><b>VIII. <a name="Caveats">Caveats</a></b></font></p>

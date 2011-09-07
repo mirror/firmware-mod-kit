@@ -8,6 +8,14 @@ then
 	DIR="fmk"
 fi
 
+# Need to extract file systems as ROOT
+if [ "$UID" != "0" ]
+then
+	SUDO="sudo"
+else
+	SUDO=""
+fi
+
 # Import shared settings. $DIR MUST be defined prior to this!
 eval $(cat shared-ng.inc)
 
@@ -42,7 +50,7 @@ then
 fi
 
 # Get the size, in bytes, of the target firmware image
-FW_SIZE=$(ls -l $IMG | cut -d' ' -f5)
+FW_SIZE=$(ls -l "$IMG" | cut -d' ' -f5)
 
 # Create output directories
 mkdir -p "$DIR/logs"
@@ -95,13 +103,9 @@ done
 # Header image size is everything from the header image offset (0) up to the file system
 ((HEADER_IMAGE_SIZE=$FS_OFFSET-$HEADER_IMAGE_OFFSET))
 
-if [ "$HEADER_OFFSET" == "0" ] && [ "$HEADER_IMAGE_SIZE" -gt "$HEADER_SIZE" ]
-then
-        echo "Extracting $HEADER_IMAGE_SIZE bytes of $HEADER_TYPE header image at offset $HEADER_IMAGE_OFFSET"
-        dd if="$IMG" bs=$HEADER_IMAGE_SIZE skip=$HEADER_IMAGE_OFFSET count=1 of="$HEADER_IMAGE" 2>/dev/null
-else
-        echo "WARNING: Firmware header not recognized! Will not be able to reassemble firmware image."
-fi
+# Extract the header + image up to the file system
+echo "Extracting $HEADER_IMAGE_SIZE bytes of $HEADER_TYPE header image at offset $HEADER_IMAGE_OFFSET"
+dd if="$IMG" bs=$HEADER_IMAGE_SIZE skip=$HEADER_IMAGE_OFFSET count=1 of="$HEADER_IMAGE" 2>/dev/null
 
 if [ "$FS_OFFSET" != "" ]
 then
@@ -154,7 +158,7 @@ echo "ENDIANESS='$ENDIANESS'" >> $CONFLOG
 case $FS_TYPE in
 	"squashfs")
 		echo "Extracting squashfs files..."
-		./unsquashfs_all.sh "$FSIMG" "$ROOTFS" 2>/dev/null | grep MKFS >> $CONFLOG
+		$SUDO ./unsquashfs_all.sh "$FSIMG" "$ROOTFS" 2>/dev/null | grep MKFS >> $CONFLOG
 		;;
 #	"cramfs")
 #		echo "Extracting CramFS file system..."

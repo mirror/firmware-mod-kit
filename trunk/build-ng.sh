@@ -9,6 +9,8 @@ fi
 
 eval $(cat shared-ng.inc)
 eval $(cat $CONFLOG)
+FSOUT="$DIR/newfs.$FS_TYPE"
+FWOUT="$DIR/fw.img"
 
 echo -e "Firmware Mod Kit (build-ng) $VERSION, (c)2011 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
 
@@ -18,15 +20,12 @@ then
 	exit 1
 fi
 
-FSOUT="$DIR/newfs.$FS_TYPE"
-FWOUT="$DIR/fw.img"
-
 echo "Building new $FS_TYPE file system..."
 
 # Build the appropriate file system
 case $FS_TYPE in
 	"squashfs")
-		$MKFS $ROOTFS $FSOUT $ENDIANESS -all-root
+		$MKFS "$ROOTFS" "$FSOUT" $ENDIANESS -all-root
 		;;
 esac
 
@@ -52,17 +51,18 @@ then
 	echo "Quitting..."
 	exit 1
 else
-	perl -e "print \"\xFF\"x$FILLER_SIZE" >> $FWOUT
+	echo "Remaining free bytes in firmware image: $FILLER_SIZE"
+	perl -e "print \"\xFF\"x$FILLER_SIZE" >> "$FWOUT"
 fi
 
 # Append the footer to the new firmware image, if there is any footer
 if [ "$FOOTER_SIZE" -gt "0" ]
 then
-	cat $FOOTER_IMAGE >> $FWOUT
+	cat $FOOTER_IMAGE >> "$FWOUT"
 fi
 
 # Calculate new checksum values for the firmware header
-./src/crcalc/crcalc $FWOUT
+./src/crcalc/crcalc "$FWOUT" "$BINLOG"
 
 if [ $? -eq 0 ]
 then

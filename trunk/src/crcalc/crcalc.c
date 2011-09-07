@@ -14,12 +14,13 @@
 
 int main(int argc, char *argv[])
 {
-	int retval = EXIT_FAILURE, ok = 0;
-	char *buf = NULL, *fname = NULL;
-	size_t size = 0;
+	int retval = EXIT_FAILURE, ok = 0, fail = 1, n = 0, i = 0, offset = 0;
+	int offsets[MAX_HEAD_SIZE] = { 0 };
+	char *buf = NULL, *ptr = NULL, *fname = NULL, *log = NULL;
+	size_t size = 0, nsize = 0;
 
 	/* Check usage */
-	if(argc != 2 || argv[1][0] == '-')
+	if(argc < 2 || argv[1][0] == '-')
 	{
 		fprintf(stderr, USAGE, argv[0]);
 		goto end;
@@ -27,30 +28,60 @@ int main(int argc, char *argv[])
 	else
 	{
 		fname = argv[1];
-	}
-
-	buf = file_read(fname, &size);
-	if(buf && size > MIN_FILE_SIZE)
-	{
-		switch(identify_header(buf))
+	
+		if(argc == 3)
 		{
-			case TRX:
-				ok = patch_trx(buf, size);
-				break;
-			case UIMAGE:
-				ok = patch_uimage(buf, size);
-				break;
-			default:
-				fprintf(stderr, "Sorry, this file type is not supported.");
-				break;
+			log = argv[2];
 		}
 	}
-	else
+
+	/* Read in target file */
+	buf = file_read(fname, &size);
+
+	if(buf && size > MIN_FILE_SIZE)
 	{
-		fprintf(stderr, "ERROR: Cannot open file '%s', or file is too small.\n", fname);
+		/* Parse in the log file, if any */
+		n = parse_log(log, offsets);
+
+		fprintf(stderr, "Processing %d header(s) from %s...\n", n, fname);
+
+		/* Loop through each offset in the integer array */
+		for(i=0; i<n; i++)
+		{
+			ok = 0;
+			offset = offsets[i];
+			nsize = size - offset;
+			ptr = (buf + offset);
+
+			fprintf(stderr, "Processing header at offset %d...", offset);
+
+			/* Identify and patch the header at each offset */
+			switch(identify_header(ptr))
+			{
+				case TRX:
+					ok = patch_trx(ptr, nsize);
+					break;
+				case UIMAGE:
+					ok = patch_uimage(ptr, nsize);
+					break;
+				default:
+					fprintf(stderr, "sorry, this file type is not supported.\n");
+					break;
+			}
+
+			if(ok)
+			{
+				fail = 0;
+				fprintf(stderr, "checksum(s) updated OK.\n");
+			}
+			else
+			{
+				fprintf(stderr, "checksum update(s) failed!\n");
+			}
+		}
 	}
 
-	if(ok)
+	if(!fail)
 	{
 		if(!file_write(fname, buf, size))
 		{
@@ -58,7 +89,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			fprintf(stderr, "CRC updated successfully.\n");
+			fprintf(stderr, "CRC(s) updated successfully.\n");
 			retval = EXIT_SUCCESS;
 		}
 	}
@@ -69,6 +100,69 @@ int main(int argc, char *argv[])
 
 end:
 	if(buf) free(buf);
+	return retval;
+}
+
+/* Parse binwalk-style log file for offsets to headers in the target firmware image */
+int parse_log(char *file, int offsets[MAX_HEAD_SIZE])
+{
+	FILE *fp = NULL;
+	char line[MAX_LINE_SIZE] = { 0 };
+	int n = 0;
+
+	if(file == NULL)
+	{
+		offsets[0] = 0;
+		n = 1;
+	}
+	else
+	{
+		fp = fopen(file, "r");
+		if(fp)
+		{
+			/* Read each line one at a time from the log file */
+			while((fgets((char *) &line, MAX_LINE_SIZE, fp) != NULL) && (n < MAX_HEAD_SIZE))
+			{
+				/* 
+				 * If the line has the string 'header', or it is a short, non-white space line, 
+				 * use the offset in this line. This allows us to parse a file with just a list of
+				 * header offsets, as well as standard binwalk logs.
+				 */
+				if((((strlen((char *) &line) < MAX_STR_SIZE) && !is_whitespace((char *) &line))) ||
+				   (strstr((char *) &line, HEADER_ID_STR)))
+				{
+					offsets[n] = atoi((char *) &line);
+					n++;
+				}
+
+				memset((char *) &line, 0, MAX_LINE_SIZE);
+			}
+
+			fclose(fp);
+		}
+		else
+		{
+			perror(file);
+		}
+	}
+
+	return n;
+}
+
+/* Determine if a string is all white space or not */
+int is_whitespace(char *string)
+{
+	int i = 0, retval = 1;
+
+	for(i=0; i<strlen(string); i++)
+	{
+		if(string[i] >= MIN_NON_WHITE)
+		{
+			retval = 0;
+			break;
+		}
+	}
+
 	return retval;
 }
 
