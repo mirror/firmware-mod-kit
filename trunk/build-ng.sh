@@ -7,10 +7,10 @@ then
 	DIR="fmk"
 fi
 
+# Order matters here!
 eval $(cat shared-ng.inc)
 eval $(cat $CONFLOG)
-FSOUT="$DIR/newfs.$FS_TYPE"
-FWOUT="$DIR/fw.img"
+FSOUT="$DIR/new-filesystem.$FS_TYPE"
 
 echo -e "Firmware Mod Kit (build-ng) $VERSION, (c)2011 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
 
