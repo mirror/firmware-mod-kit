@@ -1,0 +1,12 @@
+DESCRIPTION
+	
+	Webcomp tools are a set of utilities for modifying the Web UI files embedded in DD-WRT firmware.
+
+USAGE:
+
+	The webcomp tools require you to supply the virtual and physical section addresses for the target
+	ELF file in order to calculate the physical addresses of critical data inside the DD-WRT httpd binary.
+
+	Although all of the required information can be obtained manually using readelf, it is recommended that
+	you use the ddwrt-gui-extract script included with the Firmware Mod Kit, which will automate this
+	process for you.

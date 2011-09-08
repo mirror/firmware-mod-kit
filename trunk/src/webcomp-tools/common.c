@@ -74,6 +74,35 @@ end:
         return buffer;
 }
 
+/* Writes data to the specified file */
+int file_write(char *file, unsigned char *data, size_t size)
+{
+	FILE *fp = NULL;
+	int retval = 0;
+
+	fp = fopen(file, "wb");
+	if(fp)
+	{
+		if(fwrite(data, 1, size, fp) != size)
+		{
+			perror("fwrite");
+		}
+		else
+		{
+			retval = 1;
+		}
+
+		fclose(fp);
+	}
+	else
+	{
+		perror("fopen");
+	}
+
+	return retval;
+}
+
+/* Recursive mkdir (same as mkdir -p) */
 void mkdir_p(char *dir) 
 {
         char tmp[FILENAME_MAX] = { 0 };
@@ -103,18 +132,24 @@ void mkdir_p(char *dir)
 	return;
 }
 
+/* Sanitize the specified file path */
 char *make_path_safe(char *path)
 {
 	int size = 0;
 	char *safe = NULL;
 
-	size = strlen(path) + 3;
-	safe = malloc(size);
-	if(safe)
+	/* Make sure the specified path is valid, and that there are no traversal issues */
+	if(path != NULL && strstr(path, DIRECTORY_TRAVERSAL) == NULL)
 	{
-		memset(safe, 0, size);
-		memcpy(safe, "./", 2);
-		strcat(safe, path);
+		/* Append a './' to the beginning of the file path */
+		size = strlen(path) + strlen(PATH_PREFIX) + 1;
+		safe = malloc(size);
+		if(safe)
+		{
+			memset(safe, 0, size);
+			memcpy(safe, PATH_PREFIX, 2);
+			strcat(safe, path);
+		}
 	}
 
 	return safe;
