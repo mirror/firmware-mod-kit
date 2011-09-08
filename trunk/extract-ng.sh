@@ -19,7 +19,7 @@ fi
 # Import shared settings. $DIR MUST be defined prior to this!
 eval $(cat shared-ng.inc)
 
-echo -e "Firmware Mod Kit (extract-ng) $VERSION, (c)2011 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
+echo -e "Firmware Mod Kit (build-ng) $VERSION, (c)2011 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
 
 # Check usage
 if [ "$IMG" == "" ] || [ "$IMG" == "-h" ]

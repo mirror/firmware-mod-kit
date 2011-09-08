@@ -13,6 +13,7 @@ all: asustrx addpattern untrx motorola-bin splitter3 binwalk
 	make -C ./wrt_vx_imgtool/
 	make -C ./others/
 	make -C ./crcalc/
+	make -C ./webcomp-tools/
 
 addpattern: addpattern.o
 	$(CC) addpattern.o -o $@
@@ -49,4 +50,5 @@ clean:
 	make -C ./wrt_vx_imgtool clean
 	make -C ./others clean
 	make -C ./crcalc clean
+	make -C ./webcomp-tools clean
 	make -C ./binwalk*/src/ cleanall
