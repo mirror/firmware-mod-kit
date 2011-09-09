@@ -25,12 +25,27 @@ uint32_t file_offset(uint32_t address, uint32_t virtual, uint32_t physical)
         return offset;
 }
 
+/* Given the literal file offset and virtual section loading addresses, convert a physical file offset to a virtual address */
+uint32_t virtual_address(uint32_t offset, uint32_t virtual, uint32_t physical)
+{
+	uint32_t address = 0;
+
+	address = (offset+virtual-physical);
+
+	if(globals.endianess == BIG_ENDIAN)
+	{
+		address = (uint32_t) ntohl(address);
+	}
+
+	return address;
+}
+
 /* Returns the next web file entry */
-struct file_entry *next_entry(unsigned char *data, uint32_t size)
+struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
 	static int n;
 	uint32_t offset = 0, rom_offset = 0, str_offset = 0;
-	struct file_entry *entry = NULL;
+	struct entry_info *info = NULL;
 
 	/* Calculate the physical offset of the websRomIndex array */
         rom_offset = file_offset(globals.index_address, globals.dv_address, globals.dv_offset);
@@ -40,33 +55,44 @@ struct file_entry *next_entry(unsigned char *data, uint32_t size)
 
 	if(offset < (size + sizeof(struct file_entry)))
 	{
-		entry = (struct file_entry *) (data + offset);
-
-		/* A NULL entry name signifies the end of the array */
-		if(entry->name == 0)
+		info = malloc(sizeof(struct entry_info));
+		if(info)
 		{
-			entry = NULL;
-		}
-		else
-		{
-			/* Get the physical offset of the file name string */
-			str_offset = file_offset(entry->name, globals.tv_address, globals.tv_offset);
+			memset(info, 0, sizeof(struct entry_info));
 
-			/* Sanity check */
-			if(str_offset >= size)
+			info->entry = (struct file_entry *) (data + offset);
+
+			/* A NULL entry name signifies the end of the array */
+			if(info->entry->name == 0)
 			{
-				entry = NULL;
+				free(info);
+				info = NULL;
 			}
 			else
 			{
-				/* Point entry->name at the actual string */
-				entry->name = (uint32_t) (data + str_offset);
-				n++;
+				/* Convert data to little endian, if necessary */
+				ntoh_struct(info->entry);
+
+				/* Get the physical offset of the file name string */
+				str_offset = file_offset(info->entry->name, globals.tv_address, globals.tv_offset);
+
+				/* Sanity check */
+				if(str_offset >= size)
+				{
+					free(info);
+					info = NULL;
+				}
+				else
+				{
+					/* Point entry->name at the actual string */
+					info->name = (char *) (data + str_offset);
+					n++;
+				}
 			}
 		}
 	}
 
-	return entry;
+	return info;
 }
 
 /* Get the virtual addresses and physical offsets of the program headers in the ELF file */
@@ -167,12 +193,40 @@ int find_websRomPageIndex(char *httpd)
 	return retval;
 }
 
+/* Convert structure members from big to little endian, if necessary */
+void ntoh_struct(struct file_entry *entry)
+{
+	if(globals.endianess == BIG_ENDIAN)
+	{
+		entry->name = (uint32_t) ntohl(entry->name);
+		entry->size = (uint32_t) ntohl(entry->name);
+		entry->offset = (uint32_t) ntohl(entry->offset);
+	}
+
+	return;
+}
+
+/* Convert structure members from little to big endian, if necessary */
+void hton_struct(struct file_entry *entry)
+{
+	if(globals.endianess == BIG_ENDIAN)
+	{
+		entry->name = (uint32_t) htonl(entry->name);
+		entry->size = (uint32_t) htonl(entry->size);
+		entry->offset = (uint32_t) htonl(entry->offset);
+	}
+
+	return;
+}
+
 /* Reads in and returns the contents and size of a given file */
 char *file_read(char *file, size_t *fsize)
 {
         int fd = 0;
         struct stat _fstat = { 0 };
         char *buffer = NULL;
+
+	*fsize = 0;
 
         if(stat(file, &_fstat) == -1)
         {

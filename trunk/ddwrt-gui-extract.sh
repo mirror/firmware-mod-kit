@@ -32,5 +32,5 @@ then
 fi
 
 # Extract!
-./src/webcomp-tools/webdecomp --httpd="$HTTPD" --www="$WWW"
+./src/webcomp-tools/webdecomp --httpd="$HTTPD" --www="$WWW" --dir="$OUT" --extract
 

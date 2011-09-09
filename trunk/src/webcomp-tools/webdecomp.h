@@ -5,11 +5,14 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#define MIN_ARGS 7
+#define NONE 	0
+#define EXTRACT 1
+#define RESTORE 2
+
 #define USAGE "\
 webdecomp v.0.2, (c) 2011, Craig Heffner\n\
 \n\
-Extracts the Web UI pages from DD-WRT firmware.\n\
+Extracts and restores the Web UI pages from and to DD-WRT firmware.\n\
 \n\
 Usage: %s [OPTIONS]\n\
 \n\
@@ -17,16 +20,17 @@ Required Options:\n\
 \n\
 \t-b, --httpd=<file>                    Path to the DD-WRT httpd binary (ex: usr/sbin/httpd)\n\
 \t-w, --www=<file>                      Path to the DD-WRT www binary (ex: etc/www)\n\
+\t-e, --extract                         Extract Web files to a directory\n\
+\t-r, --restore                         Restore Web files from a directory\n\
 \n\
 Additional Options:\n\
 \n\
-\t-o, --out=<directory>                 Output directory [default: %s]\n\
+\t-d, --dir=<directory>                 Web files directory [default: %s]\n\
 \t-h, --help                            Show help\n\
-\n\
-The virtual address of the websRomPageIndex global can be found by running 'readelf --arch-specific <file>'.\n\
 "
 
 void usage(char *progname);
+int restore(char *httpd, char *www, char *dir);
 int extract(char *httpd, char *www, char *outdir);
 
 #endif
