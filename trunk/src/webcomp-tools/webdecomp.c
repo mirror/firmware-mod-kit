@@ -17,23 +17,14 @@
 int main(int argc, char *argv[])
 {
 	char *httpd = NULL, *www = NULL, *outdir = NULL;
-	int rom_v_addr = 0, rom_p_addr = 0, romaddr = 0;
-	int strings_v_addr = 0, strings_p_addr = 0;
 	int retval = EXIT_FAILURE, long_opt_index = 0, ucount = 0, n = 0;
 	char c = 0;
 
-	char *short_options = "b:l:e:w:r:v:p:m:n:o:h";
+	char *short_options = "b:w:o:h";
 	struct option long_options[] = {
-		{ "httpd", required_argument, NULL, 'e' },
+		{ "httpd", required_argument, NULL, 'b' },
 		{ "www", required_argument, NULL, 'w' },
-		{ "virtual-rom-section", required_argument, NULL, 'v' },
-		{ "physical-rom-section", required_argument, NULL, 'p' },
-		{ "rom-address", required_argument, NULL, 'r' },
-		{ "virtual-strings-section", required_argument, NULL, 'm' },
-		{ "physical-strings-section", required_argument, NULL, 'n' },
 		{ "out", required_argument, NULL, 'o' },
-		{ "big-endian", no_argument, NULL, 'b' },
-		{ "little-endian", no_argument, NULL, 'l' },
 		{ "help", no_argument, NULL, 'h' },
 		{ 0, 0, 0, 0 }
 	};
@@ -43,37 +34,11 @@ int main(int argc, char *argv[])
 		switch(c)
 		{
 			case 'b':
-				globals.endianess = BIG_ENDIAN;
-				break;
-			case 'l':
-				globals.endianess = LITTLE_ENDIAN;
-				break;
-			case 'e':
 				httpd = strdup(optarg);
 				ucount++;
 				break;
 			case 'w':
 				www = strdup(optarg);
-				ucount++;
-				break;
-			case 'r':
-				romaddr = atoi(optarg);
-				ucount++;
-				break;
-			case 'v':
-				rom_v_addr = atoi(optarg);
-				ucount++;
-				break;
-			case 'p':
-				rom_p_addr = atoi(optarg);
-				ucount++;
-				break;
-			case 'm':
-				strings_v_addr = atoi(optarg);
-				ucount++;
-				break;
-			case 'n':
-				strings_p_addr = atoi(optarg);
 				ucount++;
 				break;
 			case 'o':
@@ -87,7 +52,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Verify that all required options were specified  */
-	if(ucount != MIN_ARGS)
+	if(ucount != 2)
 	{
 		usage(argv[0]);
 		goto end;
@@ -100,7 +65,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Extract! */
-	n = extract(httpd, www, outdir, romaddr, rom_v_addr, rom_p_addr, strings_v_addr, strings_p_addr);
+	n = extract(httpd, www, outdir);
 
 	if(n > 0)
 	{
@@ -120,62 +85,33 @@ end:
 }
 
 /* Extract embedded file contents from binary file(s) */
-int extract(char *httpd, char *www, char *outdir, uint32_t rom, uint32_t r_virtual, uint32_t r_physical, uint32_t s_virtual, uint32_t s_physical)
+int extract(char *httpd, char *www, char *outdir)
 {
 	int n = 0;
-	uint32_t rom_offset = 0, str_offset = 0, offset = 0;
 	size_t hsize = 0, wsize = 0;
 	struct file_entry *entry = NULL;
 	unsigned char *hdata = NULL, *wdata = NULL;
 	char *dir_tmp = NULL, *path = NULL;
 
-	/* Calculate the physical offset of the websRomIndex array */
-	rom_offset = file_offset(rom, r_virtual, r_physical);
-
 	/* Read in the httpd and www files */
 	hdata = (unsigned char *) file_read(httpd, &hsize);
 	wdata = (unsigned char *) file_read(www, &wsize);
-
-	/* Create the output directory, if it doesn't already exist */
-	mkdir_p(outdir);
-
-	/* Change directories to the output directory */
-        if(chdir(outdir) == -1)
-        {
-                perror(outdir);
-        }
-	else
+	
+	if(hdata != NULL && wdata != NULL && find_websRomPageIndex(httpd) && parse_elf_header(hdata, hsize))
 	{
-		/* Make sure all our data and calculations are OK */
-		if(hdata && wdata && (hsize > rom_offset))
+		/* Create the output directory, if it doesn't already exist */
+		mkdir_p(outdir);
+
+		/* Change directories to the output directory */
+        	if(chdir(outdir) == -1)
+        	{
+                	perror(outdir);
+        	}
+		else 
 		{
-			/* Loop through the structure array until we hit the end of the file, or we break due to a NULL entry name */
-			while((offset = rom_offset + (sizeof(struct file_entry) * n)) < hsize)
+			/* Get the next entry until we get a blank entry */
+			while((entry = next_entry(hdata, hsize)) != NULL)
 			{
-				entry = (struct file_entry *) (hdata + offset);
-
-				/* A NULL entry name signifies the end of the array */
-				if(entry->name == 0)
-				{
-					break;
-				}
-				else
-				{
-					/* Get the physical offset of the file name string */
-					str_offset = file_offset(entry->name, s_virtual, s_physical);
-				
-					/* Sanity check */
-					if(str_offset >= hsize)
-					{
-						break;
-					}
-					else
-					{
-						/* Point entry->name at the actual string */
-						entry->name = (uint32_t) (hdata + str_offset);
-					}
-				}
-
 				/* Make sure the full file path is safe (i.e., it won't overwrite something critical on the host system) */
 				path = make_path_safe((char *) entry->name);
 				if(path)
@@ -189,7 +125,11 @@ int extract(char *httpd, char *www, char *outdir, uint32_t rom, uint32_t r_virtu
 					free(dir_tmp);
 
 					/* Write the data to disk */
-					if(file_write(path, (wdata + entry->offset), entry->size))
+					if(!file_write(path, (wdata + entry->offset), entry->size))
+					{
+						fprintf(stderr, "ERROR: Failed to extract file '%s'\n", (char *) entry->name);
+					}
+					else
 					{
 						n++;
 					}
@@ -203,7 +143,11 @@ int extract(char *httpd, char *www, char *outdir, uint32_t rom, uint32_t r_virtu
 			}
 		}
 	}
-
+	else
+	{
+		printf("Failed to parse ELF header!\n");
+	}
+	
 	if(hdata) free(hdata);
 	if(wdata) free(wdata);
 	return n;

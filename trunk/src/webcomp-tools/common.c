@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <elf.h>
 #include "common.h"
 
 /* Given the physical and virtual section loading addresses, convert a virtual address to a physical file offset */
@@ -22,6 +23,148 @@ uint32_t file_offset(uint32_t address, uint32_t virtual, uint32_t physical)
         }
 
         return offset;
+}
+
+/* Returns the next web file entry */
+struct file_entry *next_entry(unsigned char *data, uint32_t size)
+{
+	static int n;
+	uint32_t offset = 0, rom_offset = 0, str_offset = 0;
+	struct file_entry *entry = NULL;
+
+	/* Calculate the physical offset of the websRomIndex array */
+        rom_offset = file_offset(globals.index_address, globals.dv_address, globals.dv_offset);
+
+	/* Calculate the offset into the array for the next entry */
+	offset = rom_offset + (sizeof(struct file_entry) * n);
+
+	if(offset < (size + sizeof(struct file_entry)))
+	{
+		entry = (struct file_entry *) (data + offset);
+
+		/* A NULL entry name signifies the end of the array */
+		if(entry->name == 0)
+		{
+			entry = NULL;
+		}
+		else
+		{
+			/* Get the physical offset of the file name string */
+			str_offset = file_offset(entry->name, globals.tv_address, globals.tv_offset);
+
+			/* Sanity check */
+			if(str_offset >= size)
+			{
+				entry = NULL;
+			}
+			else
+			{
+				/* Point entry->name at the actual string */
+				entry->name = (uint32_t) (data + str_offset);
+				n++;
+			}
+		}
+	}
+
+	return entry;
+}
+
+/* Get the virtual addresses and physical offsets of the program headers in the ELF file */
+int parse_elf_header(unsigned char *data, size_t size)
+{
+	int i = 0, n = 0, retval = 0;
+	Elf32_Ehdr *header = NULL;
+	Elf32_Phdr *program = NULL;
+
+	if(data && size > sizeof(Elf32_Ehdr))
+	{
+		header = (Elf32_Ehdr *) data;
+
+		if(strncmp((char *) &header->e_ident, ELF_MAGIC, 4) == 0)
+		{
+			if(header->e_ident[EI_DATA] == ELFDATA2MSB)
+			{
+				globals.endianess = BIG_ENDIAN;
+			}
+			else
+			{
+				globals.endianess = LITTLE_ENDIAN;
+			}
+
+			/* Loop through program headers looking for TEXT and DATA headers */
+			for(i=0; i<header->e_phnum; i++)
+			{
+				program = (Elf32_Phdr *) (data + header->e_phoff + (sizeof(Elf32_Phdr) * i));
+	
+				if(program->p_type == PT_LOAD)
+				{
+					/* TEXT */
+					if((program->p_flags | PF_X) == program->p_flags)
+					{
+						globals.tv_address = program->p_vaddr;
+						globals.tv_offset = program->p_offset;
+						n++;
+					}
+					/* DATA */
+					else if((program->p_flags | PF_R | PF_W) == program->p_flags)
+					{
+						globals.dv_address = program->p_vaddr;
+						globals.dv_offset = program->p_offset;
+						n++;
+					}
+				}
+			}
+		}
+	}
+
+	/* Return true if both program headers were identified */
+	if(n == NUM_PROGRAM_HEADERS)
+	{
+		retval = 1;
+	}
+
+	return retval;
+}
+
+/* Get the virtual offset to the websRomPageIndex variable */
+int find_websRomPageIndex(char *httpd)
+{
+	char *cmd = 0;
+	char output[256] = { 0 };
+	FILE *phandle = NULL;
+	int size = 0, retval = 0;
+
+	size = strlen(EXE) + strlen(httpd) + 1;
+
+	cmd = malloc(size);
+	if(cmd)
+	{
+		memset(cmd, 0, size);
+		snprintf(cmd, size, EXE, httpd);
+
+		/* This feels so wrong, but it works... */
+		phandle = popen(cmd, "r");
+		if(phandle)
+		{
+			if(fread((char *) &output, 1, sizeof(output), phandle) > 0)
+			{
+				globals.index_address = strtol((char *) &output, NULL, 16);
+				retval = 1;
+			}
+			else
+			{
+				perror("popen fread");
+			}
+
+			pclose(phandle);
+		}
+		else
+		{
+			perror(cmd);
+		}			
+	}
+
+	return retval;
 }
 
 /* Reads in and returns the contents and size of a given file */

@@ -6,6 +6,9 @@
 #define DEFAULT_OUTDIR 		"www"
 #define DIRECTORY_TRAVERSAL 	".."
 #define PATH_PREFIX 		"./"
+#define EXE			"readelf --arch-specific %s 2>/dev/null | grep websRomPageIndex | awk '{print $4}'"
+#define ELF_MAGIC		"\x7F\x45\x4C\x46"
+#define NUM_PROGRAM_HEADERS	2
 
 struct file_entry
 {
@@ -17,12 +20,19 @@ struct file_entry
 struct global
 {
 	int endianess;
+	uint32_t index_address;
+	uint32_t dv_address;
+	uint32_t dv_offset;
+	uint32_t tv_address;
+	uint32_t tv_offset;
 } globals;
 
 void mkdir_p(char *dir);
 char *make_path_safe(char *path);
+int find_websRomPageIndex(char *httpd);
 char *file_read(char *file, size_t *fsize);
+int parse_elf_header(unsigned char *data, size_t size);
 int file_write(char *file, unsigned char *data, size_t size);
+struct file_entry *next_entry(unsigned char *data, uint32_t size);
 uint32_t file_offset(uint32_t address, uint32_t virtual, uint32_t physical);
-
 #endif
