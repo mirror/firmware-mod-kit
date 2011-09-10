@@ -17,11 +17,6 @@ uint32_t file_offset(uint32_t address, uint32_t virtual, uint32_t physical)
 
         offset = (address-virtual+physical);
 
-        if(globals.endianess == BIG_ENDIAN)
-        {
-                offset = (uint32_t) ntohl(offset);
-        }
-
         return offset;
 }
 
@@ -31,11 +26,6 @@ uint32_t virtual_address(uint32_t offset, uint32_t virtual, uint32_t physical)
 	uint32_t address = 0;
 
 	address = (offset+virtual-physical);
-
-	if(globals.endianess == BIG_ENDIAN)
-	{
-		address = (uint32_t) ntohl(address);
-	}
 
 	return address;
 }
@@ -99,6 +89,8 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 int parse_elf_header(unsigned char *data, size_t size)
 {
 	int i = 0, n = 0, retval = 0;
+	uint32_t phoff = 0, type = 0, flags = 0;
+	uint16_t phnum = 0;
 	Elf32_Ehdr *header = NULL;
 	Elf32_Phdr *program = NULL;
 
@@ -111,42 +103,69 @@ int parse_elf_header(unsigned char *data, size_t size)
 			if(header->e_ident[EI_DATA] == ELFDATA2MSB)
 			{
 				globals.endianess = BIG_ENDIAN;
+
+				phnum = ntohs(header->e_phnum);
+				phoff = ntohl(header->e_phoff);
 			}
 			else
 			{
 				globals.endianess = LITTLE_ENDIAN;
+			
+				phnum = header->e_phnum;
+				phoff = header->e_phoff;
 			}
 
 			/* Loop through program headers looking for TEXT and DATA headers */
-			for(i=0; i<header->e_phnum; i++)
+			for(i=0; i<phnum; i++)
 			{
-				program = (Elf32_Phdr *) (data + header->e_phoff + (sizeof(Elf32_Phdr) * i));
-	
-				if(program->p_type == PT_LOAD)
+				program = (Elf32_Phdr *) (data + phoff + (sizeof(Elf32_Phdr) * i));
+
+				if(globals.endianess == LITTLE_ENDIAN)
+				{
+					type = program->p_type;
+					flags = program->p_flags;
+				}
+				else
+				{
+					type = htonl(program->p_type);
+					flags = htonl(program->p_flags);
+				}
+
+				if(type == PT_LOAD)
 				{
 					/* TEXT */
-					if((program->p_flags | PF_X) == program->p_flags)
+					if((flags | PF_X) == flags)
 					{
 						globals.tv_address = program->p_vaddr;
 						globals.tv_offset = program->p_offset;
 						n++;
 					}
 					/* DATA */
-					else if((program->p_flags | PF_R | PF_W) == program->p_flags)
+					else if((flags | PF_R | PF_W) == flags)
 					{
 						globals.dv_address = program->p_vaddr;
 						globals.dv_offset = program->p_offset;
 						n++;
 					}
 				}
+
+				/* Return true if both program headers were identified */
+				if(n == NUM_PROGRAM_HEADERS)
+				{
+					retval = 1;
+					break;
+				}
 			}
 		}
 	}
 
-	/* Return true if both program headers were identified */
-	if(n == NUM_PROGRAM_HEADERS)
+
+	if(globals.endianess == BIG_ENDIAN)
 	{
-		retval = 1;
+		globals.tv_address = htonl(globals.tv_address);
+		globals.tv_offset = htonl(globals.tv_offset);
+		globals.dv_address = htonl(globals.dv_address);
+		globals.dv_offset = htonl(globals.dv_offset);
 	}
 
 	return retval;
@@ -199,7 +218,7 @@ void ntoh_struct(struct file_entry *entry)
 	if(globals.endianess == BIG_ENDIAN)
 	{
 		entry->name = (uint32_t) ntohl(entry->name);
-		entry->size = (uint32_t) ntohl(entry->name);
+		entry->size = (uint32_t) ntohl(entry->size);
 		entry->offset = (uint32_t) ntohl(entry->offset);
 	}
 

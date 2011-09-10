@@ -217,6 +217,7 @@ int restore(char *httpd, char *www, char *indir)
 					/* Update the entry size and file offset */
                                         info->entry->size = fsize;
                                         info->entry->offset = total;
+					hton_struct(info->entry);
 	
 					/* Write the new file to the www blob file */
 					if(fdata)
@@ -233,9 +234,6 @@ int restore(char *httpd, char *www, char *indir)
 	
 						free(fdata);
 					}
-
-					/* Convert data to big endian, if necessary */
-					hton_struct(info->entry);
 	
 					free(path);
 				}
