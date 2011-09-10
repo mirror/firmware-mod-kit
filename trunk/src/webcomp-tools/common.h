@@ -6,7 +6,7 @@
 #define DEFAULT_OUTDIR 		"www"
 #define DIRECTORY_TRAVERSAL 	".."
 #define PATH_PREFIX 		"./"
-#define EXE			"readelf --arch-specific %s 2>/dev/null | grep websRomPageIndex | awk '{print $4}'"
+#define FIRST_WEB_FILE		"Alive.asp"
 #define ELF_MAGIC		"\x7F\x45\x4C\x46"
 #define NUM_PROGRAM_HEADERS	2
 
@@ -37,10 +37,11 @@ struct global
 
 void mkdir_p(char *dir);
 char *make_path_safe(char *path);
-int find_websRomPageIndex(char *httpd);
 char *file_read(char *file, size_t *fsize);
 void ntoh_struct(struct file_entry *entry);
 void hton_struct(struct file_entry *entry);
+int find_websRomPageIndex(char *data, size_t size);
+int find(char *needle, char *haystack, size_t size);
 int parse_elf_header(unsigned char *data, size_t size);
 int file_write(char *file, unsigned char *data, size_t size);
 struct entry_info *next_entry(unsigned char *data, uint32_t size);

@@ -111,7 +111,7 @@ int extract(char *httpd, char *www, char *outdir)
 	hdata = (unsigned char *) file_read(httpd, &hsize);
 	wdata = (unsigned char *) file_read(www, &wsize);
 	
-	if(hdata != NULL && wdata != NULL && find_websRomPageIndex(httpd) && parse_elf_header(hdata, hsize))
+	if(hdata != NULL && wdata != NULL && parse_elf_header(hdata, hsize) && find_websRomPageIndex((char *) hdata, hsize))
 	{
 		/* Create the output directory, if it doesn't already exist */
 		mkdir_p(outdir);
@@ -189,7 +189,7 @@ int restore(char *httpd, char *www, char *indir)
 	/* Open the www file for writing */
 	fp = fopen(www, "wb");
 
-	if(hdata != NULL && fp != NULL && find_websRomPageIndex(httpd) && parse_elf_header(hdata, hsize))
+	if(hdata != NULL && fp != NULL && parse_elf_header(hdata, hsize) && find_websRomPageIndex((char *) hdata, hsize))
 	{
 		/* Change directories to the target directory */
         	if(chdir(indir) == -1)
@@ -262,7 +262,7 @@ int restore(char *httpd, char *www, char *indir)
 	}
 	else
 	{
-		printf("Failed to parse ELF header!\n");
+		perror("restore");
 	}
 	
 	if(fp) fclose(fp);

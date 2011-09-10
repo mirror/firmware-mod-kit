@@ -34,14 +34,11 @@ uint32_t virtual_address(uint32_t offset, uint32_t virtual, uint32_t physical)
 struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
 	static int n;
-	uint32_t offset = 0, rom_offset = 0, str_offset = 0;
+	uint32_t offset = 0, str_offset = 0;
 	struct entry_info *info = NULL;
 
-	/* Calculate the physical offset of the websRomIndex array */
-        rom_offset = file_offset(globals.index_address, globals.dv_address, globals.dv_offset);
-
 	/* Calculate the offset into the array for the next entry */
-	offset = rom_offset + (sizeof(struct file_entry) * n);
+	offset = globals.index_address + (sizeof(struct file_entry) * n);
 
 	if(offset < (size + sizeof(struct file_entry)))
 	{
@@ -172,41 +169,39 @@ int parse_elf_header(unsigned char *data, size_t size)
 }
 
 /* Get the virtual offset to the websRomPageIndex variable */
-int find_websRomPageIndex(char *httpd)
+int find_websRomPageIndex(char *data, size_t size)
 {
-	char *cmd = 0;
-	char output[256] = { 0 };
-	FILE *phandle = NULL;
-	int size = 0, retval = 0;
+	int i = 0, poff = 0, retval = 0;
+	struct file_entry entry = { 0 };
+	uint32_t string_vaddr = 0;
 
-	size = strlen(EXE) + strlen(httpd) + 1;
+	/* Find the location of the first Web page string in the binary */
+	poff = find(FIRST_WEB_FILE, data, size);
 
-	cmd = malloc(size);
-	if(cmd)
+	if(poff)
 	{
-		memset(cmd, 0, size);
-		snprintf(cmd, size, EXE, httpd);
+		/* Convert the file offset to a virtual address */
+		string_vaddr = virtual_address(poff, globals.tv_address, globals.tv_offset);
 
-		/* This feels so wrong, but it works... */
-		phandle = popen(cmd, "r");
-		if(phandle)
+		/* Swap the virtual address endinaess, if necessary */
+		if(globals.endianess == BIG_ENDIAN)
 		{
-			if(fread((char *) &output, 1, sizeof(output), phandle) > 0)
-			{
-				globals.index_address = strtol((char *) &output, NULL, 16);
-				retval = 1;
-			}
-			else
-			{
-				perror("popen fread");
-			}
-
-			pclose(phandle);
+			string_vaddr = htonl(string_vaddr);
 		}
-		else
+
+		/* Loop through the binary looking for references to the string's virtual address */	
+		for(i=globals.tv_offset; i<(size-sizeof(struct file_entry)); i++)
 		{
-			perror(cmd);
-		}			
+			memcpy((void *) &entry, data+i, sizeof(struct file_entry));
+
+			/* The first entry in the structure array should have an offset of zero and a size greater than zero */
+			if(entry.name == string_vaddr && entry.offset == 0 && entry.size > 0)
+			{
+				globals.index_address = i;
+				retval = 1;
+				break;
+			}
+		}
 	}
 
 	return retval;
@@ -236,6 +231,28 @@ void hton_struct(struct file_entry *entry)
 	}
 
 	return;
+}
+
+/* Find a needle in a haystack */
+int find(char *needle, char *haystack, size_t size)
+{
+        int i = 0, offset = 0, len = 0;
+
+        if(haystack && needle)
+        {
+		len = strlen(needle);
+
+                for(i=0; i<(size-len); i++)
+                {
+                        if(memcmp(haystack+i, needle, len) == 0)
+                        {
+                                offset = i;
+                                break;
+                        }
+                }
+        }
+
+        return offset;
 }
 
 /* Reads in and returns the contents and size of a given file */

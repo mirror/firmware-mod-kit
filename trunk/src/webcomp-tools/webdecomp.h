@@ -10,7 +10,7 @@
 #define RESTORE 2
 
 #define USAGE "\
-webdecomp v.0.2, (c) 2011, Craig Heffner\n\
+webdecomp v.0.3, (c) 2011, Craig Heffner\n\
 \n\
 Extracts and restores the Web UI pages from and to DD-WRT firmware.\n\
 \n\
