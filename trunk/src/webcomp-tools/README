@@ -38,10 +38,16 @@ HOW IT WORKS:
 
 USAGE:
 
-	The webcomp tools require you to supply the virtual and physical section addresses for the target
-	ELF file in order to calculate the physical addresses of critical data inside the DD-WRT httpd binary.
+	Usage is fairly straight forward. You must supply webdecomp with the paths to the www and httpd files.
 
-	Although all of the required information can be obtained manually using readelf, it is recommended that
-	you use the ddwrt-gui-extract script included with the Firmware Mod Kit, which will automate this
-	process for you.
+	To extract files:
 
+		$ ./webdecomp --httpd=rootfs/usr/sbin/httpd --www=rootfs/etc/www --extract
+
+	To restore modified files:
+
+		$ ./webdecomp --httpd=rootfs/usr/sbin/httpd --www=rootfs/etc/www --restore
+
+	The default input/output directory is 'www'. You may specify an alternate directory with the --dir argument.
+
+		
