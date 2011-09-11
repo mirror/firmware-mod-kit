@@ -20,16 +20,19 @@ int main(int argc, char *argv[])
 	int retval = EXIT_FAILURE, action = NONE, long_opt_index = 0, n = 0;
 	char c = 0;
 
-	char *short_options = "b:w:d:erh";
+	char *short_options = "b:w:d:i:erh";
 	struct option long_options[] = {
 		{ "httpd", required_argument, NULL, 'b' },
 		{ "www", required_argument, NULL, 'w' },
 		{ "dir", required_argument, NULL, 'd' },
+		{ "index", required_argument, NULL, 'i' },
 		{ "extract", no_argument, NULL, 'e' },
 		{ "restore", no_argument, NULL, 'r' },
 		{ "help", no_argument, NULL, 'h' },
 		{ 0, 0, 0, 0 }
 	};
+
+	memset((void *) &globals, 0, sizeof(globals));
 	
 	while((c = getopt_long(argc, argv, short_options, long_options, &long_opt_index)) != -1)
 	{
@@ -49,6 +52,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'r':
 				action = RESTORE;
+				break;
+			case 'i':
+				globals.index_address = atoi(optarg);
 				break;
 			default:
 				usage(argv[0]);

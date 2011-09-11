@@ -6,7 +6,8 @@
 #define DEFAULT_OUTDIR 		"www"
 #define DIRECTORY_TRAVERSAL 	".."
 #define PATH_PREFIX 		"./"
-#define FIRST_WEB_FILE		"Alive.asp"
+#define ASP			".asp\x00"
+#define ASP_LEN			5
 #define ELF_MAGIC		"\x7F\x45\x4C\x46"
 #define NUM_PROGRAM_HEADERS	2
 
@@ -37,6 +38,7 @@ struct global
 
 void mkdir_p(char *dir);
 char *make_path_safe(char *path);
+int is_ascii(char *data, int len);
 char *file_read(char *file, size_t *fsize);
 void ntoh_struct(struct file_entry *entry);
 void hton_struct(struct file_entry *entry);

@@ -171,35 +171,65 @@ int parse_elf_header(unsigned char *data, size_t size)
 /* Get the virtual offset to the websRomPageIndex variable */
 int find_websRomPageIndex(char *data, size_t size)
 {
-	int i = 0, poff = 0, retval = 0;
+	int i = 0, len = 0, poff = 0, tmpoff = 0, retval = 0;
 	struct file_entry entry = { 0 };
 	uint32_t string_vaddr = 0;
 
-	/* Find the location of the first Web page string in the binary */
-	poff = find(FIRST_WEB_FILE, data, size);
-
-	if(poff)
+	/* Index may have already been set by user. If so, trust the user. */
+	if(globals.index_address != 0)
 	{
-		/* Convert the file offset to a virtual address */
-		string_vaddr = virtual_address(poff, globals.tv_address, globals.tv_offset);
-
-		/* Swap the virtual address endinaess, if necessary */
-		if(globals.endianess == BIG_ENDIAN)
+		retval = 1;
+	}
+	else
+	{
+		while(tmpoff < size)
 		{
-			string_vaddr = htonl(string_vaddr);
-		}
+			/* Find the location of the first string that ends in '.asp'  */
+			tmpoff = find(ASP, (data+tmpoff), (size-tmpoff));
 
-		/* Loop through the binary looking for references to the string's virtual address */	
-		for(i=globals.tv_offset; i<(size-sizeof(struct file_entry)); i++)
-		{
-			memcpy((void *) &entry, data+i, sizeof(struct file_entry));
-
-			/* The first entry in the structure array should have an offset of zero and a size greater than zero */
-			if(entry.name == string_vaddr && entry.offset == 0 && entry.size > 0)
+			/* Find the beginning of the string by looping backwards from the '.asp' until we get a non-ASCII character */
+			while(is_ascii((data+tmpoff), 1))
 			{
-				globals.index_address = i;
-				retval = 1;
+				tmpoff--;
+			}
+			tmpoff++;
+
+			len = strlen(data+tmpoff);
+
+			if(len > ASP_LEN)
+			{
+				poff = tmpoff;
 				break;
+			}
+			else
+			{
+				tmpoff += len;
+			}
+		}
+	
+		if(poff)
+		{
+			/* Convert the file offset to a virtual address */
+			string_vaddr = virtual_address(poff, globals.tv_address, globals.tv_offset);
+
+			/* Swap the virtual address endinaess, if necessary */
+			if(globals.endianess == BIG_ENDIAN)
+			{
+				string_vaddr = htonl(string_vaddr);
+			}
+
+			/* Loop through the binary looking for references to the string's virtual address */	
+			for(i=globals.tv_offset; i<(size-sizeof(struct file_entry)); i++)
+			{
+				memcpy((void *) &entry, data+i, sizeof(struct file_entry));
+
+				/* The first entry in the structure array should have an offset of zero and a size greater than zero */
+				if(entry.name == string_vaddr && entry.offset == 0 && entry.size > 0)
+				{
+					globals.index_address = i;
+					retval = 1;
+					break;
+				}
 			}
 		}
 	}
@@ -231,6 +261,27 @@ void hton_struct(struct file_entry *entry)
 	}
 
 	return;
+}
+
+/* Verify if the given data is printable ASCII */
+int is_ascii(char *data, int len)
+{
+	int i = 0, retval = 0;
+
+	for(i=0; i<len; i++)
+	{
+		if(data[i] < ' ' || data[i] > 'z')
+		{
+			break;
+		}
+	}
+
+	if(i == len)
+	{
+		retval = 1;
+	}
+
+	return retval;
 }
 
 /* Find a needle in a haystack */
