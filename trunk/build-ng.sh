@@ -27,11 +27,23 @@ case $FS_TYPE in
 	"squashfs")
 		$MKFS "$ROOTFS" "$FSOUT" $ENDIANESS -all-root
 		;;
+	"cramfs")
+		$MKFS "$ROOTFS" "$FSOUT"
+		if [ "$ENDIANESS" == "-be" ]
+		then
+			mv "$FSOUT" "$FSOUT.le"
+			./src/cramfsswap/cramfsswap "$FSOUT.le" "$FSOUT"
+			rm -f "$FSOUT.le"
+		fi
+		;;
+	*)
+		echo "Unsupported file system '$FS_TYPE'!"
+		;;
 esac
 
 if [ ! -e $FSOUT ]
 then
-	echo "Unsupported file system ($FS_TYPE), or failed to create new file system. Quitting..."
+	echo "Failed to create new file system! Quitting..."
 	exit 1
 fi
 

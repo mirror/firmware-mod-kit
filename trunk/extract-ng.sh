@@ -58,11 +58,9 @@ mkdir -p "$DIR/image_parts"
 
 echo "Scanning firmware..."
 
-# Log binwalk results to a file, disable default filters, add filters to only include
-# lzma/gzip signatures and signatures that have the words "filesystem", "header" or 
-# "footer" in their description. Filter out results whose description/text contains the 
-# word "invalid".
-$BINWALK -f "$BINLOG" -d -x invalid -y trx -y uimage -y squashfs "$IMG"
+# Log binwalk results to the $BINLOG file, disable default filters, exclude invalid results,
+# and search only for trx, uimage, squashfs, and cramfs results.
+$BINWALK -f "$BINLOG" -d -x invalid -y trx -y uimage -y squashfs -y cramfs "$IMG"
 
 IFS=$'\n'
 
@@ -113,15 +111,17 @@ then
         dd if="$IMG" bs=$FS_OFFSET skip=1 of="$FSIMG" 2>/dev/null
 else
         echo "ERROR: No supported file system found! Aborting..."
-        exit 1
+	rm -rf "$DIR"
+	exit 1
 fi
 
 FOOTER_SIZE=0
 FOOTER_OFFSET=0
 
 # Try to determine if there is a footer at the end of the firmware image.
-# Grap the last 10 lines of a hexdump of the firmware image. Reverse the line order and
-# replace any lines that start with '*' with the word 'FILLER'.
+# Grab the last 10 lines of a hexdump of the firmware image, excluding the 
+# last line in the hexdump. Reverse the line order and replace any lines 
+# that start with '*' with the word 'FILLER'.
 for LINE in $(hexdump -C $IMG | tail -11 | head -10 | sed -n '1!G;h;$p' | sed -e 's/^*/FILLER/')
 do
         if [ "$LINE" == "FILLER" ]
@@ -158,30 +158,28 @@ echo "ENDIANESS='$ENDIANESS'" >> $CONFLOG
 case $FS_TYPE in
 	"squashfs")
 		echo "Extracting squashfs files..."
-		$SUDO ./unsquashfs_all.sh "$FSIMG" "$ROOTFS" 2>/dev/null | grep MKFS >> $CONFLOG
+		$SUDO ./unsquashfs_all.sh "$FSIMG" "$ROOTFS" 2>/dev/null | grep MKFS >> "$CONFLOG"
 		;;
-#	"cramfs")
-#		echo "Extracting CramFS file system..."
-#		if [ "$ENDIANESS" == "-be" ]
-#		then
-#			mv "$FSIMG" "$FSIMG.be"
-#			cramfsswap "$FSIMG.be" "$FSIMG" && rm "$FSIMG.be"
-#		fi
-#		./src/cramfs-2.x/cramfsck -x "$ROOTFS" "$FSIMG"
-#		echo "MKFS=./src/cramfs-2.x/mkcramfs" >> $CONFLOG
-#		;;
+	"cramfs")
+		echo "Extracting CramFS file system..."
+		$SUDO ./uncramfs_all.sh "$FSIMG" "$ROOTFS" $ENDIANESS 2>/dev/null | grep MKFS >> "$CONFLOG"
+		;;
+	*)
+		echo "Unsupported file system '$FS_TYPE'! Quitting..."
+		rm -rf "$DIR"
+		exit 1
+		;;
 esac
 
 # Check if file system extraction was successful
 if [ $? == 0 ]
 then
 	echo "Firmware extraction successful!"
-	EXIT=0
+	echo "Firmware parts can be found in '$DIR/*'"
 else
 	echo "Firmware extraction failed!"
-	EXIT=1
+	rm -rf "$DIR"
+	exit 1
 fi
 
-echo "Firmware parts can be found in '$DIR/*'"
-exit $EXIT
-
+exit 0

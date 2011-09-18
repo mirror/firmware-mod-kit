@@ -7,6 +7,7 @@ all: asustrx addpattern untrx motorola-bin splitter3 binwalk
 	make -C ./uncramfs/
 	make -C ./uncramfs-lzma/
 	make -C ./cramfs-2.x/
+	make -C ./cramfsswap/
 	make -C ./squashfs-2.1-r2/
 	make -C ./squashfs-3.0/
 	make -C ./squashfs-3.0-lzma-damn-small-variant/
@@ -47,6 +48,7 @@ clean:
 	make -C ./cramfs-2.x clean
 	make -C ./uncramfs clean
 	make -C ./uncramfs-lzma clean
+	make -C ./cramfsswap clean
 	make -C ./wrt_vx_imgtool clean
 	make -C ./others clean
 	make -C ./crcalc clean

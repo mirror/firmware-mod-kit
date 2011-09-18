@@ -60,7 +60,7 @@ do
 	if [ "$MKFS" != "" ]
 	then
 		echo "File system sucessfully extracted!"
-		echo "MKFS=$MKFS"
+		echo "MKFS=\"$MKFS\""
 		exit 0
 	fi
 done
