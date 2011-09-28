@@ -29,8 +29,7 @@ VERSION="${SHARED_VERSION}"
 EXIT_ON_FS_PROBLEM="0"
 
 echo
-echo " Firmware Mod Kit (extract) v$VERSION, (c)2010 Jeremy Collake"
-echo " http://www.bitsum.com"
+echo " Firmware Mod Kit (extract) v$VERSION, (c)2010-2011 Jeremy Collake, - Newer NG edition by Craig Heffner"
 
 #################################################################
 #
