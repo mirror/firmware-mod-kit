@@ -8,7 +8,7 @@ VERSION="${SHARED_VERSION}"
 #
 # Title: ipkg_install.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
-# Site: http://www.bitsum.com
+# Site: http://code.google.com/p/firmware-mod-kit/
 #
 # Do a really dumb package install. No dependencies,
 # removal, or anything. Just extract the data files

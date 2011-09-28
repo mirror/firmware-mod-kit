@@ -8,7 +8,7 @@ VERSION="${SHARED_VERSION}"
 #
 # Title: ipkg_install_all.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
-# Site: http://www.bitsum.com
+# Site: hhttp://code.google.com/p/firmware-mod-kit/
 #
 # Invoke ipkg_install for every package in the given
 # folder.

@@ -8,7 +8,7 @@ VERSION="${SHARED_VERSION}"
 #
 # Title: extract_firmware.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
-# Site: http://www.bitsum.com/firmware_mod_kit.htm
+# Site: http://code.google.com/p/firmware-mod-kit/
 #
 # See documentation at:
 #  http://www.bitsum.com/firmware_mod_kit.htm

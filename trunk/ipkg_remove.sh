@@ -9,7 +9,7 @@ VERSION="${SHARED_VERSION}"
 #
 # Title: ipkg_remove.sh
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
-# Site: http://www.bitsum.com
+# Site: hhttp://code.google.com/p/firmware-mod-kit/
 #
 #
 # USAGE: ipkg_remove.sh nano_1.3.8-1_mipsel.ipk WORKING_DIRECTORY/
