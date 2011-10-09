@@ -7,6 +7,14 @@ then
 	DIR="fmk"
 fi
 
+# Need to extract file systems as ROOT
+if [ "$UID" != "0" ]
+then
+        SUDO="sudo"
+else
+        SUDO=""
+fi
+
 # Order matters here!
 eval $(cat shared-ng.inc)
 eval $(cat $CONFLOG)
@@ -25,10 +33,10 @@ echo "Building new $FS_TYPE file system..."
 # Build the appropriate file system
 case $FS_TYPE in
 	"squashfs")
-		$MKFS "$ROOTFS" "$FSOUT" $ENDIANESS -all-root
+		$SUDO $MKFS "$ROOTFS" "$FSOUT" $ENDIANESS -all-root
 		;;
 	"cramfs")
-		$MKFS "$ROOTFS" "$FSOUT"
+		$SUDO $MKFS "$ROOTFS" "$FSOUT"
 		if [ "$ENDIANESS" == "-be" ]
 		then
 			mv "$FSOUT" "$FSOUT.le"

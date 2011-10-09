@@ -6,7 +6,7 @@
 
 IMG="$1"
 DST="$2"
-BLOCK="/dev/mtdblock0"
+BLOCK="/dev/mtdblock1"
 
 if [ "$IMG" == "" ] || [ "$IMG" == "-h" ]
 then
@@ -14,41 +14,57 @@ then
 	exit 1
 fi
 
+# Need to extract file systems as ROOT
+if [ "$UID" != "0" ]
+then
+        SUDO="sudo"
+else
+        SUDO=""
+fi
+
 if [ "$DST" == "" ]
 then
 	DST="jffs2-root"
 fi
 
+if [ -e "$DST" ]
+then
+	echo "ERROR: $DST already exists! Quitting..."
+	exit 1
+fi
+
 TMP="/tmp/$DST"
 
 #Make sure required modules are loaded
-modprobe mtdblock
-modprobe mtdchar
-modprobe mtdram
-modprobe mtd
+$SUDO modprobe mtdblock
+$SUDO modprobe mtdchar
+$SUDO modprobe mtdram
+$SUDO modprobe mtd
 
 #Create destination and temporary mount directories
-mkdir $DST && mkdir $TMP
+$SUDO rm -rf $DST $TMP && $SUDO mkdir -p $DST && $SUDO mkdir -p $TMP
 
 if [ $? == 0 ]
 then
 	if [ ! -e $BLOCK ]
 	then
-		mknod $BLOCK b 31 0
+		$SUDO mknod $BLOCK b 31 0
 	fi
 
 	#Copy JFSS2 image to MTD block
-	dd if="$IMG" of=$BLOCK 2>/dev/null && mount -t jffs2 $BLOCK $TMP
+	$SUDO dd if="$IMG" of=$BLOCK 2>/dev/null && mount -t jffs2 $BLOCK $TMP
 
 	if [ $? == 0 ]
 	then
 		#Copy files from mounted directory to destination directory, then unmount
-		cp -vR $TMP/* $DST
-		umount $TMP && rm -rf $TMP
+		$SUDO cp -vR $TMP/* $DST
+		$SUDO umount $TMP && rm -rf $TMP
 		exit 0
 	else
-		echo "Failed to mount $IMG to $BLOCK"
+		echo "ERROR: Failed to mount $IMG to $BLOCK"
 	fi
+else
+	echo "ERROR: Directory creation failed"
 fi
 
 exit 1
