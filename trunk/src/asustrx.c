@@ -67,18 +67,9 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#ifndef __DARWIN_UNIX03
 #include <endian.h>
 #include <byteswap.h>
-#else
-#include <ppc/endian.h>
-#endif
 #include <sys/types.h>
-
-/* stuff for quick OS X compatibility by Jeremy Collake */
-#ifndef bswap_32
-#define bswap_32 flip_endian
-#endif
 
 // always flip, regardless of endianness of machine
 u_int32_t flip_endian(u_int32_t nValue)

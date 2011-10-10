@@ -32,12 +32,8 @@
 #include <string.h>
 #include <sys/types.h>
 
-#ifndef __DARWIN_UNIX03
 #include <endian.h>
 #include <byteswap.h>
-#else
-#include <ppc/endian.h>
-#endif
 #include <sys/types.h>
 
 #include "untrx.h"
