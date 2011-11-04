@@ -65,10 +65,15 @@ CUR_SIZE=$(ls -l $FWOUT | awk '{print $5}')
 
 if [ "$FILLER_SIZE" -lt 0 ]
 then
-	echo "ERROR: New firmware image will be larger than original image! This is not supported."
-	echo -e "\tOriginal file size: $FW_SIZE"
-	echo -e "\tCurrent file size:  $CUR_SIZE"
-	echo "Quitting..."
+	echo "ERROR: New firmware image will be larger than original image!"
+	echo "       Building firmware images larger than the original can brick your device!"
+	echo "       Try removing unnecessary files from the file system to decrease total image size."
+	echo "       Refusing to create new firmware image."
+	echo ""
+	echo "       Original file size: $FW_SIZE"
+	echo "       Current file size:  $CUR_SIZE"
+	echo ""
+	echo "       Quitting..."
 	exit 1
 else
 	echo "Remaining free bytes in firmware image: $FILLER_SIZE"
