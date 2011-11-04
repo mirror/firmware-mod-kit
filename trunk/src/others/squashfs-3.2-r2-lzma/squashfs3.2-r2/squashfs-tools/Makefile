@@ -30,6 +30,7 @@ unsquashfs.o: unsquashfs.c squashfs_fs.h read_fs.h global.h \
 
 unsquashfs: LDLIBS += -lunlzma
 unsquashfs: unsquashfs.o
+	$(CC) unsquashfs.o -o unsquashfs $(LDLIBS) -lz
 
 clean:
 	${RM} *~ *.o ${Tgt}

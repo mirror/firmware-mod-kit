@@ -31,6 +31,7 @@ unsquashfs.o: unsquashfs.c squashfs_fs.h read_fs.h global.h \
 	${Sqlzma}/sqlzma.h ${Sqlzma}/sqmagic.h ${LzmaC}/libunlzma.a
 unsquashfs: LDLIBS += -lunlzma
 unsquashfs: unsquashfs.o
+	$(CC) unsquashfs.o -o unsquashfs $(LDLIBS) -lz
 
 clean:
 	${RM} *~ *.o ${Tgt}
