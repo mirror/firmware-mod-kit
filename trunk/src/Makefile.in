@@ -54,3 +54,6 @@ clean:
 	make -C ./crcalc clean
 	make -C ./webcomp-tools clean
 	make -C ./binwalk*/src/ cleanall
+
+cleanall: clean
+	rm -rf Makefile config.* *.cache

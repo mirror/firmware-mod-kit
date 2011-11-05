@@ -38,7 +38,7 @@ fi
 if [ ! -e "./src/crcalc/crcalc" ]
 then
 	echo "Firmware-Mod-Kit has not been built yet. Building..."
-	cd src && make
+	cd src && ./configure && make
 
 	if [ $? -eq 0 ]
 	then
