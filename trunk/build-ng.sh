@@ -74,6 +74,7 @@ then
 	echo "       Current file size:  $CUR_SIZE"
 	echo ""
 	echo "       Quitting..."
+	rm -f "$FWOUT"
 	exit 1
 else
 	echo "Remaining free bytes in firmware image: $FILLER_SIZE"
