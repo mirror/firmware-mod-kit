@@ -2,9 +2,10 @@
 #------------------Compression Formats-----------------------------
 
 # bzip2
-0       string          BZh             bzip2 compressed data
+0       string          BZh
+>4	string		1AY&SY		bzip2 compressed data
 !:mime  application/x-bzip2
->3      byte            >47             \b, block size = %c00k
+>>3      byte            >47            \b, block size = %c00k
 
 # lzip  
 0       string          LZIP            lzip compressed data
@@ -117,9 +118,8 @@
 >1	lelong			<1			invalid
 >1	lelong			x			dictionary size: %d bytes,
 >5	lequad			0			invalid
->5	lequad			<-1			invalid
+>5	lequad			<0			invalid
 >5	lequad			>0x40000000		invalid
->5	lequad			-1			unknown
 >5	lequad			x			uncompressed size: %lld bytes
 
 #An alternative common LZMA signature
@@ -129,9 +129,8 @@
 >1      lelong                  <1                      invalid
 >1      lelong                  x                       dictionary size: %d bytes,
 >5	lequad			0			invalid
->5      lequad                  <-1                     invalid
+>5      lequad                  <0                      invalid
 >5	lequad			>0x40000000		invalid
->5	lequad			-1			unknown
 >5      lequad                  x                       uncompressed size: %lld bytes
 
 #Signature for less common LZMA flag/dictionary values. Results in lots of false positives, but usually marked as invalid.
@@ -141,9 +140,8 @@
 >1	lelong			<1			invalid
 >1	lelong			x			dictionary size: %d bytes,
 >5	lequad			0			invalid
->5	lequad			<-1			invalid
+>5	lequad			<0			invalid
 >5	lequad			>0x40000000		invalid
->5	lequad			-1			unknown
 >5	lequad			x			uncompressed size: %lld bytes
 
 

@@ -21,7 +21,6 @@ int update_magic_file(char *url, char *outfile)
 	int retval = 0;
 
 #ifndef NOCURL
-	CURLcode res;
 	CURL *curl = NULL;
 	FILE *fp = NULL;
     
@@ -34,15 +33,20 @@ int update_magic_file(char *url, char *outfile)
         		curl_easy_setopt(curl, CURLOPT_URL, url);
         		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
         		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-        		res = curl_easy_perform(curl);
-        		curl_easy_cleanup(curl);
+        		
+			if(curl_easy_perform(curl) == 0)
+			{
+				retval = 1;
+			}
+
         		fclose(fp);
-			retval = 1;
 		} 
 		else 
 		{
 			perror(outfile);
 		}
+        
+		curl_easy_cleanup(curl);
     	}
 #else
 	fprintf(stderr, "Sorry, this feature has been disabled!\n");

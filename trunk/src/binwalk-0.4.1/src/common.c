@@ -3,11 +3,17 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "common.h"
+
+#ifdef __linux
+#include <linux/fs.h>
+#endif
 
 /* Convert decimal and hexadecimal strings to integers */
 int str2int(char *str)
@@ -54,8 +60,16 @@ int str2int(char *str)
 const void *file_read(char *file, size_t *fsize)
 {
         int fd = 0;
+	size_t file_size = 0;
         struct stat _fstat = { 0 };
         const void *buffer = NULL;
+
+	fd = open(file, O_RDONLY);
+        if(!fd)
+        {
+                perror(file);
+                goto end;
+        }
 
         if(stat(file, &_fstat) == -1)
         {
@@ -63,37 +77,41 @@ const void *file_read(char *file, size_t *fsize)
                 goto end;
         }
 
-        if(_fstat.st_size == 0)
+        if(_fstat.st_size > 0)
         {
-		fprintf(stderr, "%s: zero size file\n", file);
-                goto end;
+		file_size = _fstat.st_size;
         }
+#ifdef __linux
+	else
+	{
+		long long long_file_size = 0;
 
-        fd = open(file,O_RDONLY);
-        if(!fd)
-        {
-		perror(file);
-                goto end;
-        }
+		/* Special files may report a zero size in stat(); must get their file size via an ioctl call */
+		if(ioctl(fd, BLKGETSIZE64, &long_file_size) == -1)
+		{
+			perror("ioctl");
+			goto end;
+		}
+		else
+		{
+			file_size = (size_t) long_file_size;
+		}
+	}
+#endif
 
-        buffer = malloc(_fstat.st_size);
-        if(!buffer)
-        {
-		perror("malloc");
-                goto end;
-        }
-        memset((void *) buffer, 0 ,_fstat.st_size);
-
-        if(read(fd, (void *) buffer, _fstat.st_size) != _fstat.st_size)
-        {
-		perror(file);
-                if(buffer) free((void *) buffer);
-                buffer = NULL;
-        }
-        else
-        {
-                *fsize = _fstat.st_size;
-        }
+	if(file_size > 0)
+	{
+		buffer = mmap(NULL, file_size, PROT_READ, (MAP_SHARED | MAP_NORESERVE), fd, 0);
+		if(buffer == MAP_FAILED)
+		{
+			perror("mmap");
+			buffer = NULL;
+		}
+		else
+		{
+			*fsize = file_size;
+		}
+	}
 
 end:
         if(fd) close(fd);

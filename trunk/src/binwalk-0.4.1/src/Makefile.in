@@ -11,7 +11,7 @@ BIN=$(DESTDIR)@bindir@
 
 all: magi binwalk
 
-binwalk: file common.o md5.o mparse.o filter.o update.o
+binwalk: @DOFILE@ common.o md5.o mparse.o filter.o update.o
 	$(CC) $(CFLAGS) -DMAGIC='"$(MAGICPATH).binwalk"' -DMAGIC_CAST='"$(MAGICPATH).bincast"' -DMAGIC_ARCH='"$(MAGICPATH).binarch"' binwalk.c -o binwalk *.o $(LDFLAGS)
 
 file:

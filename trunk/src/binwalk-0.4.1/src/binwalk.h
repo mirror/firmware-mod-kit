@@ -30,6 +30,7 @@
 #define MULTIPLE_MATCH_SIZE	6
 #define GZIP_FILTER		"gzip"
 #define LZMA_FILTER		"lzma"
+#define JFFS_FILTER		"jffs2"
 #define INVALID_FILTER		"invalid"
 
 #define USAGE_OPTIONS		"\
@@ -56,7 +57,7 @@ OPTIONS\n\
 \n\n\
 *  Signatures of two bytes or less are excluded by default. Use -i or -a to include them in the search.\n\
 \n\
-** Default filters include '%s' and '%s' results, and exclude '%s' results. Disabling the default\n\
+** Default filters include '%s', '%s' and '%s' results, and exclude '%s' results. Disabling the default\n\
    filters will speed up scan time, but may miss these file types.\n\
 "
 

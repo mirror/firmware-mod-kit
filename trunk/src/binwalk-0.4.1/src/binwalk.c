@@ -5,6 +5,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 #include <magic.h>
 #include "update.h"
@@ -48,7 +49,7 @@ int main(int argc, char *argv[])
 			{ "help", no_argument, NULL, 'h' },
 			{ 0, 0, 0, 0 }
 	};
-	
+
 	/* Need at least one argument: the target file */
 	if(argc == 1)
 	{
@@ -165,6 +166,7 @@ int main(int argc, char *argv[])
 	{
 		add_filter(filters, &filter_count, FILTER_ADD, GZIP_FILTER);
 		add_filter(filters, &filter_count, FILTER_ADD, LZMA_FILTER);
+		add_filter(filters, &filter_count, FILTER_ADD, JFFS_FILTER);
 		add_filter(filters, &filter_count, FILTER_EXCLUDE, INVALID_FILTER);
 	}
 
@@ -271,7 +273,7 @@ int main(int argc, char *argv[])
 
 end:
         if(config.magic) free(config.magic);
-        if(magic_file_contents) free(magic_file_contents);
+        if(magic_file_contents) munmap((void *) magic_file_contents, mfsize);
         if(globals.fsout != NULL) fclose(globals.fsout);
         if(config.cookie) magic_close(config.cookie);
 	return retval;
@@ -374,7 +376,8 @@ int process_file(char *bin_file, struct binconf *config, struct magic_signature 
 							}
 						}
 
-						print("%-10d\t0x%-8X\t%s\n",i,i,type);
+						print("%-10d\t0x%-8X\t",i,i);
+						print("%s\n",type);
 						break;
                         		}
 				}
@@ -386,7 +389,7 @@ int process_file(char *bin_file, struct binconf *config, struct magic_signature 
 	retval = EXIT_SUCCESS;
 
 end:
-	if(buffer) free((void *) buffer);
+	if(buffer) munmap((void *) buffer, fsize);
 	return retval;
 }
 
@@ -397,7 +400,7 @@ void usage(char *progname)
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Usage: %s [OPTIONS] [FILE1] [FILE2] [FILE3] ...\n", progname);
 	fprintf(stderr,"\n");
-	fprintf(stderr,USAGE_OPTIONS, MAGIC, GZIP_FILTER, LZMA_FILTER, INVALID_FILTER);
+	fprintf(stderr,USAGE_OPTIONS, MAGIC, GZIP_FILTER, LZMA_FILTER, JFFS_FILTER, INVALID_FILTER);
 	fprintf(stderr,"\n");
 
 	return;

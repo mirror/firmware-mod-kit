@@ -78,7 +78,6 @@ int string_contains(char *haystack, char *needle)
 {
 	char *my_haystack = NULL;
 	int retval = 0;
-	size_t haystack_size = 0, needle_size = 0;
 
 	/* Duplicate the haystack string, as we will be converting it to all uppercase */
 	my_haystack = strdup(haystack);
@@ -89,9 +88,6 @@ int string_contains(char *haystack, char *needle)
 	}
 	else
 	{
-		haystack_size = strlen(my_haystack);
-		needle_size = strlen(needle);
-
 		/* Convert haystack to all upper case */
 		uppercase(my_haystack);
 

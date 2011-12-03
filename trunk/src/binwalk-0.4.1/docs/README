@@ -22,9 +22,9 @@ USAGE
 
 		$ binwalk firmware1.bin firmware2.bin firmware3.bin
 
-	By default binwalk will include short signatures for gzip and lzma file fomats, and exclude invalid
-	results. These default filters can be disabled with the -d option, which will speed up the scan time
-	but may cause binwalk to miss gzip and lzma files:
+	By default binwalk will include short signatures for gzip, lzma and jffs2 file fomats, and exclude 
+	invalid results. These default filters can be disabled with the -d option, which will speed up the 
+	scan time but may cause binwalk to miss gzip, lzma or jffs2 files:
 
 		$ binwalk -d firmware.bin
 
