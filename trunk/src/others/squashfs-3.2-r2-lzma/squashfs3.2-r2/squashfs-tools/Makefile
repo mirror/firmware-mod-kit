@@ -7,7 +7,7 @@ ifdef UseDebugFlags
 DebugFlags = -g -Wall -Wno-unused-variable -O0 -UNDEBUG
 endif
 CFLAGS += -I${Sqlzma} -D_REENTRANT -DNDEBUG ${DebugFlags}
-LDLIBS += -lz -L${LzmaAlone} -L${LzmaC}
+LDLIBS += -lz -lm -L${LzmaAlone} -L${LzmaC}
 Tgt = mksquashfs unsquashfs
 
 all: ${Tgt}
