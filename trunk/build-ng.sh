@@ -1,10 +1,16 @@
 #!/bin/bash
 
 DIR="$1"
+NEXT_PARAM=""
 
 if [ "$DIR" == "" ]
 then
 	DIR="fmk"
+	NEXT_PARAM="$1"
+elif [ "$DIR" == "-nopad" ]
+then
+	DIR="fmk"
+	NEXT_PARAM="$1"
 fi
 
 # Need to extract file systems as ROOT
@@ -20,11 +26,11 @@ eval $(cat shared-ng.inc)
 eval $(cat $CONFLOG)
 FSOUT="$DIR/new-filesystem.$FS_TYPE"
 
-echo -e "Firmware Mod Kit (build-ng) $VERSION, (c)2011 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
+echo -e "Firmware Mod Kit (build-ng) $VERSION, (c)2012 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
 
 if [ ! -d "$DIR" ]
 then
-	echo -e "Usage: $0 [build directory]\n"
+	echo -e "Usage: $0 [build directory] [-nopad]\n"
 	exit 1
 fi
 
@@ -77,8 +83,10 @@ then
 	rm -f "$FWOUT"
 	exit 1
 else
-	echo "Remaining free bytes in firmware image: $FILLER_SIZE"
-	perl -e "print \"\xFF\"x$FILLER_SIZE" >> "$FWOUT"
+	if [ "$NEXT_PARAM" != "-nopad" ]; then
+		echo "Remaining free bytes in firmware image: $FILLER_SIZE"
+		perl -e "print \"\xFF\"x$FILLER_SIZE" >> "$FWOUT"
+	fi	
 fi
 
 # Append the footer to the new firmware image, if there is any footer
