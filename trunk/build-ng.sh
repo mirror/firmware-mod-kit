@@ -3,11 +3,7 @@
 DIR="$1"
 NEXT_PARAM=""
 
-if [ "$DIR" == "" ]
-then
-	DIR="fmk"
-	NEXT_PARAM="$1"
-elif [ "$DIR" == "-nopad" ]
+if [ "$DIR" == "" ] || [ "$DIR" == "-nopad" ]
 then
 	DIR="fmk"
 	NEXT_PARAM="$1"
