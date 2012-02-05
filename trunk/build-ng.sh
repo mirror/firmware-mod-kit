@@ -84,6 +84,8 @@ else
 	if [ "$NEXT_PARAM" != "-nopad" ]; then
 		echo "Remaining free bytes in firmware image: $FILLER_SIZE"
 		perl -e "print \"\xFF\"x$FILLER_SIZE" >> "$FWOUT"
+	else
+		echo "Padding of firmware image disabled via -nopad"
 	fi	
 fi
 
