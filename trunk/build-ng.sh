@@ -7,6 +7,8 @@ if [ "$DIR" == "" ] || [ "$DIR" == "-nopad" ]
 then
 	DIR="fmk"
 	NEXT_PARAM="$1"
+else
+	NEXT_PARAM="$2"
 fi
 
 # Need to extract file systems as ROOT
