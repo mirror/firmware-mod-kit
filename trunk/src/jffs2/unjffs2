@@ -38,8 +38,9 @@ TMP="/tmp/$DST"
 #Make sure required modules are loaded
 $SUDO modprobe mtdblock
 $SUDO modprobe mtdchar
-$SUDO modprobe mtdram
 $SUDO modprobe mtd
+$SUDO rmmod mtdram
+$SUDO modprobe mtdram total_size=102400
 
 #Create destination and temporary mount directories
 $SUDO rm -rf $DST $TMP && $SUDO mkdir -p $DST && $SUDO mkdir -p $TMP
@@ -52,19 +53,21 @@ then
 	fi
 
 	#Copy JFSS2 image to MTD block
-	$SUDO dd if="$IMG" of=$BLOCK 2>/dev/null && mount -t jffs2 $BLOCK $TMP
+	$SUDO dd if="$IMG" of=$BLOCK && $SUDO mount -t jffs2 $BLOCK $TMP
 
 	if [ $? == 0 ]
 	then
 		#Copy files from mounted directory to destination directory, then unmount
 		$SUDO cp -vR $TMP/* $DST
-		$SUDO umount $TMP && rm -rf $TMP
+		$SUDO umount $TMP && $SUDO rm -rf $TMP
 		exit 0
 	else
 		echo "ERROR: Failed to mount $IMG to $BLOCK"
+		$SUDO rm -rf "$DST"
 	fi
 else
 	echo "ERROR: Directory creation failed"
+	$SUDO rm -rf "$DST"
 fi
 
 exit 1
