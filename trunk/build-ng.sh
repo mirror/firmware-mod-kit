@@ -61,7 +61,7 @@ fi
 
 # Append the new file system to the first part of the original firmware file
 cp $HEADER_IMAGE $FWOUT
-cat $FSOUT >> $FWOUT
+$SUDO cat $FSOUT >> $FWOUT
 
 # Calculate and create any filler bytes required between the end of the file system and the footer / EOF.
 CUR_SIZE=$(ls -l $FWOUT | awk '{print $5}')
