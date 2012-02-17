@@ -291,7 +291,7 @@ int main(int argc, char **argv)
 				else
 				{
 					// should add assertion
-					sprintf(pszTemp,"%s/part%d.bin",nI);
+					sprintf(pszTemp,"%s/part%d.bin",pszOutFolder,nI);
 				}
 				break;			
 		}		
