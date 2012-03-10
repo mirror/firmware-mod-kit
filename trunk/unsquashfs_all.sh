@@ -8,7 +8,19 @@ IMG="$1"
 DIR="$2"
 
 ROOT="./src"
-SUBDIRS="squashfs-2.1-r2 squashfs-3.0 squashfs-3.0-lzma-damn-small-variant others/squashfs-3.0-e2100 others/squashfs-3.2-r2 others/squashfs-3.2-r2-lzma others/squashfs-3.2-r2-lzma/squashfs3.2-r2/squashfs-tools others/squashfs-3.3 others/squashfs-3.3-lzma/squashfs3.3/squashfs-tools others/squashfs-3.3-grml-lzma/squashfs3.3/squashfs-tools/unsquashfs others/squashfs-4.0-lzma others/squashfs-4.0-realtek"
+SUBDIRS="squashfs-2.1-r2 \
+squashfs-3.0 \
+squashfs-3.0-lzma-damn-small-variant \
+others/squashfs-3.0-e2100 \
+others/squashfs-3.2-r2 \
+others/squashfs-3.2-r2-lzma \
+others/squashfs-3.2-r2-lzma/squashfs3.2-r2/squashfs-tools \
+others/squashfs-3.2-r2-hg612-lzma \
+others/squashfs-3.3 \
+others/squashfs-3.3-lzma/squashfs3.3/squashfs-tools \
+others/squashfs-3.3-grml-lzma/squashfs3.3/squashfs-tools \
+others/squashfs-4.0-lzma \
+others/squashfs-4.0-realtek"
 TIMEOUT="15"
 MKFS=""
 DEST=""
