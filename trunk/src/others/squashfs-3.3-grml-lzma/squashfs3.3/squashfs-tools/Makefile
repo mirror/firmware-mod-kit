@@ -29,7 +29,7 @@ mksquashfs: mksquashfs.o read_fs.o sort.o
 unsquashfs.o: CFLAGS += -U_REENTRANT
 unsquashfs.o: unsquashfs.c squashfs_fs.h read_fs.h global.h \
 	${Sqlzma}/sqlzma.h ${Sqlzma}/sqmagic.h ${LzmaC}/libunlzma.a
-unsquashfs: LDLIBS += -lunlzma -lz
+unsquashfs: LDLIBS += -lm -lunlzma -lz
 unsquashfs: unsquashfs.o
 
 clean:
