@@ -52,7 +52,7 @@ do
 
 		if [ -d "$DIR" ]
 		then
-			if [ "$(ls $DIR)" == "" ]
+			if [ "$(ls $DIR)" != "" ]
 			then
 				MKFS="$mksquashfs"
 			else
@@ -70,7 +70,7 @@ do
 		
 		if [ -d "$DIR" ]
                 then
-			if [ "$(ls $DIR)" == "" ]
+			if [ "$(ls $DIR)" != "" ]
 			then
                         	MKFS="$mksquashfs-lzma"
 			else
