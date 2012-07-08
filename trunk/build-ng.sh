@@ -58,8 +58,8 @@ echo "Building new $FS_TYPE file system..."
 # Build the appropriate file system
 case $FS_TYPE in
 	"squashfs")
-		# Some mksquashfs images don't support the -le option; little endian is built by default
-		if [ "$ENDIANESS" == "-le" ]
+		# Mksquashfs 4.0 tools don't support the -le option; little endian is built by default
+		if [ "$(echo $MKFS | grep 'squashfs-4.0')" != "" ] && [ "$ENDIANESS" == "-le" ]
 		then
 			ENDIANESS=""
 		fi
@@ -72,7 +72,15 @@ case $FS_TYPE in
 			BS=""
 		fi
 
-		$SUDO $MKFS "$ROOTFS" "$FSOUT" $ENDIANESS $BS -all-root
+		# Check for squashfs 4.0 realtek, which requires the -comp option to build lzma images.
+		if [ "$(echo $MKFS | grep 'squashfs-4.0-realtek')" != "" ] && [ "$FS_COMPRESSION" == "lzma" ]
+		then
+			COMP="-comp lzma"
+		else
+			COMP=""
+		fi
+
+		$SUDO $MKFS "$ROOTFS" "$FSOUT" $ENDIANESS $BS $COMP -all-root
 		;;
 	"cramfs")
 		$SUDO $MKFS "$ROOTFS" "$FSOUT"

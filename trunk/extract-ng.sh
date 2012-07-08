@@ -95,6 +95,15 @@ do
                 else
                         ENDIANESS="-le"
                 fi
+
+		# Check for LZMA compression in the file system. If not present, assume gzip.
+		# This is only used for squashfs 4.0 images.
+		if [ "$(echo $LINE | grep -i 'lzma')" != "" ]
+		then
+			FS_COMPRESSION="lzma"
+		else
+			FS_COMPRESSION="gzip"
+		fi
 	fi
 done
 
@@ -152,6 +161,7 @@ echo "FOOTER_SIZE='$FOOTER_SIZE'" >> $CONFLOG
 echo "FOOTER_OFFSET='$FOOTER_OFFSET'" >> $CONFLOG
 echo "FS_TYPE='$FS_TYPE'" >> $CONFLOG
 echo "FS_OFFSET='$FS_OFFSET'" >> $CONFLOG
+echo "FS_COMPRESSION='$FS_COMPRESSION'" >> $CONFLOG
 echo "ENDIANESS='$ENDIANESS'" >> $CONFLOG
 
 # Extract the file system and save the MKFS variable to the CONFLOG
