@@ -3,7 +3,13 @@
 DIR="$1"
 NEXT_PARAM=""
 
-if [ "$DIR" == "" ] || [ "$DIR" == "-nopad" ]
+if [ "$1" == "-h" ]
+then
+	echo "Usage: $0 [FMK directory] [-nopad | -min]"
+	exit 1
+fi
+
+if [ "$DIR" == "" ] || [ "$DIR" == "-nopad" ] || [ "$DIR" == "-min" ]
 then
 	DIR="fmk"
 	NEXT_PARAM="$1"
@@ -52,7 +58,21 @@ echo "Building new $FS_TYPE file system..."
 # Build the appropriate file system
 case $FS_TYPE in
 	"squashfs")
-		$SUDO $MKFS "$ROOTFS" "$FSOUT" $ENDIANESS -all-root
+		# Some mksquashfs images don't support the -le option; little endian is built by default
+		if [ "$ENDIANESS" == "-le" ]
+		then
+			ENDIANESS=""
+		fi
+		
+		# Increasing the block size minimizes the resulting image size. Max block size of 1MB.
+		if [ "$NEXT_PARAM" == "-min" ]
+		then
+			BS="-b $((1024*1024))"
+		else
+			BS=""
+		fi
+
+		$SUDO $MKFS "$ROOTFS" "$FSOUT" $ENDIANESS $BS -all-root
 		;;
 	"cramfs")
 		$SUDO $MKFS "$ROOTFS" "$FSOUT"
