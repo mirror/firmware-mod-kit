@@ -118,7 +118,6 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 				/* Sanity check */
 				if(str_offset >= size)
 				{
-printf("bad str_offset! [0x%X]\n", str_offset);
 					free(info);
 					info = NULL;
 				}
