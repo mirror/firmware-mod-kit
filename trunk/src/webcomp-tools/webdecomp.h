@@ -33,5 +33,6 @@ Additional Options:\n\
 void usage(char *progname);
 int restore(char *httpd, char *www, char *dir);
 int extract(char *httpd, char *www, char *outdir);
+int detect_settings(unsigned char *httpd, size_t httpd_size);
 
 #endif

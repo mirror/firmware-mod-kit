@@ -104,6 +104,36 @@ end:
 	return retval;
 }
 
+/* Initializes everything for extract() and restore() */
+int detect_settings(unsigned char *httpd, size_t httpd_size)
+{
+	int retval = 0;
+
+	if(parse_elf_header(httpd, httpd_size))
+	{
+		if(find_websRomPageIndex((char *) httpd, httpd_size))
+		{
+			/* If the entry offsets are not valid, then the firmware must be using the new webcomp structure format */
+			if(!are_entry_offsets_valid(httpd, httpd_size))
+			{
+				globals.use_new_format = 1;
+			}
+
+			retval = 1;
+		}
+		else
+		{
+			fprintf(stderr, "Failed to locate websRomPageIndex!\n");
+		}
+	}
+	else
+	{
+		fprintf(stderr, "Failed to parse ELF header!\n");
+	}
+
+	return retval;
+}
+
 /* Extract embedded file contents from binary file(s) */
 int extract(char *httpd, char *www, char *outdir)
 {
@@ -117,7 +147,7 @@ int extract(char *httpd, char *www, char *outdir)
 	hdata = (unsigned char *) file_read(httpd, &hsize);
 	wdata = (unsigned char *) file_read(www, &wsize);
 	
-	if(hdata != NULL && wdata != NULL && parse_elf_header(hdata, hsize) && find_websRomPageIndex((char *) hdata, hsize))
+	if(hdata != NULL && wdata != NULL && detect_settings(hdata, hsize))
 	{
 		/* Create the output directory, if it doesn't already exist */
 		mkdir_p(outdir);
@@ -145,7 +175,7 @@ int extract(char *httpd, char *www, char *outdir)
 					free(dir_tmp);
 
 					/* Write the data to disk */
-					if(!file_write(path, (wdata + info->entry->offset), info->entry->size))
+					if(!file_write(path, (wdata + info->offset), info->size))
 					{
 						fprintf(stderr, "ERROR: Failed to extract file '%s'\n", info->name);
 					}
@@ -195,7 +225,7 @@ int restore(char *httpd, char *www, char *indir)
 	/* Open the www file for writing */
 	fp = fopen(www, "wb");
 
-	if(hdata != NULL && fp != NULL && parse_elf_header(hdata, hsize) && find_websRomPageIndex((char *) hdata, hsize))
+	if(hdata != NULL && fp != NULL && detect_settings(hdata, hsize))
 	{
 		/* Change directories to the target directory */
         	if(chdir(indir) == -1)
@@ -221,10 +251,19 @@ int restore(char *httpd, char *www, char *indir)
 					fdata = (unsigned char *) file_read(path, &fsize);
 				
 					/* Update the entry size and file offset */
-                                        info->entry->size = fsize;
-                                        info->entry->offset = total;
-					hton_struct(info->entry);
-	
+					if(globals.use_new_format)
+					{
+						info->new_entry->size = fsize;
+					}
+					else
+					{
+						info->entry->size = fsize;
+						info->entry->offset = total;
+					}
+					
+					/* Byte swap, if necessary */
+					hton_entries(info);
+
 					/* Write the new file to the www blob file */
 					if(fdata)
 					{

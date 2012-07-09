@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-g -Wall
 
 all: webdecomp
 
@@ -12,3 +12,5 @@ common.o:
 clean:
 	rm -f webdecomp
 	rm -f *.o
+
+distclean: clean

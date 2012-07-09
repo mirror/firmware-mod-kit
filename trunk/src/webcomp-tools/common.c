@@ -30,42 +30,95 @@ uint32_t virtual_address(uint32_t offset, uint32_t virtual, uint32_t physical)
 	return address;
 }
 
+/* Check to see if the data offsets reported by next_entry make sense; this is used to detect if the new or old webcomp data structures are in use. */
+int are_entry_offsets_valid(unsigned char *data, uint32_t size)
+{
+	int retval = 0;
+	struct entry_info *first = NULL;
+
+	first = next_entry(data, size);
+	if(first)
+	{
+		if(first->offset == 0 && (first->size < first->name_ptr))
+		{
+			retval = 1;
+		}
+
+		free(first);
+	}
+
+	next_entry(NULL, 0);
+
+	return retval;
+}
+
 /* Returns the next web file entry */
 struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
-	static int n;
-	uint32_t offset = 0, str_offset = 0;
+	static int n, total_size;
+	uint32_t entry_size = 0, offset = 0, str_offset = 0;
 	struct entry_info *info = NULL;
 
-	/* Calculate the offset into the array for the next entry */
-	offset = globals.index_address + (sizeof(struct file_entry) * n);
+	if(data == NULL || size == 0)
+	{
+		n = 0;
+		total_size = 0;
+		return NULL;
+	}
 
-	if(offset < (size + sizeof(struct file_entry)))
+	if(globals.use_new_format)
+	{
+		entry_size = sizeof(struct new_file_entry);
+	}
+	else
+	{
+		entry_size = sizeof(struct file_entry);
+	}
+
+	/* Calculate the offset into the array for the next entry */
+	offset = globals.index_address + (entry_size * n);
+
+	if(offset < size)
 	{
 		info = malloc(sizeof(struct entry_info));
 		if(info)
 		{
 			memset(info, 0, sizeof(struct entry_info));
 
-			info->entry = (struct file_entry *) (data + offset);
+			/* Calculate the offset if this firmware uses the new structure format */
+			if(globals.use_new_format)
+			{
+				info->new_entry = (struct new_file_entry *) (data + offset);
+				info->name_ptr = info->new_entry->name;
+				info->size = info->new_entry->size;
+				info->offset = total_size;
+			}
+			else
+			{
+				info->entry = (struct file_entry *) (data + offset);
+				info->size = info->entry->size;
+				info->offset = info->entry->offset;
+				info->name_ptr = info->entry->name;
+			}
+				
+			/* Convert data to little endian, if necessary */
+			ntoh_struct(info);
 
 			/* A NULL entry name signifies the end of the array */
-			if(info->entry->name == 0)
+			if(info->name_ptr == 0)
 			{
 				free(info);
 				info = NULL;
 			}
 			else
 			{
-				/* Convert data to little endian, if necessary */
-				ntoh_struct(info->entry);
-
 				/* Get the physical offset of the file name string */
-				str_offset = file_offset(info->entry->name, globals.tv_address, globals.tv_offset);
+				str_offset = file_offset(info->name_ptr, globals.tv_address, globals.tv_offset);
 
 				/* Sanity check */
 				if(str_offset >= size)
 				{
+printf("bad str_offset! [0x%X]\n", str_offset);
 					free(info);
 					info = NULL;
 				}
@@ -73,6 +126,9 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 				{
 					/* Point entry->name at the actual string */
 					info->name = (char *) (data + str_offset);
+
+					/* Track the total size of the processed entries so far, and increment the entry count */
+					total_size += info->size;
 					n++;
 				}
 			}
@@ -224,7 +280,9 @@ int find_websRomPageIndex(char *data, size_t size)
 				memcpy((void *) &entry, data+i, sizeof(struct file_entry));
 
 				/* The first entry in the structure array should have an offset of zero and a size greater than zero */
-				if(entry.name == string_vaddr && entry.offset == 0 && entry.size > 0)
+				if(entry.name == string_vaddr && 
+				  ((entry.offset == 0 && entry.size < entry.name) || 
+				   (entry.size > 0)))
 				{
 					globals.index_address = i;
 					retval = 1;
@@ -238,26 +296,46 @@ int find_websRomPageIndex(char *data, size_t size)
 }
 
 /* Convert structure members from big to little endian, if necessary */
-void ntoh_struct(struct file_entry *entry)
+void ntoh_struct(struct entry_info *info)
 {
 	if(globals.endianess == BIG_ENDIAN)
 	{
-		entry->name = (uint32_t) ntohl(entry->name);
-		entry->size = (uint32_t) ntohl(entry->size);
-		entry->offset = (uint32_t) ntohl(entry->offset);
+		info->name_ptr = (uint32_t) ntohl(info->name_ptr);
+		info->size = (uint32_t) ntohl(info->size);
+		info->offset = (uint32_t) ntohl(info->offset);
 	}
 
 	return;
 }
 
 /* Convert structure members from little to big endian, if necessary */
-void hton_struct(struct file_entry *entry)
+void hton_struct(struct entry_info *info)
 {
 	if(globals.endianess == BIG_ENDIAN)
 	{
-		entry->name = (uint32_t) htonl(entry->name);
-		entry->size = (uint32_t) htonl(entry->size);
-		entry->offset = (uint32_t) htonl(entry->offset);
+		info->name_ptr = (uint32_t) htonl(info->name_ptr);
+		info->size = (uint32_t) htonl(info->size);
+		info->offset = (uint32_t) htonl(info->offset);
+	}
+
+	return;
+}
+
+/* Convert entry data values from little to big endian, if necessary */
+void hton_entries(struct entry_info *info)
+{
+	if(globals.endianess == BIG_ENDIAN)
+	{
+		if(info->entry)
+		{
+			info->entry->size = (uint32_t) htonl(info->entry->size);
+			info->entry->offset = (uint32_t) htonl(info->entry->offset);
+		}
+
+		if(info->new_entry)
+		{
+			info->new_entry->size = (uint32_t) htonl(info->new_entry->size);
+		}
 	}
 
 	return;
