@@ -166,22 +166,29 @@ int extract(char *httpd, char *www, char *outdir)
 				path = make_path_safe(info->name);
 				if(path)
 				{
-					/* Display the file name */
-					printf("%s\n", info->name);
-					
 					/* dirname() clobbers the string you pass it, so make a temporary one */
 					dir_tmp = strdup(path);
 					mkdir_p(dirname(dir_tmp));
 					free(dir_tmp);
 
-					/* Write the data to disk */
-					if(!file_write(path, (wdata + info->offset), info->size))
+					/* Sanity checks on our buffer offsets and sizes */
+					if(info->offset > 0 && info->size > 0 && (info->offset + info->size) < wsize)
 					{
-						fprintf(stderr, "ERROR: Failed to extract file '%s'\n", info->name);
+						/* Write the data to disk */
+						if(!file_write(path, (wdata + info->offset), info->size))
+						{
+							fprintf(stderr, "ERROR: Failed to extract file '%s'\n", info->name);
+						}
+						else
+						{
+							/* Display the file name */
+							printf("%s\n", info->name);
+							n++;
+						}
 					}
 					else
 					{
-						n++;
+						fprintf(stderr, "ERROR: Bad file size/offset for %s [ %d %d ]\n", info->name, info->size, info->offset);
 					}
 
 					free(path);
