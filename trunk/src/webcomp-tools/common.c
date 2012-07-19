@@ -301,7 +301,12 @@ void ntoh_struct(struct entry_info *info)
 	{
 		info->name_ptr = (uint32_t) ntohl(info->name_ptr);
 		info->size = (uint32_t) ntohl(info->size);
-		info->offset = (uint32_t) ntohl(info->offset);
+		
+		/* If using the new format, we calculate the offset, so it is going to be in host byte format */
+		if(!globals.use_new_format)
+		{
+			info->offset = (uint32_t) ntohl(info->offset);
+		}
 	}
 
 	return;
