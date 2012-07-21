@@ -11,6 +11,7 @@ ROOT="./src"
 SUBDIRS="squashfs-2.1-r2 \
 squashfs-3.0 \
 squashfs-3.0-lzma-damn-small-variant \
+others/squashfs-2.0-nb4 \
 others/squashfs-3.0-e2100 \
 others/squashfs-3.2-r2 \
 others/squashfs-3.2-r2-lzma \
@@ -56,8 +57,20 @@ do
 		then
 			if [ "$(ls $DIR)" != "" ]
 			then
-				MKFS="$mksquashfs"
-			else
+				# Most systems will have busybox - make sure it's a non-zero file size
+				if [ -e "$DIR/bin/busybox" ]
+				then
+					if [ "$(wc -c $DIR/bin/busybox | cut -d' ' -f1)" != "0" ]
+					then
+						MKFS="$mksquashfs"
+					fi
+				else
+					MKFS="$mksquashfs"
+				fi
+			fi
+
+			if [ "$MKFS" == "" ]
+			then
 				rm -rf "$DIR"
 			fi
 		fi
@@ -74,8 +87,20 @@ do
                 then
 			if [ "$(ls $DIR)" != "" ]
 			then
-                        	MKFS="$mksquashfs-lzma"
-			else
+				# Most systems will have busybox - make sure it's a non-zero file size
+				if [ -e "$DIR/bin/busybox" ]
+				then
+					if [ "$(wc -c $DIR/bin/busybox | cut -d' ' -f1)" != "0" ]
+					then
+						MKFS="$mksquashfs-lzma"
+					fi
+				else
+                        		MKFS="$mksquashfs-lzma"
+				fi
+			fi
+			
+			if [ "$MKFS" == "" ]
+			then
 				rm -rf "$DIR"
 			fi
                 fi
