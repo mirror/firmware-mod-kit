@@ -76,12 +76,6 @@ int main(int argc, char *argv[])
 			{
 				fail = 0;
 				fprintf(stderr, "checksum(s) updated OK.\n");
-				int i;
-				for(i=0x38; i<(0x38+16); i++)
-				{
-					printf("0x%.2X ", (buf[i] & 0xFF));
-				}
-				printf("\n");
 			}
 			else
 			{

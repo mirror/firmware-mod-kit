@@ -59,8 +59,8 @@ mkdir -p "$DIR/image_parts"
 echo "Scanning firmware..."
 
 # Log binwalk results to the $BINLOG file, disable default filters, exclude invalid results,
-# and search only for trx, uimage, squashfs, and cramfs results.
-$BINWALK -f "$BINLOG" -d -x invalid -y trx -y uimage -y squashfs -y cramfs "$IMG"
+# and search only for trx, uimage, dlob, squashfs, and cramfs results.
+$BINWALK -f "$BINLOG" -d -x invalid -y trx -y uimage -y dlob -y squashfs -y cramfs "$IMG"
 
 IFS=$'\n'
 

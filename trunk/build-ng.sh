@@ -55,6 +55,9 @@ fi
 
 echo "Building new $FS_TYPE file system..."
 
+# Clean up any previously created files
+rm -rf "$FWOUT" "$FSOUT"
+
 # Build the appropriate file system
 case $FS_TYPE in
 	"squashfs")
@@ -114,14 +117,14 @@ if [ "$FILLER_SIZE" -lt 0 ]
 then
 	echo "ERROR: New firmware image will be larger than original image!"
 	echo "       Building firmware images larger than the original can brick your device!"
-	echo "       Try removing unnecessary files from the file system to decrease total image size."
+	echo "       Try re-running with the -min option, or remove any unnecessary files from the file system."
 	echo "       Refusing to create new firmware image."
 	echo ""
 	echo "       Original file size: $FW_SIZE"
 	echo "       Current file size:  $CUR_SIZE"
 	echo ""
 	echo "       Quitting..."
-	rm -f "$FWOUT"
+	rm -f "$FWOUT" "$FSOUT"
 	exit 1
 else
 	if [ "$NEXT_PARAM" != "-nopad" ]; then

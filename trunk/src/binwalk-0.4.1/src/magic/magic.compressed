@@ -103,6 +103,9 @@
 >>30    ubelong         !0x6d696d65     at least v2.0 to extract
 !:mime  application/zip
 
+# Alternate ZIP string (amc@arwen.cs.berkeley.edu)
+0       string          PK00PK\003\004  Zip archive data [NSRL|ZIP]
+
 # Type: LZMA            
 # URL:  http://www.7-zip.org/sdk.html   
 #
@@ -124,6 +127,7 @@
 
 #An alternative common LZMA signature
 1	belong			0x00008000		LZMA compressed data,
+>0	byte			0			invalid
 >0	leshort			>0xE0			invalid
 >0	byte			x			properties: 0x%.2X,
 >1      lelong                  <1                      invalid
@@ -135,6 +139,7 @@
 
 #Signature for less common LZMA flag/dictionary values. Results in lots of false positives, but usually marked as invalid.
 1	beshort			0x0000			LZMA compressed data,
+>0	byte			0			invalid
 >0	byte			>0xE0			invalid
 >0	byte			x			properties: 0x%.2X,
 >1	lelong			<1			invalid

@@ -222,3 +222,67 @@
 #Windows CE
 64	string		CECE		Windows CE RTOS
 
+# --------------------------------
+# ZynOS ROM header format
+# From openwrt zynos.h.
+6	string		SIG		ZynOS header, header size: 48 bytes,
+>0	belong		x		load address 0x%X,
+>9	byte		<0x7F		rom image type:
+>>9	byte		<1		invalid,
+>>9	byte		>7		invalid,
+>>9	byte		1		ROMIMG,
+>>9	byte		2		ROMBOOT,
+>>9	byte		3		BOOTEXT,
+>>9	byte		4		ROMBIN,
+>>9	byte		5		ROMDIR,
+>>9	byte		6		6,
+>>9	byte		7		ROMMAP,
+>9	byte		>0x7F		ram image type:
+>>9	byte		>0x82		invalid,
+>>9	byte		0x80		RAM,
+>>9	byte		0x81		RAMCODE,
+>>9	byte		0x82		RAMBOOT,
+>10	belong		>0x40000000	invalid
+>10	belong		<0		invalid
+>10	belong		0		invalid
+>10	belong		x		uncompressed size: %d,
+>14	belong		>0x40000000	invalid
+>14	belong		<0		invalid
+>14	belong		0  		invalid
+>14	belong		x		compressed size: %d,
+>20	beshort		x		uncompressed checksum: 0x%X,
+>22	beshort		x		compressed checksum: 0x%X,
+>18	byte		x		flags: 0x%X,
+>18	byte		&0x40		uncompressed checksum is valid,
+>18	byte		&0x80		the binary is compressed,
+>>18	byte		&0x20		compressed checksum is valid,
+>41	belong		x		memory map table address: 0x%X
+
+# Firmware header used by some VxWorks-based Cisco products
+0	string		CI032.00	Cisco VxWorks firmware header,
+>8	lelong		>1024		invalid
+>8	lelong		<0		invalid
+>8	lelong		x		header size: %d bytes,
+>32	lelong		>1024		invalid
+>32	lelong		<0		invalid
+>32	lelong		x		number of files: %d,
+>48	lelong		<0		invalid
+>48	lelong		x		image size: %d,
+>64	string		x		firmware version: %s
+
+# Firmware header used by some TV's
+0	string		FNIB		ZBOOT firmware header, header size: 32 bytes,
+>8	lelong		x		load address: 0x%.8X,
+>12	lelong		x		start address: 0x%.8X,
+>16	lelong		x		checksum: 0x%.8X,
+>20	lelong		x		version: 0x%.8X,
+>24	lelong		<1		invalid
+>24	lelong		x		image size: %d bytes
+
+# Firmware header used by several D-Link routers (and probably others)
+0	string		\x5e\xa3\xa4\x17	
+>0x2C	string		\x5e\xa3\xa4\x17	DLOB firmware header,
+>>12	string		x			%s,
+>>72	string		x			%s,
+>>92	string		x			%s
+
