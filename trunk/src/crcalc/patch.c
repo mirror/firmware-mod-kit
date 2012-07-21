@@ -1,6 +1,8 @@
+#include <string.h>
 #include <arpa/inet.h>
 #include "patch.h"
 #include "crc.h"
+#include "md5.h"
 
 /* Update the CRC for a TRX file */
 int patch_trx(char *buf, size_t size)
@@ -54,4 +56,34 @@ int patch_uimage(char *buf, size_t size)
 	}
 
         return retval;
+}
+
+/* Update the MD5 checksum in the DLOB header */
+int patch_dlob(char *buf, size_t size)
+{
+	int retval = 0;
+	uint32_t hlen = 0;
+	md5_state_t state;
+        md5_byte_t digest[16];
+	struct dlob_header *header = NULL;
+	int i = 0;
+
+	header = (struct dlob_header *) buf;
+	hlen = ntohl(header->data_size);
+
+	if(hlen <= size)
+	{
+		md5_init(&state);
+		md5_append(&state, (const md5_byte_t *) (buf + sizeof(struct dlob_header)), hlen);
+		md5_finish(&state, digest);
+
+		for(i=0; i<16; i++)
+		{
+			header->md5sum[i] = digest[i];
+		}
+		
+		retval = 1;
+	}
+		
+	return retval;
 }

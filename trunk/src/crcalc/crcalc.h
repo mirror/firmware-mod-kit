@@ -24,7 +24,8 @@ enum header_type
 {
 	UNKNOWN,
 	TRX,
-	UIMAGE
+	UIMAGE,
+	DLOB,
 };
 
 int parse_log(char *file, int offsets[MAX_HEAD_SIZE]);

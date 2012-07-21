@@ -64,6 +64,9 @@ int main(int argc, char *argv[])
 				case UIMAGE:
 					ok = patch_uimage(ptr, nsize);
 					break;
+				case DLOB:
+					ok = patch_dlob(ptr, nsize);
+					break;
 				default:
 					fprintf(stderr, "sorry, this file type is not supported.\n");
 					break;
@@ -73,6 +76,12 @@ int main(int argc, char *argv[])
 			{
 				fail = 0;
 				fprintf(stderr, "checksum(s) updated OK.\n");
+				int i;
+				for(i=0x38; i<(0x38+16); i++)
+				{
+					printf("0x%.2X ", (buf[i] & 0xFF));
+				}
+				printf("\n");
 			}
 			else
 			{
@@ -255,6 +264,9 @@ enum header_type identify_header(char *buf)
 			break;
 		case UIMAGE_MAGIC:
 			retval = UIMAGE;
+			break;
+		case DLOB_MAGIC:
+			retval = DLOB;
 			break;
 		default:
 			break;
