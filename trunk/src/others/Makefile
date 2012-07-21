@@ -9,6 +9,7 @@ all:
 	make -C ./squashfs-3.3-grml-lzma
 	make -C ./squashfs-4.0-lzma
 	make -C ./squashfs-4.0-realtek
+	make -C ./squashfs-2.0-nb4
 
 clean:
 	make -C ./squashfs-3.0-e2100 clean
@@ -21,3 +22,4 @@ clean:
 	make -C ./squashfs-3.3-grml-lzma clean
 	make -C ./squashfs-4.0-lzma clean
 	make -C ./squashfs-4.0-realtek clean
+	make -C ./squashfs-2.0-nb4 clean
