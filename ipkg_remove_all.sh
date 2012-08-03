@@ -27,7 +27,7 @@ VERSION="${SHARED_VERSION}"
 #
 # ./ipkg_remove_all.sh ../packages ../working_dir/
 #
-echo "$0 v$VERSION, (c)2006 Jeremy Collake"
+echo "$0 v$VERSION, (c)2006-2012 Jeremy Collake"
 ##################################################
 if [ ! $# = "2" ]; then
 	echo " Invalid usage"

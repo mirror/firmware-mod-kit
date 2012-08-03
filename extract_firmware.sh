@@ -29,7 +29,7 @@ VERSION="${SHARED_VERSION}"
 EXIT_ON_FS_PROBLEM="0"
 
 echo
-echo " Firmware Mod Kit (extract) v$VERSION, (c)2010-2011 Jeremy Collake, - Newer NG edition by Craig Heffner"
+echo " Firmware Mod Kit (extract) v$VERSION, (c)2010-2012 Jeremy Collake, - Newer NG edition by Craig Heffner"
 
 #################################################################
 #

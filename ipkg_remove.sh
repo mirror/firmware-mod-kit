@@ -20,7 +20,7 @@ VERSION="${SHARED_VERSION}"
 # ./ipkg_remove.sh dd-wrt.v23_generic.bin std_generic
 #
 #
-echo "$0 v$VERSION, (c)2006 Jeremy Collake"
+echo "$0 v$VERSION, (c)2006-2012 Jeremy Collake"
 echo " !!WARNING!!! This script is in early alpha stage of development"
 ##################################################
 # CleanupTmp [base_dir] [package basename]

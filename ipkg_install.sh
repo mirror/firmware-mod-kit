@@ -36,7 +36,7 @@ VERSION="${SHARED_VERSION}"
 #
 #
 #
-echo "$0 v$VERSION, (c)2006 Jeremy Collake"
+echo "$0 v$VERSION, (c)2006-2012 Jeremy Collake"
 echo " !!WARNING!!! This script is in early alpha stage of development"
 
 ############################################333
