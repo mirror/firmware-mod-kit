@@ -152,7 +152,7 @@ else
 fi
 
 # Log the parsed values to the CONFLOG for use when re-building the firmware
-echo "FW_SIZE='$FW_SIZE'" >> $CONFLOG
+echo "FW_SIZE='$FW_SIZE'" > $CONFLOG
 echo "HEADER_TYPE='$HEADER_TYPE'" >> $CONFLOG
 echo "HEADER_SIZE='$HEADER_SIZE'" >> $CONFLOG
 echo "HEADER_IMAGE_SIZE='$HEADER_IMAGE_SIZE'" >> $CONFLOG
