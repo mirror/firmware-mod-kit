@@ -61,28 +61,34 @@ int patch_uimage(char *buf, size_t size)
 /* Update the MD5 checksum in the DLOB header */
 int patch_dlob(char *buf, size_t size)
 {
-	int retval = 0;
-	uint32_t hlen = 0;
 	md5_state_t state;
         md5_byte_t digest[16];
-	struct dlob_header *header = NULL;
-	int i = 0;
+	int i = 0, retval = 0;
+	uint32_t cksum_header_offset = 0, data_size = 0, data_offset = 0;
+	struct dlob_header *sig_header = NULL, *cksum_header = NULL;
 
-	header = (struct dlob_header *) buf;
-	hlen = ntohl(header->data_size);
-
-	if(hlen <= size)
+	sig_header = (struct dlob_header *) buf;
+	cksum_header_offset = sizeof(struct dlob_header) + ntohl(sig_header->header_size) + ntohl(sig_header->data_size);
+	
+	if(cksum_header_offset < size)
 	{
-		md5_init(&state);
-		md5_append(&state, (const md5_byte_t *) (buf + sizeof(struct dlob_header)), hlen);
-		md5_finish(&state, digest);
+		cksum_header = (struct dlob_header *) (buf + cksum_header_offset);
+		data_size = ntohl(cksum_header->data_size);
+		data_offset = cksum_header_offset + sizeof(struct dlob_header) + ntohl(cksum_header->header_size) + DLOB_TYPE_STRING_LENGTH;
 
-		for(i=0; i<16; i++)
+		if(data_size < size && (data_size + data_offset) <= size)
 		{
-			header->md5sum[i] = digest[i];
-		}
+			md5_init(&state);
+			md5_append(&state, (const md5_byte_t *) (buf + data_offset), data_size);
+			md5_finish(&state, digest);
+
+			for(i=0; i<16; i++)
+			{
+				buf[cksum_header_offset+sizeof(struct dlob_header)+i] = digest[i];
+			}
 		
-		retval = 1;
+			retval = 1;
+		}
 	}
 		
 	return retval;

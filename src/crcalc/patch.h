@@ -30,16 +30,11 @@ struct uimage_header {
 };
 
 #define DLOB_MAGIC 0x17A4A35E
+#define DLOB_TYPE_STRING_LENGTH 16
 struct dlob_header {
 	uint32_t sig_magic;		/* DLOB_MAGIC */
-	uint32_t sig_header_size;	/* Size of the signature header */
-	uint32_t sig_size;		/* Size of the signature (0x20) */
-	char     signature[0x20];	/* Firmware signature string */
-	uint32_t checksum_magic;	/* DLOB_MAGIC */	
-	uint32_t header_size;		/* Size of the checksum header */
-	uint32_t data_size;		/* Size of the remaining data in the firmware image */
-	char     md5sum[16];		/* MD5 checksum */
-	char     dev[0x24];		/* Device boot string */
+	uint32_t header_size;		/* Size of the signature header */
+	uint32_t data_size;		/* Flags or an ID value maybe? */
 };
 
 int patch_trx(char *buf, size_t size);
