@@ -280,9 +280,7 @@
 >24	lelong		x		image size: %d bytes
 
 # Firmware header used by several D-Link routers (and probably others)
-0	string		\x5e\xa3\xa4\x17	
->0x2C	string		\x5e\xa3\xa4\x17	DLOB firmware header,
->>12	string		x			%s,
->>72	string		x			%s,
->>92	string		x			%s
-
+0               string  \x5e\xa3\xa4\x17
+>(7.b+12)       string  \x5e\xa3\xa4\x17        DLOB firmware header,
+>>12            string  x                       %s,
+>>(7.b+40)      string  x                       %s
