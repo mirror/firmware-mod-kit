@@ -1,30 +1,30 @@
-#!/bin/bash
+#!/bin/sh
 
 IMG="${1}"
 DIR="${2}"
 
-if [ "${DIR}" == "" ]
+if [ "${DIR}" = "" ]
  then
 	DIR="fmk"
 fi
 
 # Need to extract file systems as ROOT
-if [ "${UID}" != "0" ]
+if [ "$(id -ru)" != "0" ]
  then
 	SUDO="sudo"
 else
 	SUDO=""
 fi
 
-# Import shared settings. ${DIR} MUST be defined prior to this!
-eval $(cat shared-ng.inc)
+# Source in/Import shared settings. ${DIR} MUST be defined prior to this!
+. ./shared-ng.inc
 
-echo -e "Firmware Mod Kit (build-ng) ${VERSION}, (c)2011-2012 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
+printf "Firmware Mod Kit (build-ng) ${VERSION}, (c)2011-2012 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n\n"
 
 # Check usage
-if [ "${IMG}" == "" ] || [ "${IMG}" == "-h" ]
+if [ "${IMG}" = "" ] || [ "${IMG}" = "-h" ]
  then
-	echo -e "Usage: ${0} <firmware image>\n"
+	printf "Usage: ${0} <firmware image>\n\n"
 	exit 1
 fi
 
@@ -62,7 +62,9 @@ echo "Scanning firmware..."
 # and search only for trx, uimage, dlob, squashfs, and cramfs results.
 ${BINWALK} -f "${BINLOG}" -d -x invalid -y trx -y uimage -y dlob -y squashfs -y cramfs "${IMG}"
 
-IFS=$'\n'
+# Set Internal Field Separator (IFS) via two lines to newline only (bashism would be $'\n')
+IFS='
+'
 
 # Header image offset is ALWAYS 0. Header checksums are simply updated by build-ng.sh.
 HEADER_IMAGE_OFFSET=0
@@ -74,8 +76,8 @@ for LINE in $(sort -n ${BINLOG} | grep -v -e '^DECIMAL' -e '^---')
 	OFFSET=$(echo ${LINE} | awk '{print $1}')
 	DESCRIPTION=$(echo ${LINE} | awk '{print tolower($3)}')
 
-	# Offset 0 == firmware header
-	if [ "${OFFSET}" == "0" ]
+	# Offset 0 is firmware header
+	if [ "${OFFSET}" = "0" ]
 	 then
 		HEADER_OFFSET=${OFFSET}
 		HEADER_TYPE=${DESCRIPTION}
@@ -108,7 +110,7 @@ for LINE in $(sort -n ${BINLOG} | grep -v -e '^DECIMAL' -e '^---')
 done
 
 # Header image size is everything from the header image offset (0) up to the file system
-((HEADER_IMAGE_SIZE=${FS_OFFSET}-${HEADER_IMAGE_OFFSET}))
+HEADER_IMAGE_SIZE=$((${FS_OFFSET}-${HEADER_IMAGE_OFFSET}))
 
 # Extract the header + image up to the file system
 echo "Extracting ${HEADER_IMAGE_SIZE} bytes of ${HEADER_TYPE} header image at offset ${HEADER_IMAGE_OFFSET}"
@@ -133,18 +135,18 @@ FOOTER_OFFSET=0
 # that start with '*' with the word 'FILLER'.
 for LINE in $(hexdump -C ${IMG} | tail -11 | head -10 | sed -n '1!G;h;$p' | sed -e 's/^*/FILLER/')
  do
-	if [ "${LINE}" == "FILLER" ]
+	if [ "${LINE}" = "FILLER" ]
 	 then
 		break
 	else
-		((FOOTER_SIZE=${FOOTER_SIZE}+16))
+		FOOTER_SIZE=$((${FOOTER_SIZE}+16))
 	fi
 done
 
 # If a footer was found, dump it out
 if [ "${FOOTER_SIZE}" != "0" ]
  then
-	((FOOTER_OFFSET=${FW_SIZE}-${FOOTER_SIZE}))
+	FOOTER_OFFSET=$((${FW_SIZE}-${FOOTER_SIZE}))
 	echo "Extracting ${FOOTER_SIZE} byte footer from offset ${FOOTER_OFFSET}"
 	dd if="${IMG}" bs=1 skip=${FOOTER_OFFSET} count=${FOOTER_SIZE} of="${FOOTER_IMAGE}" 2>/dev/null
 else
@@ -182,7 +184,7 @@ case ${FS_TYPE} in
 esac
 
 # Check if file system extraction was successful
-if [ ${?} == 0 ]
+if [ ${?} -eq 0 ]
  then
 	echo "Firmware extraction successful!"
 	echo "Firmware parts can be found in '${DIR}/*'"
