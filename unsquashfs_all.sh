@@ -18,12 +18,15 @@ others/squashfs-3.2-r2-lzma \
 others/squashfs-3.2-r2-lzma/squashfs3.2-r2/squashfs-tools \
 others/squashfs-3.2-r2-hg612-lzma \
 others/squashfs-3.2-r2-wnr1000 \
-others/squashfs-hg55x-bin \
+others/squashfs-3.2-r2-rtn12 \
 others/squashfs-3.3 \
 others/squashfs-3.3-lzma/squashfs3.3/squashfs-tools \
 others/squashfs-3.3-grml-lzma/squashfs3.3/squashfs-tools \
+others/squashfs-3.4-cisco \
+others/squashfs-3.4-nb4 \
 others/squashfs-4.0-lzma \
-others/squashfs-4.0-realtek"
+others/squashfs-4.0-realtek \
+others/squashfs-hg55x-bin"
 TIMEOUT="15"
 MKFS=""
 DEST=""
