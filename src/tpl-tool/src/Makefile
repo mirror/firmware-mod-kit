@@ -2,11 +2,14 @@ CC=gcc
 CFLAGS=-O2
 TARGET=tpl-tool
 
-$(TARGET): md5.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $(TARGET).c *.o -o $(TARGET)
+$(TARGET): $(TARGET).o md5.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $(TARGET).o md5.o -o $(TARGET)
+
+$(TARGET).o: $(TARGET).c
+	$(CC) $(CFLAGS) $(LDFLAGS) $(TARGET).c -c
 
 md5.o:
 	$(CC) $(CFLAGS) $(LDFLAGS) md5.c -c
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f $(TARGET) *.o
