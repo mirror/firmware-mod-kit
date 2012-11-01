@@ -10,7 +10,7 @@ BLOCK="/dev/mtdblock1"
 
 if [ "$IMG" == "" ] || [ "$IMG" == "-h" ]
 then
-	echo "Usage: $0 <jffs2 image> [output directory]"
+	echo "Usage: $0 <jffs2 image> [mount directory]"
 	exit 1
 fi
 
@@ -33,17 +33,15 @@ then
 	exit 1
 fi
 
-TMP="/tmp/$DST"
-
 #Make sure required modules are loaded
 $SUDO modprobe mtdblock
 $SUDO modprobe mtdchar
 $SUDO modprobe mtd
 $SUDO rmmod mtdram
-$SUDO modprobe mtdram total_size=102400
+$SUDO modprobe mtdram total_size=$((16*1024))
 
 #Create destination and temporary mount directories
-$SUDO rm -rf $DST $TMP && $SUDO mkdir -p $DST && $SUDO mkdir -p $TMP
+$SUDO mkdir -p $DST && $SUDO mkdir -p $DST
 
 if [ $? == 0 ]
 then
@@ -53,13 +51,11 @@ then
 	fi
 
 	#Copy JFSS2 image to MTD block
-	$SUDO dd if="$IMG" of=$BLOCK && $SUDO mount -t jffs2 $BLOCK $TMP
+	$SUDO dd if="$IMG" of=$BLOCK && $SUDO mount -t jffs2 $BLOCK $DST
 
 	if [ $? == 0 ]
 	then
-		#Copy files from mounted directory to destination directory, then unmount
-		$SUDO cp -vR $TMP/* $DST
-		$SUDO umount $TMP && $SUDO rm -rf $TMP
+		echo "JFFS2 image mounted to $DST"
 		exit 0
 	else
 		echo "ERROR: Failed to mount $IMG to $BLOCK"

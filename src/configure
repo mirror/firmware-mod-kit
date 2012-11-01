@@ -3785,6 +3785,20 @@ fi
 
 done
 
+for ac_header in lzma.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "lzma.h" "ac_cv_header_lzma_h" "$ac_includes_default"
+if test "x$ac_cv_header_lzma_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LZMA_H 1
+_ACEOF
+
+else
+  echo "error: missing liblzma header files" && exit
+fi
+
+done
+
 
 ac_config_files="$ac_config_files Makefile"
 
