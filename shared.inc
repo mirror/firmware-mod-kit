@@ -123,7 +123,11 @@ BuildTools ()
 	local LOG_FILE="$1"
 	#################################################################
 	echo " Building tools ..."
-	make -C src > $LOG_FILE 2>&1
+	#make -C src > $LOG_FILE 2>&1
+	cd src
+	./configure && make > $LOG_FILE 2>&1
+	cd -
+
 	if [ $? = 0 ]; then
 		echo " Build seems successful."
 	else
