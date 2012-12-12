@@ -597,7 +597,7 @@ unsigned int mangle2(z_stream **strm, char *d, char *s, int size, int block_size
 			BAD_ERROR("zlib::compress failed, unknown error %d\n", res);
 	}
 
-	sqlzma_opts sqopts;
+	struct sqlzma_opts sqopts;
 	sqopts.try_lzma=un.un_lzma;
 	sqopts.dicsize=64435;
 	res = sqlzma_cm(&sqopts, stream, s, size, d, block_size);
