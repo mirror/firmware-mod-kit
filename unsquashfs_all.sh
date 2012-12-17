@@ -26,6 +26,7 @@ others/squashfs-3.4-cisco \
 others/squashfs-3.4-nb4 \
 others/squashfs-4.0-lzma \
 others/squashfs-4.0-realtek \
+others/squashfs-4.2 \
 others/squashfs-hg55x-bin"
 TIMEOUT="15"
 MKFS=""
