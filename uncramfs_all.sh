@@ -25,8 +25,14 @@ fi
 
 if [ "$ROOTFS" == "" ]
 then
-	ROOTFS="cramfs-root"
+	ROOTFS="./cramfs-root"
 fi
+
+FSIMG=$(readlink -f $FSIMG)
+ROOTFS=$(readlink -f $ROOTFS)
+
+# Make sure we're operating out of the FMK directory
+cd $(dirname $(readlink -f $0))
 
 if [ "$ENDIANESS" == "-be" ]
 then
