@@ -33,6 +33,13 @@ then
 	exit 1
 fi
 
+if [ "$(file $IMG | grep little)" == "" ]
+then
+	echo "Converting image to little endian..."
+	jffs2dump -b -e $IMG.le $IMG
+	IMG=$IMG.le
+fi
+
 #Make sure required modules are loaded
 $SUDO modprobe mtdblock
 $SUDO modprobe mtdchar

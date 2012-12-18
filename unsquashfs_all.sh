@@ -44,9 +44,18 @@ then
 fi
 
 DEST="-dest $DIR"
+MAJOR=$(file "$IMG" | sed -e 's/.*version //' | cut -d'.' -f1)
+
+echo -e "Attempting to extract SquashFS $MAJOR.X file system...\n"
 
 for SUBDIR in $SUBDIRS
 do
+	if [ "$(echo $SUBDIR | grep "$MAJOR\.")" == "" ]
+	then
+		echo "Skipping $SUBDIR (wrong version)..."
+		continue
+	fi
+
 	unsquashfs="$ROOT/$SUBDIR/unsquashfs"
 	mksquashfs="$ROOT/$SUBDIR/mksquashfs"
 
