@@ -40,8 +40,14 @@ fi
 
 if [ "$DIR" == "" ]
 then
-	DIR="squashfs-root"
+	DIR="./squashfs-root"
 fi
+
+IMG=$(readlink -f $IMG)
+DIR=$(readlink -f $DIR)
+
+# Make sure we're operating out of the FMK directory
+cd $(dirname $(readlink -f $0))
 
 DEST="-dest $DIR"
 MAJOR=$(file "$IMG" | sed -e 's/.*version //' | cut -d'.' -f1)
