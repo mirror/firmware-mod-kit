@@ -40,7 +40,15 @@ fi
 
 if [ "$DIR" == "" ]
 then
-	DIR="./squashfs-root"
+	BDIR="./squashfs-root"
+	DIR=$BDIR
+	I=1
+
+	while [ -e $DIR ]
+	do
+		DIR=$BDIR-$I
+		((I=$I+1))
+	done
 fi
 
 IMG=$(readlink -f $IMG)

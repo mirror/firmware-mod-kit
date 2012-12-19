@@ -15,12 +15,12 @@ then
 fi
 
 # Need to extract file systems as ROOT
-if [ "$UID" != "0" ]
-then
-        SUDO="sudo"
-else
-        SUDO=""
-fi
+#if [ "$UID" != "0" ]
+#then
+#        SUDO="sudo"
+#else
+#        SUDO=""
+#fi
 
 if [ "$DST" == "" ]
 then
@@ -45,7 +45,7 @@ $SUDO modprobe mtdblock
 $SUDO modprobe mtdchar
 $SUDO modprobe mtd
 $SUDO rmmod mtdram
-$SUDO modprobe mtdram total_size=$((16*1024))
+$SUDO modprobe mtdram total_size=$((64*1024))
 
 #Create destination and temporary mount directories
 $SUDO mkdir -p $DST && $SUDO mkdir -p $DST
