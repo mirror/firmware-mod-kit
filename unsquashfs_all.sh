@@ -50,7 +50,8 @@ DIR=$(readlink -f $DIR)
 cd $(dirname $(readlink -f $0))
 
 DEST="-dest $DIR"
-MAJOR=$(file "$IMG" | sed -e 's/.*version //' | cut -d'.' -f1)
+MAJOR=$(./src/binwalk -m ./src/binwalk-*/src/magic.binwalk -l 1 "$IMG" | head -4 | tail -1 | sed -e 's/.*version //' | cut -d'.' -f1)
+#./src/binwalk -m ./src/binwalk-*/src/magic.binwalk -l 1 "$IMG" | head -4 | tail -1
 
 echo -e "Attempting to extract SquashFS $MAJOR.X file system...\n"
 
