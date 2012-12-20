@@ -23,6 +23,14 @@ then
 	SUDO="sudo"
 fi
 
+if [ "$ENDIANESS" == "" ]
+then
+	if [ "$(file $FSIMG | grep 'big endian')" != "" ]
+	then
+		ENDIANESS="-be"
+	fi
+fi
+
 if [ "$ROOTFS" == "" ]
 then
 	ROOTFS="./cramfs-root"
@@ -67,4 +75,5 @@ then
 fi
 
 echo "File extraction failed!"
+finish
 exit 1
