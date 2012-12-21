@@ -26,7 +26,7 @@ fi
 
 cd $ROOTFS && cpio -i --no-absolute-filenames < $FSIMG
 
-if [ "$?" != "0" ] && [ "$ROOTFS_CREATED" == "1" ]
+if [ "$(ls $ROOTFS)" == "" ] && [ "$ROOTFS_CREATED" == "1" ]
 then
 	rm -rf $ROOTFS
 fi
