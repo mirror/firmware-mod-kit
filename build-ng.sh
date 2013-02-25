@@ -67,7 +67,7 @@ rm -rf "$FWOUT" "$FSOUT"
 case $FS_TYPE in
 	"squashfs")
 		# Mksquashfs 4.0 tools don't support the -le option; little endian is built by default
-		if [ "$(echo $MKFS | grep 'squashfs-4.0')" != "" ] && [ "$ENDIANESS" == "-le" ]
+		if [ "$(echo $MKFS | grep 'squashfs-4.')" != "" ] && [ "$ENDIANESS" == "-le" ]
 		then
 			ENDIANESS=""
 		fi
