@@ -33,7 +33,7 @@ motorola-bin: motorola-bin.o
 	$(CC) motorola-bin.o -o $@
 
 binwalk:
-	(cd ./binwalk*/src && ./setup.py build && cp bin/binwalk ../../)
+	(cd ./binwalk*/src && ./configure --disable-updates && make && cp binwalk ../../)
 
 clean:
 	rm -f *.o
@@ -54,7 +54,7 @@ clean:
 	make -C ./others clean
 	make -C ./crcalc clean
 	make -C ./webcomp-tools clean
-	cd ./binwalk*/src && ./setup.py clean && cd ../..
+	make -C ./binwalk*/src/ cleanall
 	make -C ./firmware-tools/ clean
 
 cleanall: clean
