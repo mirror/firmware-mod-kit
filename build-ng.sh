@@ -67,7 +67,8 @@ rm -rf "$FWOUT" "$FSOUT"
 case $FS_TYPE in
 	"squashfs")
 		# Check for squashfs 4.0 realtek, which requires the -comp option to build lzma images.
-		if [ "$(echo $MKFS | grep 'squashfs-4.0-realtek')" != "" ] && [ "$FS_COMPRESSION" == "lzma" ]
+#		if [ "$(echo $MKFS | grep 'squashfs-4.0-realtek')" != "" ] && [ "$FS_COMPRESSION" == "lzma" ]
+		if [ "$FS_COMPRESSION" == "lzma" ]
 		then
 			COMP="-comp lzma"
 		else
