@@ -151,6 +151,13 @@ fi
 # trx, dlob, uimage
 ./src/crcalc/crcalc "$FWOUT" "$BINLOG"
 
+if [ $? -eq 0 ]
+then
+	echo -n "Finished! "
+else
+	echo -n "Firmware header not supported; firmware checksums may be incorrect. "
+fi
+
 # if a Buffalo image, then run encrypter - base on image name
 if [ "$(echo $FWOUT | grep -i 'buffalo')" != "" ]
 then	
@@ -160,13 +167,6 @@ then
 	$PRODUCT=""
 	$LONGSTATE=""
 	./src/firmware-tools/buffalo-enc -i $FWOUT -o $FWOUT.buffalo.enc $KEY $MAGIC $PRODUCT $LONGSTATE
-fi
-
-if [ $? -eq 0 ]
-then
-	echo -n "Finished! "
-else
-	echo -n "Firmware header not supported; firmware checksums may be incorrect. "
 fi
 
 echo "New firmware image has been saved to: $FWOUT"
