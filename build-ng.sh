@@ -148,7 +148,19 @@ then
 fi
 
 # Calculate new checksum values for the firmware header
+# trx, dlob, uimage
 ./src/crcalc/crcalc "$FWOUT" "$BINLOG"
+
+# if a Buffalo image, then run encrypter - base on image name
+if [ "$(echo $FWOUT | grep -i 'buffalo')" != "" ]
+then	
+	# product name, version, key, encryption type can be specified here
+	$KEY="" # specify full param, e.g. -k mykey
+	$MAGIC=""
+	$PRODUCT=""
+	$LONGSTATE=""
+	./src/firmware-tools/buffalo-enc -i $FWOUT -o $FWOUT.buffalo.enc $KEY $MAGIC $PRODUCT $LONGSTATE
+fi
 
 if [ $? -eq 0 ]
 then
