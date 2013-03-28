@@ -33,6 +33,14 @@ fi
 if [ "$ROOTFS" == "" ]
 then
 	ROOTFS="./cramfs-root"
+	BDIR=$ROOTFS
+	I=1
+
+	while [ -e $ROOTFS ]
+	do
+		ROOTFS=$BDIR-$I
+		((I=$I+1))
+	done
 fi
 
 FSIMG=$(readlink -f $FSIMG)
@@ -51,7 +59,7 @@ fi
 if [ -e "$FSIMG.le" ]
 then
 	# If this is an OpenRG firmware, try uncramfs-lzma first.
-	if [ "$(strings $FSIMG.le | grep openrg)" != "" ]
+	if [ "$(strings "$FSIMG.le" | grep openrg)" != "" ]
 	then
 		./src/uncramfs-lzma/uncramfs-lzma "$ROOTFS" "$FSIMG.le" 2>/dev/null
 		if [ $? -eq 0 ]
