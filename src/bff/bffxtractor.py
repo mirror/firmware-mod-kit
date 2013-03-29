@@ -87,7 +87,7 @@ if file_size:
 	if magic == HUFFMAN_MAGIC:
 		try:
 			# Many thanks to Philipp for patching the huffman decoder to work!
-			subprocess.call([script_path + "/unpack", filename + '.packed', filename])
+			subprocess.call([script_path + "/bff_huffman_decompress", filename + '.packed', filename])
 			os.remove(filename + '.packed')
 		except:
 			pass
