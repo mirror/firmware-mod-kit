@@ -3,7 +3,7 @@ CXX := g++
 INCLUDEDIR = .
 CFLAGS := -I$(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2
 
-all: asustrx addpattern untrx motorola-bin splitter3 binwalk
+all: asustrx addpattern untrx motorola-bin splitter3 bffutils
 	make -C ./uncramfs/
 	make -C ./uncramfs-lzma/
 	make -C ./cramfs-2.x/
@@ -32,8 +32,8 @@ asustrx: asustrx.o
 motorola-bin: motorola-bin.o
 	$(CC) motorola-bin.o -o $@
 
-binwalk:
-	(cd ./binwalk*/src && ./configure --disable-updates && make && cp binwalk ../../)
+bffutils:
+	make -C ./bff/
 
 clean:
 	rm -f *.o
@@ -56,6 +56,7 @@ clean:
 	make -C ./webcomp-tools clean
 	make -C ./binwalk*/src/ cleanall
 	make -C ./firmware-tools/ clean
+	make -C ./bff/ clean
 
 cleanall: clean
 	rm -rf Makefile config.* *.cache
