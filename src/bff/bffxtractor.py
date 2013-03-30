@@ -91,4 +91,6 @@ if file_size:
 			os.remove(filename + '.packed')
 		except:
 			pass
+else:
+	_mkdir('./' + filename)
 
