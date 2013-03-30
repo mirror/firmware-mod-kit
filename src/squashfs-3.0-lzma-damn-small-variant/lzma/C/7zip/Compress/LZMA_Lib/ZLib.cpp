@@ -19,9 +19,7 @@
  * Public License along with this library; if not, write to 
  * the Free Software Foundation, Inc., 59 Temple Place, 
  * Suite 330, Boston, MA 02111-1307 USA 
- *
- * 07/10/06 - jc - Added LZMA encoding parameter specification (_LZMA_PARAMS)
- *				   contact: jeremy@bitsum.com
+ *				 
  */
 
 /*
@@ -333,9 +331,7 @@ if (testcount==(sizeof(matrix)/sizeof(struct MATRIXENTRY)))
     }
 pthread_mutex_unlock(&pos_mutex);
 Bytef *test2 = (Bytef*)malloc(test2len);
-//fprintf(stderr,"try method [pb:%d lc:%d lp:%d fb:%d]\n",pbtest,lctest,lptest,testfb);
 int ret =  compress2_lzma_test(test2,&test3len,testsource,testsourcelen,testlevel,testfb,takelcvalue,takelpvalue,takepbvalue);
-//fprintf(stderr,"test return %d\n",ret);
 pthread_mutex_lock(&pos_mutex);
 if (test3len<test1len)
     {
@@ -345,7 +341,6 @@ if (test3len<test1len)
     lcsave = takelcvalue;
     lpsave = takelpvalue;
     }
-//fprintf(stderr,"finished %d running\n",running);
 running--;
 pthread_mutex_unlock(&pos_mutex);
 free(test2);
@@ -382,7 +377,6 @@ running=8;
 	    pthread_join(thread[i],NULL);
 	    }
 }
-    fprintf(stderr,"use method [pb:%d lc:%d lp:%d fb:%d] (len %d)\n",pbsave,lcsave,lpsave,fb,test1len);
     memcpy(dest+4,test1,test1len);
     dest[0]=pbsave;
     dest[1]=lcsave;
@@ -444,7 +438,8 @@ ZEXTERN int ZEXPORT compress2 OF((Bytef *dest,   uLongf *destLen,
 		{
 		fprintf(stderr,"coder properties error\n");
 		return Z_MEM_ERROR; // should not happen
-		}
+	
+	}
 	HRESULT result = encoder->Code(inStream, outStream, 0, 0, 0);
 	if (result == E_OUTOFMEMORY)
 	{
