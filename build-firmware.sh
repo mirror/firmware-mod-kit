@@ -167,6 +167,12 @@ then
 	$PRODUCT=""
 	$LONGSTATE=""
 	./src/firmware-tools/buffalo-enc -i $FWOUT -o $FWOUT.buffalo.enc $KEY $MAGIC $PRODUCT $LONGSTATE
+	#if [ $? -eq 0 ]
+	#then
+	#	echo "Encrypted Buffalo image created."
+	#else
+	#	echo "ERROR creating an encrypted Buffalo image"
+	#fi
 fi
 
 echo "New firmware image has been saved to: $FWOUT"
