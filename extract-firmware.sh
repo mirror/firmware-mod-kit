@@ -3,12 +3,6 @@
 IMG="${1}"
 DIR="${2}"
 
-if [ ! -f "${IMG}" ];
-then
-	echo "File does not exist!"
-	exit 1
-fi
-
 if [ "${DIR}" = "" ]
  then
 	DIR="fmk"
@@ -37,6 +31,12 @@ printf "Firmware Mod Kit (build-ng) ${VERSION}, (c)2011-2012 Craig Heffner, Jere
 if [ "${IMG}" = "" ] || [ "${IMG}" = "-h" ]
  then
 	printf "Usage: ${0} <firmware image>\n\n"
+	exit 1
+fi
+
+if [ ! -f "${IMG}" ];
+then
+	echo "File does not exist!"
 	exit 1
 fi
 
