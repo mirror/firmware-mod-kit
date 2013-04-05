@@ -8,7 +8,7 @@ VERSION="0.01 alpha"
 #
 #
 echo "$0 (c)2006 Jeremy Collake <jeremy.collake@gmail.com"
-echo "!! WARNING: This script is in early development stage !!"
+
 MIN_PARAMS=2
 if [ $# -lt $MIN_PARAMS ] || [ ! -d "$2" ]; then
 	echo " Invalid usage!"
