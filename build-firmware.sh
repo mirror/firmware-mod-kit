@@ -83,9 +83,14 @@ case $FS_TYPE in
 		# Increasing the block size minimizes the resulting image size (larger dictionary). Max block size of 1MB.
 		if [ "$NEXT_PARAM" == "-min" ]
 		then
-			BS="-b $((1024*1024))"
-		else
-			BS=""
+			echo "Blocksize override (-min). Original used $FS_BLOCKSIZE. New firmware uses 1MB blocks."
+			FS_BLOCKSIZE="$((1024*1024))"
+		fi
+
+		# if blocksize var exists, then add '-b' parameter
+                if [ "$FS_BLOCKSIZE" != "" ]
+		then
+			BS="-b $FS_BLOCKSIZE"
 		fi
 
 		$SUDO $MKFS "$ROOTFS" "$FSOUT" $ENDIANESS $BS $COMP -all-root

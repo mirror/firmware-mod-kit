@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 IMG="${1}"
 DIR="${2}"
@@ -77,7 +77,8 @@ IFS='
 HEADER_IMAGE_OFFSET=0
 
 # Loop through binwalk log file
-for LINE in $(sort -n ${BINLOG} | grep -v -e '^DECIMAL' -e '^---')
+for LINE in IFS='
+'$(sort -n ${BINLOG} | grep -v -e '^DECIMAL' -e '^---')
  do
 	# Get decimal file offset and the first word of the description
 	OFFSET=$(echo ${LINE} | awk '{print $1}')
@@ -113,6 +114,22 @@ for LINE in $(sort -n ${BINLOG} | grep -v -e '^DECIMAL' -e '^---')
 		else
 			FS_COMPRESSION="gzip"
 		fi
+
+		# Check for a block size (used only by mksquashfs)
+		if [ "$(echo ${LINE} | grep -i 'blocksize')" != "" ]
+		then
+			set -f
+			IFS=,
+			for fsparam in ${LINE}
+			do
+				if [[ $fsparam = *blocksize* ]]; then
+				  fsparam="${fsparam##*blocksize: }"
+				  FS_BLOCKSIZE="${fsparam%* bytes}"
+				  break
+				fi
+			done
+		fi
+		set +f; unset IFS
 	fi
 done
 
@@ -171,6 +188,7 @@ echo "FOOTER_OFFSET='${FOOTER_OFFSET}'" >> ${CONFLOG}
 echo "FS_TYPE='${FS_TYPE}'" >> ${CONFLOG}
 echo "FS_OFFSET='${FS_OFFSET}'" >> ${CONFLOG}
 echo "FS_COMPRESSION='${FS_COMPRESSION}'" >> ${CONFLOG}
+echo "FS_BLOCKSIZE='${FS_BLOCKSIZE}'" >> ${CONFLOG}
 echo "ENDIANESS='${ENDIANESS}'" >> ${CONFLOG}
 
 # Extract the file system and save the MKFS variable to the CONFLOG
