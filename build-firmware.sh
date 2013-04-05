@@ -83,7 +83,7 @@ case $FS_TYPE in
 		# Increasing the block size minimizes the resulting image size (larger dictionary). Max block size of 1MB.
 		if [ "$NEXT_PARAM" == "-min" ]
 		then
-			echo "Blocksize override (-min). Original used $FS_BLOCKSIZE. New firmware uses 1MB blocks."
+			echo "Blocksize override (-min). Original used $((FS_BLOCKSIZE/1024))KB blocks. New firmware uses 1MB blocks."
 			FS_BLOCKSIZE="$((1024*1024))"
 		fi
 
