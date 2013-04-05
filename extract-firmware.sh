@@ -3,6 +3,12 @@
 IMG="${1}"
 DIR="${2}"
 
+if [ ! -f "${IMG}" ];
+then
+	echo "File does not exist!"
+	exit 1
+fi
+
 if [ "${DIR}" = "" ]
  then
 	DIR="fmk"
