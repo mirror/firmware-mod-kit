@@ -10,10 +10,7 @@ VERSION="${SHARED_VERSION}"
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
 # Site: http://code.google.com/p/firmware-mod-kit/
 #
-# See documentation at:
-#  http://www.bitsum.com/firmware_mod_kit.htm
-#
-# USAGE: extract_firmware.sh FIRMWARE_IMAGE.BIN WORKING_DIRECTORY/
+# USAGE: old-extract.sh FIRMWARE_IMAGE.BIN WORKING_DIRECTORY/
 #
 # This scripts extacts the firmware image to [WORKING_DIRECTORY],
 # with the following subdirectories:
@@ -23,7 +20,7 @@ VERSION="${SHARED_VERSION}"
 #
 # Example:
 #
-# ./extract_firmware.sh dd-wrt.v23_generic.bin std_generic
+# ./old-extract.sh dd-wrt.v23_generic.bin std_generic
 #
 #
 EXIT_ON_FS_PROBLEM="0"

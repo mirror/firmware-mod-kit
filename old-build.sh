@@ -10,10 +10,7 @@ VERSION="${SHARED_VERSION}"
 # Author: Jeremy Collake <jeremy.collake@gmail.com>
 # Site: http://code.google.com/p/firmware-mod-kit/
 #
-# See documentation at:
-#  http://www.bitsum.com/firmware_mod_kit.htm
-#
-# USAGE: build_firmware.sh OUTPUT_DIRECTORY/ WORKING_DIRECOTRY/
+# USAGE: old-build.sh OUTPUT_DIRECTORY/ WORKING_DIRECOTRY/
 #
 # This scripts builds the firmware image from [WORKING_DIRECTORY],
 # with the following subdirectories:
@@ -23,7 +20,7 @@ VERSION="${SHARED_VERSION}"
 #
 # Example:
 #
-# ./build_firmware.sh new_firmwares/ std_generic/
+# ./old-build.sh new_firmwares/ std_generic/
 #
 ## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # 20110225-0746-MCT - Added rebuild number.
@@ -236,7 +233,7 @@ if [ $# = 2 ]; then
 	#################################################################
 	TestIsRoot
 	#################################################################
-	if [ ! -f "./build_firmware.sh" ]; then
+	if [ ! -f "./old-build.sh" ]; then
 		echo " ERROR - You must run this script from the same directory as it is in!"
 		exit 1
 	fi
