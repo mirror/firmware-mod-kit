@@ -81,7 +81,7 @@ if [ $# = 2 ]; then
 	TestIsRoot
 	#################################################################
 	if [ -f "$1" ]; then
-		if [ ! -f "./extract_firmware.sh" ]; then
+		if [ ! -f "./old-extract.sh" ]; then
 			echo " ERROR - You must run this script from the same directory as it is in!"
 			exit 1
 		fi
