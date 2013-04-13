@@ -172,7 +172,7 @@ int extract(char *httpd, char *www, char *outdir)
 					free(dir_tmp);
 
 					/* Sanity checks on our buffer offsets and sizes */
-					if(info->offset >= 0 && info->size >= 0 && (info->offset + info->size) < wsize)
+					if(info->offset >= 0 && info->size >= 0 && (info->offset + info->size) <= wsize)
 					{
 						/* Write the data to disk */
 						if(!file_write(path, (wdata + info->offset), info->size))
