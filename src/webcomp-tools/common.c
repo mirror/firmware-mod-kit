@@ -55,7 +55,7 @@ int are_entry_offsets_valid(unsigned char *data, uint32_t size)
 /* Returns the next web file entry */
 struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
-	static int n, total_size;
+	static int n, total_size=0;
 	uint32_t entry_size = 0, offset = 0, str_offset = 0;
 	struct entry_info *info = NULL;
 
