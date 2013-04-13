@@ -213,13 +213,8 @@ int extract(char *httpd, char *www, char *outdir)
 }
 
 /* Restore embedded file contents to binary file(s) */
-#define RESTORE_GEN3
 int restore(char *httpd, char *www, char *indir)
 {
-#ifndef RESTORE_GEN3
-	fprintf(stderr, "\n Restore support disabled pending update!");
-	return -1;
-#else	
 	int n = 0, total = 0;
 	int last_size = 0xAB1C;
 	FILE *fp = NULL;
