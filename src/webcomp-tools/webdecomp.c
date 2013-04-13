@@ -114,7 +114,7 @@ int detect_settings(unsigned char *httpd, size_t httpd_size)
 		if(find_websRomPageIndex((char *) httpd, httpd_size))
 		{
 			/* If the entry offsets are not valid, then the firmware must be using the new webcomp structure format */
-			if(1) //!are_entry_offsets_valid(httpd, httpd_size))
+			if(!are_entry_offsets_valid(httpd, httpd_size))
 			{
 				globals.use_new_format = 1;
 			}
