@@ -320,7 +320,6 @@ int restore(char *httpd, char *www, char *indir)
 	
 	if(fp) fclose(fp);
 	if(hdata) free(hdata);
-#endif
 	return n;
 }
 
