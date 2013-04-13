@@ -55,8 +55,9 @@ int are_entry_offsets_valid(unsigned char *data, uint32_t size)
 /* Returns the next web file entry */
 struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
-	static int n, total_size=0;
-	uint32_t entry_size = 0, offset = 0, str_offset = 0;
+	static int n, total_size = 0;
+	uint32_t entry_size = 0, offset = 0, str_offset = 0, temp = 0;
+	uint32_t last_size = 43946-142;
 	struct entry_info *info = NULL;
 
 	if(data == NULL || size == 0)
@@ -103,6 +104,11 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 				
 			/* Convert data to little endian, if necessary */
 			ntoh_struct(info);
+			
+			// new algorithm (subtract last given size from currently given size for real current size)
+			temp = info->size;					
+			info->size -= last_size;
+			last_size = temp;
 
 			/* A NULL entry name signifies the end of the array */
 			if(info->name_ptr == 0)
