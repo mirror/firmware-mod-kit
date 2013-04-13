@@ -172,7 +172,7 @@ int extract(char *httpd, char *www, char *outdir)
 					free(dir_tmp);
 
 					/* Sanity checks on our buffer offsets and sizes */
-					if(info->offset >= 0 && info->size >= 0 && (info->offset + info->size) <= wsize)
+					if(info->offset >= 0 && info->size >= 0 && (info->offset + info->size) < wsize)
 					{
 						/* Write the data to disk */
 						if(!file_write(path, (wdata + info->offset), info->size))
@@ -216,13 +216,12 @@ int extract(char *httpd, char *www, char *outdir)
 int restore(char *httpd, char *www, char *indir)
 {
 	int n = 0, total = 0;
-	int last_size = 0xAB1C;
 	FILE *fp = NULL;
 	size_t hsize = 0, fsize = 0;
 	struct entry_info *info = NULL;
 	unsigned char *hdata = NULL, *fdata = NULL;
 	char origdir[FILENAME_MAX] = { 0 };
-	char *path = NULL;	
+	char *path = NULL;
 
 	/* Read in the httpd file */
 	hdata = (unsigned char *) file_read(httpd, &hsize);
@@ -261,7 +260,7 @@ int restore(char *httpd, char *www, char *indir)
 					/* Update the entry size and file offset */
 					if(globals.use_new_format)
 					{
-						info->new_entry->size = fsize + last_size;					
+						info->new_entry->size = fsize;
 					}
 					else
 					{
@@ -320,7 +319,6 @@ int restore(char *httpd, char *www, char *indir)
 	
 	if(fp) fclose(fp);
 	if(hdata) free(hdata);
-#endif
 	return n;
 }
 

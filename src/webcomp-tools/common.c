@@ -1,528 +1,332 @@
+/*
+ * Extracts the embedded Web GUI files from DD-WRT file systems.
+ *
+ * Craig Heffner
+ * 07 September 2011
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <elf.h>
+#include <libgen.h>
+#include <getopt.h>
 #include "common.h"
+#include "webdecomp.h"
 
-/* Given the physical and virtual section loading addresses, convert a virtual address to a physical file offset */
-uint32_t file_offset(uint32_t address, uint32_t virtual, uint32_t physical)
+int main(int argc, char *argv[])
 {
-        uint32_t offset = 0;
+	char *httpd = NULL, *www = NULL, *dir = NULL;
+	int retval = EXIT_FAILURE, action = NONE, long_opt_index = 0, n = 0;
+	char c = 0;
 
-        offset = (address-virtual+physical);
+	char *short_options = "b:w:d:i:erh";
+	struct option long_options[] = {
+		{ "httpd", required_argument, NULL, 'b' },
+		{ "www", required_argument, NULL, 'w' },
+		{ "dir", required_argument, NULL, 'd' },
+		{ "index", required_argument, NULL, 'i' },
+		{ "extract", no_argument, NULL, 'e' },
+		{ "restore", no_argument, NULL, 'r' },
+		{ "help", no_argument, NULL, 'h' },
+		{ 0, 0, 0, 0 }
+	};
 
-        return offset;
-}
-
-/* Given the literal file offset and virtual section loading addresses, convert a physical file offset to a virtual address */
-uint32_t virtual_address(uint32_t offset, uint32_t virtual, uint32_t physical)
-{
-	uint32_t address = 0;
-
-	address = (offset+virtual-physical);
-
-	return address;
-}
-
-/* Check to see if the data offsets reported by next_entry make sense; this is used to detect if the new or old webcomp data structures are in use. */
-int are_entry_offsets_valid(unsigned char *data, uint32_t size)
-{
-	int retval = 0;
-	struct entry_info *first = NULL;
-
-	first = next_entry(data, size);
-	if(first)
-	{
-		if(first->offset == 0 && (first->size < first->name_ptr))
-		{
-			retval = 1;
-		}
-
-		free(first);
-	}
-
-	next_entry(NULL, 0);
-
-	return retval;
-}
-
-/* Returns the next web file entry */
-struct entry_info *next_entry(unsigned char *data, uint32_t size)
-{
-	static int n = 0, total_size = 0;
-	uint32_t entry_size = 0, offset = 0, str_offset = 0, temp = 0;
-	uint32_t last_size = 0xAB1C;
-	struct entry_info *info = NULL;
-
-	if(data == NULL || size == 0)
-	{
-		n = 0;
-		total_size = 0;
-		return NULL;
-	}
-
-	if(globals.use_new_format)
-	{
-		entry_size = sizeof(struct new_file_entry);
-	}
-	else
-	{
-		entry_size = sizeof(struct file_entry);
-	}
-
-	/* Calculate the offset into the array for the next entry */
-	offset = globals.index_address + (entry_size * n);
-
-	if(offset < size)
-	{
-		info = malloc(sizeof(struct entry_info));
-		if(info)
-		{
-			memset(info, 0, sizeof(struct entry_info));
-
-			/* Calculate the offset if this firmware uses the new structure format */
-			if(globals.use_new_format)
-			{
-				info->new_entry = (struct new_file_entry *) (data + offset);
-				info->name_ptr = info->new_entry->name;
-				info->size = info->new_entry->size;
-				info->offset = total_size;
-			}
-			else
-			{
-				info->entry = (struct file_entry *) (data + offset);
-				info->size = info->entry->size;
-				info->offset = info->entry->offset;
-				info->name_ptr = info->entry->name;
-			}
-				
-			/* Convert data to little endian, if necessary */
-			ntoh_struct(info);
-			
-			// new algorithm (subtract last given size from currently given size for real current size)
-			temp = info->size;					
-			info->size -= last_size;
-			last_size = temp;
-
-			/* A NULL entry name signifies the end of the array */
-			if(info->name_ptr == 0)
-			{
-				free(info);
-				info = NULL;
-			}
-			else
-			{
-				/* Get the physical offset of the file name string */
-				str_offset = file_offset(info->name_ptr, globals.tv_address, globals.tv_offset);
-
-				/* Sanity check */
-				if(str_offset >= size)
-				{
-					free(info);
-					info = NULL;
-				}
-				else
-				{
-					/* Point entry->name at the actual string */
-					info->name = (char *) (data + str_offset);
-
-					/* Track the total size of the processed entries so far, and increment the entry count */
-					total_size += info->size;
-					n++;
-				}
-			}
-		}
-	}
-
-	return info;
-}
-
-/* Get the virtual addresses and physical offsets of the program headers in the ELF file */
-int parse_elf_header(unsigned char *data, size_t size)
-{
-	int i = 0, n = 0, retval = 0;
-	uint32_t phoff = 0, type = 0, flags = 0;
-	uint16_t phnum = 0;
-	Elf32_Ehdr *header = NULL;
-	Elf32_Phdr *program = NULL;
-
-	if(data && size > sizeof(Elf32_Ehdr))
-	{
-		header = (Elf32_Ehdr *) data;
-
-		if(strncmp((char *) &header->e_ident, ELF_MAGIC, 4) == 0)
-		{
-			if(header->e_ident[EI_DATA] == ELFDATA2MSB)
-			{
-				globals.endianess = BIG_ENDIAN;
-
-				phnum = ntohs(header->e_phnum);
-				phoff = ntohl(header->e_phoff);
-			}
-			else
-			{
-				globals.endianess = LITTLE_ENDIAN;
-			
-				phnum = header->e_phnum;
-				phoff = header->e_phoff;
-			}
-
-			/* Loop through program headers looking for TEXT and DATA headers */
-			for(i=0; i<phnum; i++)
-			{
-				program = (Elf32_Phdr *) (data + phoff + (sizeof(Elf32_Phdr) * i));
-
-				if(globals.endianess == LITTLE_ENDIAN)
-				{
-					type = program->p_type;
-					flags = program->p_flags;
-				}
-				else
-				{
-					type = htonl(program->p_type);
-					flags = htonl(program->p_flags);
-				}
-
-				if(type == PT_LOAD)
-				{
-					/* TEXT */
-					if((flags | PF_X) == flags)
-					{
-						globals.tv_address = program->p_vaddr;
-						globals.tv_offset = program->p_offset;
-						n++;
-					}
-					/* DATA */
-					else if((flags | PF_R | PF_W) == flags)
-					{
-						globals.dv_address = program->p_vaddr;
-						globals.dv_offset = program->p_offset;
-						n++;
-					}
-				}
-
-				/* Return true if both program headers were identified */
-				if(n == NUM_PROGRAM_HEADERS)
-				{
-					retval = 1;
-					break;
-				}
-			}
-		}
-	}
-
-
-	if(globals.endianess == BIG_ENDIAN)
-	{
-		globals.tv_address = htonl(globals.tv_address);
-		globals.tv_offset = htonl(globals.tv_offset);
-		globals.dv_address = htonl(globals.dv_address);
-		globals.dv_offset = htonl(globals.dv_offset);
-	}
-
-	return retval;
-}
-
-/* Get the virtual offset to the websRomPageIndex variable */
-int find_websRomPageIndex(char *data, size_t size)
-{
-	int i = 0, len = 0, poff = 0, tmpoff = 0, retval = 0;
-	struct file_entry entry = { 0 };
-	uint32_t string_vaddr = 0;
-
-	/* Index may have already been set by user. If so, trust the user. */
-	if(globals.index_address != 0)
-	{
-		retval = 1;
-	}
-	else
-	{
-		while(tmpoff < size)
-		{
-			/* Find the location of the first string that ends in '.asp'  */
-			tmpoff = find(ASP, (data+tmpoff), (size-tmpoff));
-
-			/* Find the beginning of the string by looping backwards from the '.asp' until we get a non-ASCII character */
-			while(is_ascii((data+tmpoff), 1))
-			{
-				tmpoff--;
-			}
-			tmpoff++;
-
-			len = strlen(data+tmpoff);
-
-			if(len > ASP_LEN)
-			{
-				poff = tmpoff;
-				break;
-			}
-			else
-			{
-				tmpoff += len;
-			}
-		}
+	memset((void *) &globals, 0, sizeof(globals));
 	
-		if(poff)
+	while((c = getopt_long(argc, argv, short_options, long_options, &long_opt_index)) != -1)
+	{
+		switch(c)
 		{
-			/* Convert the file offset to a virtual address */
-			string_vaddr = virtual_address(poff, globals.tv_address, globals.tv_offset);
-
-			/* Swap the virtual address endinaess, if necessary */
-			if(globals.endianess == BIG_ENDIAN)
-			{
-				string_vaddr = htonl(string_vaddr);
-			}
-
-			/* Loop through the binary looking for references to the string's virtual address */	
-			for(i=globals.tv_offset; i<(size-sizeof(struct file_entry)); i++)
-			{
-				memcpy((void *) &entry, data+i, sizeof(struct file_entry));
-
-				/* The first entry in the structure array should have an offset of zero and a size greater than zero */
-				if(entry.name == string_vaddr && 
-				  ((entry.offset == 0 && entry.size < entry.name) || 
-				   (entry.size > 0)))
-				{
-					globals.index_address = i;
-					retval = 1;
-					break;
-				}
-			}
+			case 'b':
+				httpd = strdup(optarg);
+				break;
+			case 'w':
+				www = strdup(optarg);
+				break;
+			case 'd':
+				dir = strdup(optarg);
+				break;
+			case 'e':
+				action = EXTRACT;
+				break;
+			case 'r':
+				action = RESTORE;
+				break;
+			case 'i':
+				globals.index_address = atoi(optarg);
+				break;
+			default:
+				usage(argv[0]);
+				goto end;
+			
 		}
 	}
 
-	return retval;
-}
-
-/* Convert structure members from big to little endian, if necessary */
-void ntoh_struct(struct entry_info *info)
-{
-	if(globals.endianess == BIG_ENDIAN)
+	/* Verify that all required options were specified  */
+	if(action == NONE || httpd == NULL || www == NULL)
 	{
-		info->name_ptr = (uint32_t) ntohl(info->name_ptr);
-		info->size = (uint32_t) ntohl(info->size);
-		
-		/* If using the new format, we calculate the offset, so it is going to be in host byte format */
-		if(!globals.use_new_format)
-		{
-			info->offset = (uint32_t) ntohl(info->offset);
-		}
+		usage(argv[0]);
+		goto end;
 	}
 
-	return;
-}
-
-/* Convert structure members from little to big endian, if necessary */
-void hton_struct(struct entry_info *info)
-{
-	if(globals.endianess == BIG_ENDIAN)
+	/* If no output directory was specified, use the default (www) */
+	if(!dir)
 	{
-		info->name_ptr = (uint32_t) htonl(info->name_ptr);
-		info->size = (uint32_t) htonl(info->size);
-		info->offset = (uint32_t) htonl(info->offset);
+		dir = strdup(DEFAULT_OUTDIR);
 	}
 
-	return;
-}
-
-/* Convert entry data values from little to big endian, if necessary */
-void hton_entries(struct entry_info *info)
-{
-	if(globals.endianess == BIG_ENDIAN)
+	/* Extract! */
+	if(action == EXTRACT)
 	{
-		if(info->entry)
-		{
-			info->entry->size = (uint32_t) htonl(info->entry->size);
-			info->entry->offset = (uint32_t) htonl(info->entry->offset);
-		}
-
-		if(info->new_entry)
-		{
-			info->new_entry->size = (uint32_t) htonl(info->new_entry->size);
-		}
+		n = extract(httpd, www, dir);
+	}
+	/* Restore! */
+	else if(action == RESTORE)
+	{
+		n = restore(httpd, www, dir);
 	}
 
-	return;
-}
-
-/* Verify if the given data is printable ASCII */
-int is_ascii(char *data, int len)
-{
-	int i = 0, retval = 0;
-
-	for(i=0; i<len; i++)
+	if(n > 0)
 	{
-		if(data[i] < ' ' || data[i] > 'z')
-		{
-			break;
-		}
+		printf("\nProcessed %d Web files.\n\n", n);
+		retval = EXIT_SUCCESS;
 	}
-
-	if(i == len)
+	else
 	{
-		retval = 1;
+		fprintf(stderr, "Failed to process Web files!\n");
 	}
-
-	return retval;
-}
-
-/* Find a needle in a haystack */
-int find(char *needle, char *haystack, size_t size)
-{
-        int i = 0, offset = 0, len = 0;
-
-        if(haystack && needle)
-        {
-		len = strlen(needle);
-
-                for(i=0; i<(size-len); i++)
-                {
-                        if(memcmp(haystack+i, needle, len) == 0)
-                        {
-                                offset = i;
-                                break;
-                        }
-                }
-        }
-
-        return offset;
-}
-
-/* Reads in and returns the contents and size of a given file */
-char *file_read(char *file, size_t *fsize)
-{
-        int fd = 0;
-        struct stat _fstat = { 0 };
-        char *buffer = NULL;
-
-	*fsize = 0;
-
-        if(stat(file, &_fstat) == -1)
-        {
-                perror(file);
-                goto end;
-        }
-
-        if(_fstat.st_size == 0)
-        {
-                fprintf(stderr, "%s: zero size file\n", file);
-                goto end;
-        }
-
-        fd = open(file,O_RDONLY);
-        if(!fd)
-        {
-                perror(file);
-                goto end;
-        }
-
-        buffer = malloc(_fstat.st_size);
-        if(!buffer)
-        {
-                perror("malloc");
-                goto end;
-        }
-        memset(buffer, 0 ,_fstat.st_size);
-
-        if(read(fd, buffer, _fstat.st_size) != _fstat.st_size)
-        {
-                perror(file);
-                if(buffer) free(buffer);
-                buffer = NULL;
-        }
-        else
-        {
-                *fsize = _fstat.st_size;
-        }
 
 end:
-        if(fd) close(fd);
-        return buffer;
+	if(httpd) free(httpd);
+	if(www) free(www);
+	if(dir) free(dir);
+	return retval;
 }
 
-/* Writes data to the specified file */
-int file_write(char *file, unsigned char *data, size_t size)
+/* Initializes everything for extract() and restore() */
+int detect_settings(unsigned char *httpd, size_t httpd_size)
 {
-	FILE *fp = NULL;
 	int retval = 0;
 
-	fp = fopen(file, "wb");
-	if(fp)
+	if(parse_elf_header(httpd, httpd_size))
 	{
-		if(fwrite(data, 1, size, fp) != size)
+		if(find_websRomPageIndex((char *) httpd, httpd_size))
 		{
-			perror("fwrite");
+			/* If the entry offsets are not valid, then the firmware must be using the new webcomp structure format */
+			if(!are_entry_offsets_valid(httpd, httpd_size))
+			{
+				globals.use_new_format = 1;
+			}
+
+			retval = 1;
 		}
 		else
 		{
-			retval = 1;
+			fprintf(stderr, "Failed to locate websRomPageIndex!\n");
 		}
-
-		fclose(fp);
 	}
 	else
 	{
-		perror("fopen");
+		fprintf(stderr, "Failed to parse ELF header!\n");
 	}
 
 	return retval;
 }
 
-/* Recursive mkdir (same as mkdir -p) */
-void mkdir_p(char *dir) 
+/* Extract embedded file contents from binary file(s) */
+int extract(char *httpd, char *www, char *outdir)
 {
-        char tmp[FILENAME_MAX] = { 0 };
-        char *p = NULL;
-        size_t len = 0;
- 
-        snprintf(tmp, sizeof(tmp),"%s",dir);
-        len = strlen(tmp);
+	int n = 0;
+	size_t hsize = 0, wsize = 0;
+	struct entry_info *info = NULL;
+	unsigned char *hdata = NULL, *wdata = NULL;
+	char *dir_tmp = NULL, *path = NULL;
 
-        if(tmp[len - 1] == '/')
+	/* Read in the httpd and www files */
+	hdata = (unsigned char *) file_read(httpd, &hsize);
+	wdata = (unsigned char *) file_read(www, &wsize);
+	
+	if(hdata != NULL && wdata != NULL && detect_settings(hdata, hsize))
 	{
-		tmp[len - 1] = 0;
-	}
+		/* Create the output directory, if it doesn't already exist */
+		mkdir_p(outdir);
 
-        for(p = tmp + 1; *p; p++)
-	{
-                if(*p == '/') 
+		/* Change directories to the output directory */
+        	if(chdir(outdir) == -1)
+        	{
+                	perror(outdir);
+        	}
+		else 
 		{
-                        *p = 0;
-                        mkdir(tmp, S_IRWXU);
-                        *p = '/';
-                }
-	}
+			/* Get the next entry until we get a blank entry */
+			while((info = next_entry(hdata, hsize)) != NULL)
+			{
+				/* Make sure the full file path is safe (i.e., it won't overwrite something critical on the host system) */
+				path = make_path_safe(info->name);
+				if(path)
+				{
+					/* dirname() clobbers the string you pass it, so make a temporary one */
+					dir_tmp = strdup(path);
+					mkdir_p(dirname(dir_tmp));
+					free(dir_tmp);
 
-        mkdir(tmp, S_IRWXU);
+					/* Sanity checks on our buffer offsets and sizes */
+					if(info->offset >= 0 && info->size >= 0 && (info->offset + info->size) < wsize)
+					{
+						/* Write the data to disk */
+						if(!file_write(path, (wdata + info->offset), info->size))
+						{
+							fprintf(stderr, "ERROR: Failed to extract file '%s'\n", info->name);
+						}
+						else
+						{
+							/* Display the file name */
+							printf("%s\n", info->name);
+							n++;
+						}
+					}
+					else
+					{
+						fprintf(stderr, "ERROR: Bad file size/offset for %s [ %d %d ]\n", info->name, info->size, info->offset);
+					}
 
-	return;
-}
+					free(path);
+				}
+				else
+				{
+					fprintf(stderr, "File path '%s' is not safe! Skipping...\n", info->name);
+				}
 
-/* Sanitize the specified file path */
-char *make_path_safe(char *path)
-{
-	int size = 0;
-	char *safe = NULL;
-
-	/* Make sure the specified path is valid, and that there are no traversal issues */
-	if(path != NULL && strstr(path, DIRECTORY_TRAVERSAL) == NULL)
-	{
-		/* Append a './' to the beginning of the file path */
-		size = strlen(path) + strlen(PATH_PREFIX) + 1;
-		safe = malloc(size);
-		if(safe)
-		{
-			memset(safe, 0, size);
-			memcpy(safe, PATH_PREFIX, 2);
-			strcat(safe, path);
+				free(info);
+			}
 		}
 	}
+	else
+	{
+		printf("Failed to parse ELF header!\n");
+	}
+	
+	if(hdata) free(hdata);
+	if(wdata) free(wdata);
+	return n;
+}
 
-	return safe;
+/* Restore embedded file contents to binary file(s) */
+int restore(char *httpd, char *www, char *indir)
+{
+	int n = 0, total = 0;
+	FILE *fp = NULL;
+	size_t hsize = 0, fsize = 0;
+	struct entry_info *info = NULL;
+	unsigned char *hdata = NULL, *fdata = NULL;
+	char origdir[FILENAME_MAX] = { 0 };
+	char *path = NULL;
+
+	/* Read in the httpd file */
+	hdata = (unsigned char *) file_read(httpd, &hsize);
+	
+	/* Get the current working directory */
+	getcwd((char *) &origdir, sizeof(origdir));
+
+	/* Open the www file for writing */
+	fp = fopen(www, "wb");
+
+	if(hdata != NULL && fp != NULL && detect_settings(hdata, hsize))
+	{
+		/* Change directories to the target directory */
+        	if(chdir(indir) == -1)
+        	{
+                	perror(indir);
+        	}
+		else 
+		{
+			/* Get the next entry until we get a blank entry */
+			while((info = next_entry(hdata, hsize)) != NULL)
+			{
+				/* Count the number of files we process */
+				n++;
+			
+				/* Make sure the full file path is safe (i.e., it won't overwrite something critical on the host system) */
+				path = make_path_safe(info->name);
+				if(path)
+				{
+					/* Display the file name */
+					printf("%s\n", info->name);
+
+					/* Read in the file */
+					fdata = (unsigned char *) file_read(path, &fsize);
+				
+					/* Update the entry size and file offset */
+					if(globals.use_new_format)
+					{
+						info->new_entry->size = fsize;
+					}
+					else
+					{
+						info->entry->size = fsize;
+						info->entry->offset = total;
+					}
+					
+					/* Byte swap, if necessary */
+					hton_entries(info);
+
+					/* Write the new file to the www blob file */
+					if(fdata)
+					{
+						if(fwrite(fdata, 1, fsize, fp) != fsize)
+						{
+							fprintf(stderr, "ERROR: Failed to restore file '%s'\n", info->name);
+						}
+						else
+						{
+							/* Update the total size written to the www blob */
+							total += fsize;
+						}
+	
+						free(fdata);
+					}
+	
+					free(path);
+				}
+				else
+				{
+					fprintf(stderr, "File path '%s' is not safe! Skipping...\n", info->name);
+				}
+		
+				free(info);
+			}
+
+			/* The www blob file always appears to be null byte terminated */
+			fwrite("\x00", 1, 1, fp);
+
+			/* Change back to our original directory, so that relative paths for httpd will still work */
+			if(chdir((char *) &origdir) != -1)
+			{
+				/* Write the modified httpd binary back to disk */
+				file_write(httpd, hdata, hsize);
+			}
+			else
+			{
+				perror(origdir);
+			}
+		}
+	}
+	else
+	{
+		perror("restore");
+	}
+	
+	if(fp) fclose(fp);
+	if(hdata) free(hdata);
+	return n;
+}
+
+void usage(char *progname)
+{
+	fprintf(stderr, "\n");
+	fprintf(stderr, USAGE, progname, DEFAULT_OUTDIR);
+	fprintf(stderr, "\n");
+
+	return;
 }
