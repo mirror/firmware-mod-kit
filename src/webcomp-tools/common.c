@@ -93,6 +93,12 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 				info->name_ptr = info->new_entry->name;
 				info->size = info->new_entry->size;
 				info->offset = total_size;
+				/* Convert data to little endian, if necessary */
+				ntoh_struct(info);			
+				// new algorithm (subtract last given size from currently given size for real current size)
+				temp = info->size;					
+				info->size -= last_size;
+				last_size = temp;
 			}
 			else
 			{
@@ -100,16 +106,10 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 				info->size = info->entry->size;
 				info->offset = info->entry->offset;
 				info->name_ptr = info->entry->name;
+				/* Convert data to little endian, if necessary */
+				ntoh_struct(info);
 			}
 				
-			/* Convert data to little endian, if necessary */
-			ntoh_struct(info);
-			
-			// new algorithm (subtract last given size from currently given size for real current size)
-			temp = info->size;					
-			info->size -= last_size;
-			last_size = temp;
-
 			/* A NULL entry name signifies the end of the array */
 			if(info->name_ptr == 0)
 			{
