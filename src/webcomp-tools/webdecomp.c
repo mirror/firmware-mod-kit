@@ -222,8 +222,7 @@ int restore(char *httpd, char *www, char *indir)
 	struct entry_info *info = NULL;
 	unsigned char *hdata = NULL, *fdata = NULL;
 	char origdir[FILENAME_MAX] = { 0 };
-	char *path = NULL;
-	
+	char *path = NULL;	
 
 	/* Read in the httpd file */
 	hdata = (unsigned char *) file_read(httpd, &hsize);
