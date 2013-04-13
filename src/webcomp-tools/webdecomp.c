@@ -213,6 +213,7 @@ int extract(char *httpd, char *www, char *outdir)
 }
 
 /* Restore embedded file contents to binary file(s) */
+#define RESTORE_GEN3
 int restore(char *httpd, char *www, char *indir)
 {
 #ifndef RESTORE_GEN3
@@ -220,12 +221,14 @@ int restore(char *httpd, char *www, char *indir)
 	return -1;
 #else	
 	int n = 0, total = 0;
+	int last_size = 0xAB1C;
 	FILE *fp = NULL;
 	size_t hsize = 0, fsize = 0;
 	struct entry_info *info = NULL;
 	unsigned char *hdata = NULL, *fdata = NULL;
 	char origdir[FILENAME_MAX] = { 0 };
 	char *path = NULL;
+	
 
 	/* Read in the httpd file */
 	hdata = (unsigned char *) file_read(httpd, &hsize);
@@ -264,7 +267,7 @@ int restore(char *httpd, char *www, char *indir)
 					/* Update the entry size and file offset */
 					if(globals.use_new_format)
 					{
-						info->new_entry->size = fsize;
+						info->new_entry->size = fsize + last_size;					
 					}
 					else
 					{

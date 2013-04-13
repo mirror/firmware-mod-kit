@@ -57,7 +57,7 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
 	static int n, total_size = 0;
 	uint32_t entry_size = 0, offset = 0, str_offset = 0, temp = 0;
-	uint32_t last_size = 43946-142;
+	uint32_t last_size = 0xAB1C;
 	struct entry_info *info = NULL;
 
 	if(data == NULL || size == 0)
