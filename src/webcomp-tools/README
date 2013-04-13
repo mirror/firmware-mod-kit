@@ -22,6 +22,10 @@ HOW IT WORKS:
 			char *file_name;	/* Pointer to the file name */
 			uint32_t file_offset;	/* Offset of the file data in the /etc/www file */
 			uint32_t file_size;	/* Total size of the file data */
+						/* jc: some time in late 2012 the format was changed so */
+						/*    that sizes are chained together. The last (encoded) size */
+						/*    is added to the current to encode it. The chain is started */
+						/*    with a constant of 0xAB1C
 		};
 	
 	An array of these structures can be found in the httpd binary. The beginning of the array is located
