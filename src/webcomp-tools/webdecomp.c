@@ -216,7 +216,6 @@ int extract(char *httpd, char *www, char *outdir)
 int restore(char *httpd, char *www, char *indir)
 {
 	int n = 0, total = 0;
-	int last_size = 0xAB1C;
 	FILE *fp = NULL;
 	size_t hsize = 0, fsize = 0;
 	struct entry_info *info = NULL;
@@ -261,7 +260,7 @@ int restore(char *httpd, char *www, char *indir)
 					/* Update the entry size and file offset */
 					if(globals.use_new_format)
 					{
-						info->new_entry->size = fsize + last_size;					
+						info->new_entry->size = fsize + DDWRT_HTTPD_OBFUSCATOR_KEY;					
 					}
 					else
 					{

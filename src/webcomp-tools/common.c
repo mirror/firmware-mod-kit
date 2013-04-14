@@ -56,8 +56,7 @@ int are_entry_offsets_valid(unsigned char *data, uint32_t size)
 struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
 	static int n = 0, total_size = 0;
-	uint32_t entry_size = 0, offset = 0, str_offset = 0, temp = 0;
-	uint32_t last_size = 0xAB1C;
+	uint32_t entry_size = 0, offset = 0, str_offset = 0;
 	struct entry_info *info = NULL;
 
 	if(data == NULL || size == 0)
@@ -94,11 +93,8 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 				info->size = info->new_entry->size;
 				info->offset = total_size;
 				/* Convert data to little endian, if necessary */
-				ntoh_struct(info);			
-				// new algorithm (subtract last given size from currently given size for real current size)
-				temp = info->size;					
-				info->size -= last_size;
-				last_size = temp;
+				ntoh_struct(info);
+				info->size-=DDWRT_HTTPD_OBFUSCATOR_KEY;
 			}
 			else
 			{
