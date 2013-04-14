@@ -52,6 +52,7 @@ int are_entry_offsets_valid(unsigned char *data, uint32_t size)
 	return retval;
 }
 
+
 /* Returns the next web file entry */
 struct entry_info *next_entry(unsigned char *data, uint32_t size)
 {
@@ -94,7 +95,16 @@ struct entry_info *next_entry(unsigned char *data, uint32_t size)
 				info->offset = total_size;
 				/* Convert data to little endian, if necessary */
 				ntoh_struct(info);
-				info->size-=DDWRT_HTTPD_OBFUSCATOR_KEY;
+				if(!n)
+				{
+					/* assume first file is our target and 142 bytes */
+					/* TODO: filename check and hash check on data */
+					/*  make sure as we expect */
+					globals.key = info->size-142;
+					fprintf(stderr, "\nKey is: %u (0x%x)\n", globals.key, globals.key);
+					
+				}
+				info->size-=globals.key;
 			}
 			else
 			{

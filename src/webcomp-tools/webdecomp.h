@@ -20,6 +20,7 @@ Required Options:\n\
 \n\
 \t-b, --httpd=<file>                    Path to the DD-WRT httpd binary (ex: usr/sbin/httpd)\n\
 \t-w, --www=<file>                      Path to the DD-WRT www binary (ex: etc/www)\n\
+\t-k, --key=<file>                      Path to the file to store or retrieve the key\n\
 \t-e, --extract                         Extract Web files to a directory\n\
 \t-r, --restore                         Restore Web files from a directory\n\
 \n\
@@ -31,8 +32,8 @@ Additional Options:\n\
 "
 
 void usage(char *progname);
-int restore(char *httpd, char *www, char *dir);
-int extract(char *httpd, char *www, char *outdir);
+int restore(char *httpd, char *www, char *dir, char *key);
+int extract(char *httpd, char *www, char *outdir, char *key);
 int detect_settings(unsigned char *httpd, size_t httpd_size);
 
 #endif

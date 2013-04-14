@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define DDWRT_HTTPD_OBFUSCATOR_KEY 0x4BF8
-
 #define DEFAULT_OUTDIR 		"www"
 #define DIRECTORY_TRAVERSAL 	".."
 #define PATH_PREFIX 		"./"
@@ -49,6 +47,7 @@ struct global
 	uint32_t dv_offset;
 	uint32_t tv_address;
 	uint32_t tv_offset;
+	uint32_t key;
 } globals;
 
 void mkdir_p(char *dir);
