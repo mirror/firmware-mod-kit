@@ -22,6 +22,7 @@ fi
 eval $(cat shared-ng.inc)
 HTTPD="$DIR/usr/sbin/httpd"
 WWW="$DIR/etc/www"
+KEYFILE="$DIR/webcomp.key"
 
 echo -e "Firmware Mod Kit (ddwrt-gui-rebuild) $VERSION, (c)2011 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
 
@@ -38,5 +39,10 @@ then
 fi
 
 # Restore!
-$SUDO ./src/webcomp-tools/webdecomp --httpd="$HTTPD" --www="$WWW" --dir="$WEBDIR" --restore
+TMPFILE=`mktemp /tmp/$0.XXXXXX`
+# we actually pass a temporary copy of the keyfile to the webdecomp tool so that 
+# the actual keyfile won't be included in the compiled web file system
+$SUDO mv "$KEYFILE" "$TMPFILE"
+$SUDO ./src/webcomp-tools/webdecomp --httpd="$HTTPD" --www="$WWW" --dir="$WEBDIR" --key="$TMPFILE" --restore
+$SUDO mv "$TMPFILE" "$KEYFILE"
 
