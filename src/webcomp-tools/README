@@ -22,7 +22,7 @@ HOW IT WORKS:
 			char *file_name;	/* Pointer to the file name */
 			uint32_t file_offset;	/* Offset of the file data in the /etc/www file */
 			uint32_t file_size;	/* Total size of the file data */
-						/* jc: the indexes may be subtracted by a constant that varies between builds */
+						/* jc: the indexes may be added by a constant that varies between builds */
 		};
 	
 	An array of these structures can be found in the httpd binary. The beginning of the array is located
