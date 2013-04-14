@@ -25,7 +25,8 @@ HOW IT WORKS:
 						/* jc: some time in late 2012 the format was changed so */
 						/*    that sizes are chained together. The last (encoded) size */
 						/*    is added to the current to encode it. The chain is started */
-						/*    with a constant of 0xAB1C
+						/*    with a constant of 0xAB1C */
+						/*    UPDATE: it appears this varies .. will need amendment */
 		};
 	
 	An array of these structures can be found in the httpd binary. The beginning of the array is located
