@@ -17,7 +17,7 @@ eval $(cat shared-ng.inc)
 HTTPD="$DIR/usr/sbin/httpd"
 WWW="$DIR/etc/www"
 
-echo -e "Firmware Mod Kit (ddwrt-gui-extract) $VERSION, (c)2011-2013 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
+echo -e "Firmware Mod Kit (ddwrt-gui-extract) $VERSION, (c)2013 Craig Heffner, Jeremy Collake\nhttp://www.bitsum.com\n"
 
 if [ ! -d "$DIR" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]
 then
