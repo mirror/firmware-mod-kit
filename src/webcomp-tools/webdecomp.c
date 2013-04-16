@@ -139,6 +139,45 @@ int detect_settings(unsigned char *httpd, size_t httpd_size)
 	return retval;
 }
 
+/* Dynamically detect the key offset to be subtracted from each entry size.  */
+void detect_key(char *httpd, char *www)
+{
+	int total_size = 0, total_entries = 0;
+	size_t hsize = 0, wsize = 0;
+	unsigned char *hdata = NULL, *wdata = NULL;
+	struct entry_info *info = NULL;
+
+	hdata = (unsigned char *) file_read(httpd, &hsize);
+	wdata = (unsigned char *) file_read(www, &wsize);
+
+	if(hdata && wdata)
+	{
+		while((info = next_entry(hdata, hsize)) != NULL)
+		{
+			total_size += info->size;
+			total_entries++;
+		}
+	}
+
+	/* Reset the next_entry counters for subsequent entry processing */
+	next_entry(NULL, 0);
+
+	if(hdata) free(hdata);
+	if(wdata) free(wdata);
+
+	/* This should always be evenly divisble. */
+	if(((total_size - wsize) % total_entries) == 0)
+	{
+		globals.key = ((total_size - wsize) / total_entries);
+	}
+	else
+	{
+		globals.key = 0;
+	}
+
+	return;
+}
+
 /* Extract embedded file contents from binary file(s) */
 int extract(char *httpd, char *www, char *outdir, char *key)
 {
@@ -155,6 +194,9 @@ int extract(char *httpd, char *www, char *outdir, char *key)
 	
 	if(hdata != NULL && wdata != NULL && detect_settings(hdata, hsize))
 	{
+		/* Detect the key */
+		detect_key(httpd, www);
+
 		/* Create the output directory, if it doesn't already exist */
 		mkdir_p(outdir);
 
@@ -281,6 +323,9 @@ int restore(char *httpd, char *www, char *indir, char *key)
 
 	if(hdata != NULL && fp != NULL && detect_settings(hdata, hsize))
 	{
+		/* Detect the key */
+		detect_key(httpd, www);
+
 		/* Change directories to the target directory */
         	if(chdir(indir) == -1)
         	{

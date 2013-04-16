@@ -35,5 +35,6 @@ void usage(char *progname);
 int restore(char *httpd, char *www, char *dir, char *key);
 int extract(char *httpd, char *www, char *outdir, char *key);
 int detect_settings(unsigned char *httpd, size_t httpd_size);
+void detect_key(char *httpd, char *www);
 
 #endif
